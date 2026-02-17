@@ -239,7 +239,7 @@ class Farsite:
         
         self.debug = debug
 
-    def run(self, timeout=20, ncores=1):
+    def run(self, timeout=20, ncores=4):
         """
         Run FARSITE simulation.
         
@@ -485,7 +485,7 @@ def forward_pass_farsite_24h(poly, params, start_time, lcppath,
             debug=debug,
         )
         farsite.id = run_id   # Share ID so cleanup catches all files
-        farsite.run(ncores=1)
+        farsite.run(ncores=4)
         
         out = farsite.output_geom()
         
