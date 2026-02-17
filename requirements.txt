@@ -18,3 +18,4 @@ seaborn
 colorcet
 OWSLib==0.28.1
 influxdb
+scipy

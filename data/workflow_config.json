@@ -1,0 +1,15 @@
+{
+  "fire_name": "BORDER 2",
+  "year": 2025,
+  "lcp_path": "landscape.lcp",
+  "ignition_date": "2025-01-23T00:00:00",
+  "containment_date": "2025-01-26T00:00:00",
+  "duration_days": 3,
+  "n_perimeters": 6,
+  "perimeters_path": "/home/jovyan/work/WIFIRE-Digital-Twinners/wildfire-digital-twin/outputs/border_2_perimeters.geojson",
+  "weather_location": {
+    "lat": 32.595886593540015,
+    "lon": -116.85708743001499
+  },
+  "data_source": "WIFIRE Firemap WFS (view_historical_fires)"
+}

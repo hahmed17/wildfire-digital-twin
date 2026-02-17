@@ -1,0 +1,41 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -117.13696,
+              32.392212
+            ],
+            [
+              -116.621795,
+              32.392212
+            ],
+            [
+              -116.621795,
+              32.827249
+            ],
+            [
+              -117.13696,
+              32.827249
+            ],
+            [
+              -117.13696,
+              32.392212
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "type": "bounding_box",
+        "radius_miles": 15.0,
+        "center_lon": -116.88,
+        "center_lat": 32.61
+      }
+    }
+  ]
+}
