@@ -1,0 +1,23 @@
+<PAMDataset>
+  <Metadata>
+    <MDI key="AREA_OR_POINT">Area</MDI>
+    <MDI key="Creator">USGS EROS Landfire Product Service</MDI>
+    <MDI key="DataType">Thematic</MDI>
+    <MDI key="ResampleResolution">90</MDI>
+  </Metadata>
+  <PAMRasterBand band="1">
+    <Description>US_ELEV2020</Description>
+    <Metadata>
+      <MDI key="BandName">US_ELEV2020</MDI>
+      <MDI key="RepresentationType">ATHEMATIC</MDI>
+      <MDI key="STATISTICS_COVARIANCES">121.9066237046245,163.2521197127675,585.4433657497664,4074.097124043421,2715.973491411821,10965.49564011388,70665.91653286866,3273.703580043667</MDI>
+      <MDI key="STATISTICS_MAXIMUM">1537</MDI>
+      <MDI key="STATISTICS_MEAN">294.67794510002</MDI>
+      <MDI key="STATISTICS_MEDIAN">235.070588</MDI>
+      <MDI key="STATISTICS_MINIMUM">0</MDI>
+      <MDI key="STATISTICS_SKIPFACTORX">1</MDI>
+      <MDI key="STATISTICS_SKIPFACTORY">1</MDI>
+      <MDI key="STATISTICS_STDDEV">265.83061624438</MDI>
+    </Metadata>
+  </PAMRasterBand>
+</PAMDataset>

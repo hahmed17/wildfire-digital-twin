@@ -1,0 +1,10 @@
+{
+  "fire_name": "WOOLSEY",
+  "year": 2018,
+  "n_perimeters": 14,
+  "start_date": "2018-11-09 00:00:00",
+  "end_date": "2018-11-18 00:00:00",
+  "duration_days": 9,
+  "total_area_km2": 392.3385960976045,
+  "data_source": "WIFIRE Firemap WFS (view_historical_fires)"
+}

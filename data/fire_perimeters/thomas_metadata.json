@@ -1,0 +1,10 @@
+{
+  "fire_name": "THOMAS",
+  "year": 2017,
+  "n_perimeters": 46,
+  "start_date": "2017-12-05 00:00:00",
+  "end_date": "2018-01-07 00:00:00",
+  "duration_days": 33,
+  "total_area_km2": 1139.432461246382,
+  "data_source": "WIFIRE Firemap WFS (view_historical_fires)"
+}

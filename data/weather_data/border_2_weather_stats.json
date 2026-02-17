@@ -1,0 +1,19 @@
+{
+  "mean_wind_speed": 10.356666666666667,
+  "mean_wind_direction": 86.95833333333333,
+  "min_wind_speed": 4.47,
+  "max_wind_speed": 15.2,
+  "std_wind_speed": 2.6561856528153713,
+  "std_wind_direction": 11.436342534025272,
+  "n_observations": 24,
+  "station_name": "OTAY MOUNTAIN",
+  "station_id": "3414",
+  "query_location": {
+    "lat": 32.601,
+    "lon": -116.841
+  },
+  "time_window": {
+    "start": "2025-01-23T13:53:00",
+    "end": "2025-01-24T13:53:00"
+  }
+}
