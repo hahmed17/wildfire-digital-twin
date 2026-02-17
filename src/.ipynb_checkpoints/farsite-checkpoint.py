@@ -217,14 +217,14 @@ class Farsite:
         
         # Create configuration file
         self.config = Config_File(start_dt, end_dt, windspeed, winddirection, dist_res, perim_res)
-        self.configpath = os.path.join(self.tmpfolder, f'{irwinid}_config_{self.id}.cfg')
+        self.configpath = os.path.join(self.tmpfolder, f'{self.id}_config.cfg')
         self.config.to_file(self.configpath)
         
         # Set barrier path
         self.barrierpath = barrierpath if barrierpath else str(NO_BARRIER_PATH)
         
         # Create ignition shapefile
-        self.ignitepath = os.path.join(self.tmpfolder, f'{irwinid}_ignite_{self.id}.shp')
+        self.ignitepath = os.path.join(self.tmpfolder, f'{self.id}_ignite.shp')
         ignite_gdf = gpd.GeoDataFrame({'FID': [0], 'geometry': [initial]}, crs="EPSG:5070")
         ignite_gdf.to_file(self.ignitepath)
         
@@ -336,7 +336,6 @@ def forward_pass_farsite(poly, params, start_time, lcppath,
         params: Dict with 'windspeed', 'winddirection', 'dt' (timedelta)
         start_time: Start time (datetime or string)
         lcppath: Path to landscape file
-        irwinid: Unique fire identifier
         dist_res: Distance resolution (meters)
         perim_res: Perimeter resolution (meters)
         debug: Keep intermediate files if True
@@ -354,6 +353,8 @@ def forward_pass_farsite(poly, params, start_time, lcppath,
     if perim_res > 500:
         warnings.warn(f'perim_res ({perim_res}) must be 1-500. Setting to 500')
         perim_res = 500
+    
+    run_id = uuid.uuid4().hex   # Single unique ID for this forward pass
     
     # Run multiple FARSITE steps if needed
     number_of_farsites = dt.seconds // (MAX_SIM * 60)
@@ -385,6 +386,8 @@ def forward_pass_farsite(poly, params, start_time, lcppath,
     # Handle remaining time
     remaining_dt = dt - number_of_farsites * datetime.timedelta(minutes=MAX_SIM)
     if remaining_dt < datetime.timedelta(minutes=10):
+        cleanup_farsite_outputs(run_id, str(FARSITE_TMP_DIR))
+        print("FARSITE outputs cleaned")
         return poly
     
     new_params = {
@@ -427,7 +430,6 @@ def forward_pass_farsite_24h(poly, params, start_time, lcppath,
         params: Dict with 'windspeed', 'winddirection', 'dt' (timedelta)
         start_time: Start time (datetime or string "YYYY-mm-dd HH:MM:SS")
         lcppath: Path to landscape file
-        irwinid: Unique fire identifier
         dist_res: Distance resolution (meters)
         perim_res: Perimeter resolution (meters)
         debug: Keep intermediate files if True

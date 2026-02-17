@@ -16,10 +16,10 @@ DATA_DIR = BASE_DIR / "data"              # .../repo/data/
 OUTPUT_DIR = BASE_DIR / "outputs"         # .../repo/outputs/
 TMP_DIR  = BASE_DIR / "tmp"               # .../repo/tmp/
 
-# Executables and static assets live in data/
-FARSITE_EXECUTABLE = DATA_DIR / "TestFARSITE"
-LCPMAKE_EXECUTABLE = DATA_DIR / "lcpmake"
-NO_BARRIER_PATH    = DATA_DIR / "NoBarrier" / "NoBarrier.shp"
+# Executables and static assets
+FARSITE_EXECUTABLE = SRC_DIR / "TestFARSITE"
+LCPMAKE_EXECUTABLE = SRC_DIR / "lcpmake"
+NO_BARRIER_PATH    = SRC_DIR / "NoBarrier" / "NoBarrier.shp"
 LCP_PATH           = DATA_DIR / "landscape.lcp"
 
 # Temporary working directory for FARSITE runs
