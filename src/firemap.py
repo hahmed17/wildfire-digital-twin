@@ -15,6 +15,64 @@ from shapely.geometry import Polygon, MultiPolygon
 from config import FIREMAP_WFS_URL, FIREMAP_WX_URL, FARSITE_CRS
 
 
+
+
+# ============================================================================
+# ACTIVE FIRE DETECTIONS
+# ============================================================================
+def get_fire_detections(firms_map_key, bbox_str, start_date, satellite_source="LANDSAT_NRT", day_range=5):
+    """
+    Fetch active fire detections from NASA FIRMS API. 
+    
+    Args:
+        firms_map_key (str): Access key to query NASA FIRMS API.
+        bbox (str): "minLon, minLat, maxLon, maxLat" (WGS84)
+        start_time (str): Start datetime ("%Y-%m-%d")
+        satellite_source (str): satelite source name (options: https://firms.modaps.eosdis.nasa.gov/api/area/)
+            default: "LANDSAT_NRT" (US/Canada only)
+        day_range (int): number between 1-5 of days to query
+            default: 5
+        
+    Returns:
+        dict
+    """
+    # Set up base URL
+    FIRMS_API_URL = f"https://firms.modaps.eosdis.nasa.gov/usfs/api/area/csv/{firms_map_key}/{satellite_source}/{bbox}/{day_range}/{start_date}"
+
+    try:
+        response = requests.get(FIRMS_API_URL, timeout=30)
+        response.raise_for_status()
+        
+        # Parse CSV response
+        from io import StringIO
+        csv_data = StringIO(response.text)
+        
+        # Read into DataFrame
+        hotspots_df = pd.read_csv(csv_data)
+        
+        print(f"\n✓ Retrieved {len(hotspots_df)} fire detections")
+        
+    except requests.exceptions.HTTPError as e:
+        if response.status_code == 404:
+            print("\n⚠ No fire detections found in this area and time range")
+            hotspots_df = pd.DataFrame()
+        else:
+            print(f"\n❌ API Error: {e}")
+            print("Check your MAP_KEY and try again")
+            raise
+    
+    # Display dataframe keys
+    if not hotspots_df.empty:
+        col_names = list(hotspots_df.columns.values)
+        print(f"\nData columns:\n{col_names}")
+    
+    return hotspots_df
+
+
+
+
+
+
 # ============================================================================
 # PERIMETER RETRIEVAL
 # ============================================================================
@@ -29,7 +87,7 @@ def _multipolygon_to_polygon(geom):
         raise TypeError(f"Unsupported geometry type: {type(geom)}")
 
 
-def fetch_fire_perimeters(fire_name, year, verbose=True, synthetic=False):
+def fetch_fire_perimeters(fire_name, verbose=True, synthetic=False):
     """
     Fetch all mapped perimeters for a fire from WIFIRE Firemap GeoServer (WFS).
 
@@ -44,14 +102,14 @@ def fetch_fire_perimeters(fire_name, year, verbose=True, synthetic=False):
         in EPSG:5070, sorted oldest to newest.
     """
     if verbose:
-        print(f"Fetching perimeters for '{fire_name}' ({year})...")
+        print(f"Fetching perimeters for '{fire_name}')...")
 
     params = {
         "SERVICE":      "WFS",
         "VERSION":      "2.0.0",
         "REQUEST":      "GetFeature",
         "TYPENAMES":    "WIFIRE:view_historical_fires",
-        "CQL_FILTER":   f"fire_name = '{fire_name}' AND year = {year}",
+        "CQL_FILTER":   f"fire_name = '{fire_name}'",
         "OUTPUTFORMAT": "application/json",
         "SRSNAME":      "EPSG:4326",
     }
@@ -62,12 +120,13 @@ def fetch_fire_perimeters(fire_name, year, verbose=True, synthetic=False):
     else:
         response = requests.get(FIREMAP_WFS_URL, params=params, timeout=30)
         response.raise_for_status()
+        print(f"\nPerimeters found at: {response.url}")
         data = response.json()
 
     features = data.get("features", [])
     if not features:
         raise ValueError(
-            f"No perimeters found for fire_name='{fire_name}', year={year}.\n"
+            f"No perimeters found for fire_name='{fire_name}'.\n"
             f"Check the fire name is an exact case-sensitive match."
         )
 

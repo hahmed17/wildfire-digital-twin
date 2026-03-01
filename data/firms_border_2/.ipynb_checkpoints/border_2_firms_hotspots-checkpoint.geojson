@@ -1,0 +1,11 @@
+{
+"type": "FeatureCollection",
+"name": "border_2_firms_hotspots",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "latitude": 32.526742, "longitude": -116.778994, "path": 40, "row": 37, "scan": 5129, "track": 6289, "acq_date": "2025-01-23", "acq_time": 1822, "satellite": "L9", "confidence": "H", "daynight": "D", "datetime": "2025-01-23T18:22:00" }, "geometry": { "type": "Point", "coordinates": [ -116.778994, 32.526742 ] } },
+{ "type": "Feature", "properties": { "latitude": 32.527012, "longitude": -116.778993, "path": 40, "row": 37, "scan": 5129, "track": 6288, "acq_date": "2025-01-23", "acq_time": 1822, "satellite": "L9", "confidence": "H", "daynight": "D", "datetime": "2025-01-23T18:22:00" }, "geometry": { "type": "Point", "coordinates": [ -116.778993, 32.527012 ] } },
+{ "type": "Feature", "properties": { "latitude": 32.527012, "longitude": -116.778674, "path": 40, "row": 37, "scan": 5130, "track": 6288, "acq_date": "2025-01-23", "acq_time": 1822, "satellite": "L9", "confidence": "H", "daynight": "D", "datetime": "2025-01-23T18:22:00" }, "geometry": { "type": "Point", "coordinates": [ -116.778674, 32.527012 ] } },
+{ "type": "Feature", "properties": { "latitude": 32.527283, "longitude": -116.778993, "path": 40, "row": 37, "scan": 5129, "track": 6287, "acq_date": "2025-01-23", "acq_time": 1822, "satellite": "L9", "confidence": "H", "daynight": "D", "datetime": "2025-01-23T18:22:00" }, "geometry": { "type": "Point", "coordinates": [ -116.778993, 32.527283 ] } }
+]
+}

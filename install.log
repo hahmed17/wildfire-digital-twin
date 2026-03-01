@@ -7,13 +7,13 @@ pip 25.1.1 from /opt/conda/lib/python3.12/site-packages/pip (python 3.12)
 Channels:
  - conda-forge
 Platform: linux-64
-Collecting package metadata (repodata.json): - \ | / - \ | / - \ | / - \ | / - \ | / - done
-Solving environment: | / - \ | done
+Collecting package metadata (repodata.json): - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / done
+Solving environment: \ | / - \ done
 
 
 ==> WARNING: A newer version of conda exists. <==
     current version: 25.3.1
-    latest version: 26.1.0
+    latest version: 26.1.1
 
 Please update conda by running
 
@@ -34,8 +34,8 @@ The following packages will be downloaded:
     package                    |            build
     ---------------------------|-----------------
     blosc-1.21.6               |       he440d0b_1          47 KB  conda-forge
-    ca-certificates-2026.1.4   |       hbd8a1cb_0         143 KB  conda-forge
-    certifi-2026.1.4           |     pyhd8ed1ab_0         147 KB  conda-forge
+    ca-certificates-2026.2.25  |       hbd8a1cb_0         144 KB  conda-forge
+    certifi-2026.2.25          |     pyhd8ed1ab_0         148 KB  conda-forge
     freexl-2.0.0               |       h9dce30a_2          58 KB  conda-forge
     gdal-3.11.0                |  py312hf1b357c_5         1.7 MB  conda-forge
     geos-3.13.1                |       h97f6797_0         1.8 MB  conda-forge
@@ -118,41 +118,41 @@ The following NEW packages will be INSTALLED:
 
 The following packages will be UPDATED:
 
-  ca-certificates                      2025.4.26-hbd8a1cb_0 --> 2026.1.4-hbd8a1cb_0 
-  certifi                            2025.4.26-pyhd8ed1ab_0 --> 2026.1.4-pyhd8ed1ab_0 
+  ca-certificates                      2025.4.26-hbd8a1cb_0 --> 2026.2.25-hbd8a1cb_0 
+  certifi                            2025.4.26-pyhd8ed1ab_0 --> 2026.2.25-pyhd8ed1ab_0 
   openssl                                  3.5.0-h7b32b05_1 --> 3.6.1-h35e630c_1 
 
 
 
-Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 MB   |                                                                                                                                                                    |   0% 
-numpy-2.4.2          | 8.4 MB    |                                                                                                                                                                    |   0% [A
+Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 MB   |                                                                                  |   0% 
+numpy-2.4.2          | 8.4 MB    |                                                                                  |   0% [A
 
-libopenblas-0.3.30   | 5.7 MB    |                                                                                                                                                                    |   0% [A[A
+libopenblas-0.3.30   | 5.7 MB    |                                                                                  |   0% [A[A
 
 
-libspatialite-5.1.0  | 3.9 MB    |                                                                                                                                                                    |   0% [A[A[A
+libspatialite-5.1.0  | 3.9 MB    |                                                                                  |   0% [A[A[A
 
 
 
-proj-9.6.0           | 3.0 MB    |                                                                                                                                                                    |   0% [A[A[A[A
+proj-9.6.0           | 3.0 MB    |                                                                                  |   0% [A[A[A[A
 
 
 
 
-openssl-3.6.1        | 3.0 MB    |                                                                                                                                                                    |   0% [A[A[A[A[A
+openssl-3.6.1        | 3.0 MB    |                                                                                  |   0% [A[A[A[A[A
 
 
 
 
 
-geos-3.13.1          | 1.8 MB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A
+geos-3.13.1          | 1.8 MB    |                                                                                  |   0% [A[A[A[A[A[A
 
 
 
 
 
 
-gdal-3.11.0          | 1.7 MB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A
+gdal-3.11.0          | 1.7 MB    |                                                                                  |   0% [A[A[A[A[A[A[A
 
 
 
@@ -160,7 +160,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libjxl-0.11.1        | 1.7 MB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A
+libjxl-0.11.1        | 1.7 MB    |                                                                                  |   0% [A[A[A[A[A[A[A[A
 
 
 
@@ -169,7 +169,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-xerces-c-3.2.5       | 1.6 MB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A
+xerces-c-3.2.5       | 1.6 MB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A
 
 
 
@@ -179,7 +179,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libgfortran5-15.1.0  | 1.5 MB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A
+libgfortran5-15.1.0  | 1.5 MB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -190,7 +190,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libhwy-1.3.0         | 1.4 MB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A
+libhwy-1.3.0         | 1.4 MB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -202,7 +202,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-pcre2-10.45          | 1.1 MB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A
+pcre2-10.45          | 1.1 MB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -215,7 +215,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-sqlite-3.49.2        | 840 KB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A
+sqlite-3.49.2        | 840 KB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -229,7 +229,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libjpeg-turbo-3.1.2  | 619 KB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A
+libjpeg-turbo-3.1.2  | 619 KB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -244,7 +244,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libtiff-4.7.1        | 427 KB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+libtiff-4.7.1        | 427 KB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -260,7 +260,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libwebp-base-1.6.0   | 419 KB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+libwebp-base-1.6.0   | 419 KB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -277,7 +277,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libkml-1.3.0         | 393 KB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+libkml-1.3.0         | 393 KB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -295,7 +295,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libpng-1.6.55        | 310 KB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+libpng-1.6.55        | 310 KB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -314,7 +314,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libbrotlienc-1.1.0   | 275 KB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+libbrotlienc-1.1.0   | 275 KB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -334,7 +334,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-lerc-4.0.0           | 258 KB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+lerc-4.0.0           | 258 KB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -355,7 +355,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-librttopo-1.1.0      | 227 KB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+librttopo-1.1.0      | 227 KB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -377,7 +377,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-muparser-2.3.5       | 198 KB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+muparser-2.3.5       | 198 KB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -400,7 +400,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-certifi-2026.1.4     | 147 KB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+certifi-2026.2.25    | 148 KB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -424,7 +424,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-ca-certificates-2026 | 143 KB    |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+ca-certificates-2026 | 144 KB    |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -449,7 +449,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-minizip-4.0.10       | 91 KB     |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+minizip-4.0.10       | 91 KB     |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -475,7 +475,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-zlib-1.3.1           | 90 KB     |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+zlib-1.3.1           | 90 KB     |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -502,7 +502,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-json-c-0.18          | 81 KB     |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+json-c-0.18          | 81 KB     |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -530,7 +530,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-giflib-5.2.2         | 75 KB     |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+giflib-5.2.2         | 75 KB     |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -559,7 +559,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libdeflate-1.24      | 71 KB     |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+libdeflate-1.24      | 71 KB     |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -589,7 +589,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libbrotlicommon-1.1. | 67 KB     |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+libbrotlicommon-1.1. | 67 KB     |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -620,7 +620,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-freexl-2.0.0         | 58 KB     |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+freexl-2.0.0         | 58 KB     |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -652,7 +652,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-blosc-1.21.6         | 47 KB     |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+blosc-1.21.6         | 47 KB     |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -685,7 +685,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-uriparser-0.9.8      | 47 KB     |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+uriparser-0.9.8      | 47 KB     |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -719,7 +719,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-snappy-1.2.2         | 45 KB     |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+snappy-1.2.2         | 45 KB     |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -754,7 +754,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libbrotlidec-1.1.0   | 32 KB     |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+libbrotlidec-1.1.0   | 32 KB     |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -790,7 +790,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libgfortran-15.1.0   | 28 KB     |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+libgfortran-15.1.0   | 28 KB     |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -827,7 +827,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libblas-3.11.0       | 18 KB     |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+libblas-3.11.0       | 18 KB     |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -865,7 +865,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-liblapack-3.11.0     | 18 KB     |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+liblapack-3.11.0     | 18 KB     |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -904,94 +904,92 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libcblas-3.11.0      | 18 KB     |                                                                                                                                                                    |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+libcblas-3.11.0      | 18 KB     |                                                                                  |   0% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
-libopenblas-0.3.30   | 5.7 MB    | ##2                                                                                                                                                                |   1% [A[A
 
-libopenblas-0.3.30   | 5.7 MB    | ################################################################################################################################################################## | 100% [A[A
-numpy-2.4.2          | 8.4 MB    | 3                                                                                                                                                                  |   0% [A
+libspatialite-5.1.0  | 3.9 MB    | 3                                                                                |   0% [A[A[A
 
 
 
+proj-9.6.0           | 3.0 MB    | 4                                                                                |   1% [A[A[A[A
 
-openssl-3.6.1        | 3.0 MB    | 8                                                                                                                                                                  |   1% [A[A[A[A[A
 
 
-libspatialite-5.1.0  | 3.9 MB    | 6                                                                                                                                                                  |   0% [A[A[Alibgdal-core-3.11.0  | 11.3 MB   | 2                                                                                                                                                                  |   0% 
+proj-9.6.0           | 3.0 MB    | ################################################################################ | 100% [A[A[A[A
+numpy-2.4.2          | 8.4 MB    | 1                                                                                |   0% [A
 
 
+libspatialite-5.1.0  | 3.9 MB    | ################################################################################ | 100% [A[A[Alibgdal-core-3.11.0  | 11.3 MB   | 1                                                                                |   0% 
 
 
-openssl-3.6.1        | 3.0 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A
 
 
+openssl-3.6.1        | 3.0 MB    | 4                                                                                |   1% [A[A[A[A[A
 
+libopenblas-0.3.30   | 5.7 MB    | 2                                                                                |   0% [A[A
 
 
-geos-3.13.1          | 1.8 MB    | #4                                                                                                                                                                 |   1% [A[A[A[A[A[A
 
 
 
-proj-9.6.0           | 3.0 MB    | 8                                                                                                                                                                  |   1% [A[A[A[A
-numpy-2.4.2          | 8.4 MB    | ############################################################                                                                                                       |  37% [A
+geos-3.13.1          | 1.8 MB    | 7                                                                                |   1% [A[A[A[A[A[A
+numpy-2.4.2          | 8.4 MB    | #########################################3                                       |  52% [Alibgdal-core-3.11.0  | 11.3 MB   | ##########################                                                       |  33% 
 
 
-libspatialite-5.1.0  | 3.9 MB    | ####################################################################################################################################################8              |  92% [A[A[A
 
 
 
+geos-3.13.1          | 1.8 MB    | ################################################################################ | 100% [A[A[A[A[A[A
 
+libopenblas-0.3.30   | 5.7 MB    | ###########################################7                                     |  55% [A[A
 
-geos-3.13.1          | 1.8 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[Alibgdal-core-3.11.0  | 11.3 MB   | ###############################################8                                                                                                                   |  30% 
 
-libopenblas-0.3.30   | 5.7 MB    | ################################################################################################################################################################## | 100% [A[A
 
-libopenblas-0.3.30   | 5.7 MB    | ################################################################################################################################################################## | 100% [A[A
 
+openssl-3.6.1        | 3.0 MB    | ################################################################################ | 100% [A[A[A[A[A
 
-libspatialite-5.1.0  | 3.9 MB    | ################################################################################################################################################################## | 100% [A[A[A
 
 
 
+openssl-3.6.1        | 3.0 MB    | ################################################################################ | 100% [A[A[A[A[A
+numpy-2.4.2          | 8.4 MB    | ###############################################################################1 |  99% [Alibgdal-core-3.11.0  | 11.3 MB   | #######################################################5                         |  69% 
 
 
 
-gdal-3.11.0          | 1.7 MB    | #4                                                                                                                                                                 |   1% [A[A[A[A[A[A[A
 
 
 
-proj-9.6.0           | 3.0 MB    | ######################################################################################################9                                                            |  64% [A[A[A[A
-numpy-2.4.2          | 8.4 MB    | ###############################################################################################################################################################1   |  98% [A
+gdal-3.11.0          | 1.7 MB    | 7                                                                                |   1% [A[A[A[A[A[A[A
 
 
 
 
 
 
-gdal-3.11.0          | 1.7 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[Alibgdal-core-3.11.0  | 11.3 MB   | #######################################################################################################################9                                           |  74% 
 
+libjxl-0.11.1        | 1.7 MB    | 7                                                                                |   1% [A[A[A[A[A[A[A[A
 
 
-proj-9.6.0           | 3.0 MB    | ################################################################################################################################################################## | 100% [A[A[A[A
 
 
 
 
+gdal-3.11.0          | 1.7 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A
 
 
 
-libjxl-0.11.1        | 1.7 MB    | #5                                                                                                                                                                 |   1% [A[A[A[A[A[A[A[A
 
 
 
+gdal-3.11.0          | 1.7 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A
 
 
 
 
 
-xerces-c-3.2.5       | 1.6 MB    | #6                                                                                                                                                                 |   1% [A[A[A[A[A[A[A[A[A
 
 
+libjxl-0.11.1        | 1.7 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A
 
 
 
@@ -999,7 +997,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libgfortran5-15.1.0  | 1.5 MB    | #6                                                                                                                                                                 |   1% [A[A[A[A[A[A[A[A[A[A
+libjxl-0.11.1        | 1.7 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A
 
 
 
@@ -1007,60 +1005,62 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libjxl-0.11.1        | 1.7 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A
 
+xerces-c-3.2.5       | 1.6 MB    | 7                                                                                |   1% [A[A[A[A[A[A[A[A[A
 
+libopenblas-0.3.30   | 5.7 MB    | ################################################################################ | 100% [A[A
 
+libopenblas-0.3.30   | 5.7 MB    | ################################################################################ | 100% [A[A
 
 
 
 
 
-xerces-c-3.2.5       | 1.6 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A
-numpy-2.4.2          | 8.4 MB    | ################################################################################################################################################################## | 100% [A
 
 
 
 
-openssl-3.6.1        | 3.0 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A
+libgfortran5-15.1.0  | 1.5 MB    | 8                                                                                |   1% [A[A[A[A[A[A[A[A[A[A
+numpy-2.4.2          | 8.4 MB    | ################################################################################ | 100% [A
 
 
 
 
-openssl-3.6.1        | 3.0 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A
 
 
 
 
 
 
+libhwy-1.3.0         | 1.4 MB    | 9                                                                                |   1% [A[A[A[A[A[A[A[A[A[A[A
 
 
 
-libgfortran5-15.1.0  | 1.5 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
+xerces-c-3.2.5       | 1.6 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A
 
 
 
 
 
-libhwy-1.3.0         | 1.4 MB    | #8                                                                                                                                                                 |   1% [A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
+libgfortran5-15.1.0  | 1.5 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A
 
 
+libspatialite-5.1.0  | 3.9 MB    | ################################################################################ | 100% [A[A[A
 
 
+libspatialite-5.1.0  | 3.9 MB    | ################################################################################ | 100% [A[A[A
 
 
 
-pcre2-10.45          | 1.1 MB    | ##2                                                                                                                                                                |   1% [A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1070,10 +1070,10 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+sqlite-3.49.2        | 840 KB    | #5                                                                               |   2% [A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
-sqlite-3.49.2        | 840 KB    | ###                                                                                                                                                                |   2% [A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1081,13 +1081,13 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libhwy-1.3.0         | 1.4 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
 
-libjpeg-turbo-3.1.2  | 619 KB    | ####1                                                                                                                                                              |   3% [A[A[A[A[A[A[A[A[A[A[A[A[A[Alibgdal-core-3.11.0  | 11.3 MB   | ################################################################################################################################################################## | 100% 
 
 
 
@@ -1095,11 +1095,11 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libjpeg-turbo-3.1.2  | 619 KB    | ##                                                                               |   3% [A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
-pcre2-10.45          | 1.1 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1107,13 +1107,15 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+pcre2-10.45          | 1.1 MB    | #                                                                                |   1% [A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
-libhwy-1.3.0         | 1.4 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A
+proj-9.6.0           | 3.0 MB    | ################################################################################ | 100% [A[A[A[A
 
 
 
+proj-9.6.0           | 3.0 MB    | ################################################################################ | 100% [A[A[A[A
 
 
 
@@ -1123,10 +1125,10 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-sqlite-3.49.2        | 840 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
+sqlite-3.49.2        | 840 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1137,11 +1139,10 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libjpeg-turbo-3.1.2  | 619 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
-libspatialite-5.1.0  | 3.9 MB    | ################################################################################################################################################################## | 100% [A[A[A
 
+libjpeg-turbo-3.1.2  | 619 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1155,8 +1156,8 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libtiff-4.7.1        | 427 KB    | ######                                                                                                                                                             |   4% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
+libtiff-4.7.1        | 427 KB    | ##9                                                                              |   4% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[Alibgdal-core-3.11.0  | 11.3 MB   | ################################################################################ | 100% libgdal-core-3.11.0  | 11.3 MB   | ################################################################################ | 100% 
 
 
 
@@ -1171,7 +1172,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libwebp-base-1.6.0   | 419 KB    | ######1                                                                                                                                                            |   4% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+libtiff-4.7.1        | 427 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1186,8 +1187,8 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libtiff-4.7.1        | 427 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
+libwebp-base-1.6.0   | 419 KB    | ###                                                                              |   4% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1204,8 +1205,8 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libkml-1.3.0         | 393 KB    | ###2                                                                             |   4% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
-libbrotlienc-1.1.0   | 275 KB    | #########4                                                                                                                                                         |   6% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1216,6 +1217,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+pcre2-10.45          | 1.1 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1223,7 +1225,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libpng-1.6.55        | 310 KB    | ########3                                                                                                                                                          |   5% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1232,6 +1233,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libwebp-base-1.6.0   | 419 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1240,7 +1242,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libkml-1.3.0         | 393 KB    | ######5                                                                                                                                                            |   4% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1250,6 +1251,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libpng-1.6.55        | 310 KB    | ####1                                                                            |   5% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1259,7 +1261,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libbrotlienc-1.1.0   | 275 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1267,6 +1268,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libkml-1.3.0         | 393 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1275,7 +1277,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libwebp-base-1.6.0   | 419 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1286,6 +1287,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libbrotlienc-1.1.0   | 275 KB    | ####6                                                                            |   6% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1293,7 +1295,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libpng-1.6.55        | 310 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1304,13 +1305,13 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libpng-1.6.55        | 310 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
 
-libkml-1.3.0         | 393 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1323,6 +1324,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libbrotlienc-1.1.0   | 275 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1330,7 +1332,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-lerc-4.0.0           | 258 KB    | ##########                                                                                                                                                         |   6% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1345,12 +1346,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+muparser-2.3.5       | 198 KB    | ######4                                                                          |   8% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
-lerc-4.0.0           | 258 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1366,12 +1367,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+librttopo-1.1.0      | 227 KB    | #####6                                                                           |   7% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
-librttopo-1.1.0      | 227 KB    | ###########4                                                                                                                                                       |   7% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1388,11 +1389,11 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+muparser-2.3.5       | 198 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
-librttopo-1.1.0      | 227 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1409,13 +1410,13 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+librttopo-1.1.0      | 227 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
 
-certifi-2026.1.4     | 147 KB    | #################5                                                                                                                                                 |  11% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1432,12 +1433,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+certifi-2026.2.25    | 148 KB    | ########6                                                                        |  11% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
-muparser-2.3.5       | 198 KB    | #############                                                                                                                                                      |   8% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1455,12 +1456,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+certifi-2026.2.25    | 148 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
-certifi-2026.1.4     | 147 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1479,12 +1480,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+ca-certificates-2026 | 144 KB    | ########8                                                                        |  11% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
-ca-certificates-2026 | 143 KB    | ##################1                                                                                                                                                |  11% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1499,6 +1500,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+lerc-4.0.0           | 258 KB    | ####9                                                                            |   6% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1506,7 +1508,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-muparser-2.3.5       | 198 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1523,6 +1524,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+ca-certificates-2026 | 144 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1530,7 +1532,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-ca-certificates-2026 | 143 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1543,6 +1544,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+lerc-4.0.0           | 258 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1556,7 +1558,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-zlib-1.3.1           | 90 KB     | ############################7                                                                                                                                      |  18% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1569,6 +1570,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+zlib-1.3.1           | 90 KB     | ##############2                                                                  |  18% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1582,7 +1584,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-zlib-1.3.1           | 90 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1595,6 +1596,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+zlib-1.3.1           | 90 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1609,7 +1611,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-json-c-0.18          | 81 KB     | ################################                                                                                                                                   |  20% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1620,6 +1621,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+minizip-4.0.10       | 91 KB     | ##############                                                                   |  18% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1634,7 +1636,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-minizip-4.0.10       | 91 KB     | ############################3                                                                                                                                      |  18% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1647,6 +1648,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+json-c-0.18          | 81 KB     | ###############8                                                                 |  20% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1661,7 +1663,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-json-c-0.18          | 81 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1672,6 +1673,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+minizip-4.0.10       | 91 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1686,7 +1688,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-minizip-4.0.10       | 91 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1699,6 +1700,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+json-c-0.18          | 81 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1714,7 +1716,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-giflib-5.2.2         | 75 KB     | ##################################3                                                                                                                                |  21% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1727,6 +1728,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+giflib-5.2.2         | 75 KB     | ################9                                                                |  21% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1742,7 +1744,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-giflib-5.2.2         | 75 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1755,6 +1756,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+giflib-5.2.2         | 75 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1771,7 +1773,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libdeflate-1.24      | 71 KB     | ####################################5                                                                                                                              |  23% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1784,6 +1785,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libdeflate-1.24      | 71 KB     | ##################                                                               |  23% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1800,7 +1802,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libdeflate-1.24      | 71 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1814,6 +1815,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libbrotlicommon-1.1. | 67 KB     | ###################                                                              |  24% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1830,7 +1832,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libbrotlicommon-1.1. | 67 KB     | ######################################5                                                                                                                            |  24% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1843,6 +1844,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libdeflate-1.24      | 71 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1860,7 +1862,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libbrotlicommon-1.1. | 67 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1873,6 +1874,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libbrotlicommon-1.1. | 67 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1893,7 +1895,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-uriparser-0.9.8      | 47 KB     | ######################################################9                                                                                                            |  34% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1905,6 +1906,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+blosc-1.21.6         | 47 KB     | ###########################                                                      |  34% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1926,7 +1928,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-uriparser-0.9.8      | 47 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1937,6 +1938,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+blosc-1.21.6         | 47 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1957,7 +1959,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-freexl-2.0.0         | 58 KB     | ############################################7                                                                                                                      |  28% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1968,6 +1969,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+freexl-2.0.0         | 58 KB     | ######################1                                                          |  28% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1988,7 +1990,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-freexl-2.0.0         | 58 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -1999,6 +2000,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+freexl-2.0.0         | 58 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2020,7 +2022,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-blosc-1.21.6         | 47 KB     | ######################################################8                                                                                                            |  34% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2032,6 +2033,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+uriparser-0.9.8      | 47 KB     | ###########################1                                                     |  34% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2054,11 +2056,9 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-snappy-1.2.2         | 45 KB     | #########################################################9                                                                                                         |  36% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
-proj-9.6.0           | 3.0 MB    | ################################################################################################################################################################## | 100% [A[A[A[A
 
 
 
@@ -2066,6 +2066,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+uriparser-0.9.8      | 47 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2092,7 +2093,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-snappy-1.2.2         | 45 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2100,6 +2100,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+snappy-1.2.2         | 45 KB     | ############################6                                                    |  36% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2124,18 +2125,16 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-blosc-1.21.6         | 47 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
-proj-9.6.0           | 3.0 MB    | ################################################################################################################################################################## | 100% [A[A[A[A
 
 
 
 
 
 
-gdal-3.11.0          | 1.7 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A
+snappy-1.2.2         | 45 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2170,8 +2169,8 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libbrotlidec-1.1.0   | 32 KB     | ########################################                                         |  50% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
-libgfortran-15.1.0   | 28 KB     | ##########################################################################################9                                                                        |  56% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2205,8 +2204,8 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libbrotlidec-1.1.0   | 32 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
-libbrotlidec-1.1.0   | 32 KB     | #################################################################################1                                                                                 |  50% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2241,10 +2240,10 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libgfortran-15.1.0   | 28 KB     | ############################################9                                    |  56% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
-liblapack-3.11.0     | 18 KB     | #################################################################################################################################################8                 |  90% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2277,13 +2276,13 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libgfortran-15.1.0   | 28 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
 
-libcblas-3.11.0      | 18 KB     | #################################################################################################################################################8                 |  90% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2314,19 +2313,18 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libblas-3.11.0       | 18 KB     | #######################################################################9         |  90% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
 
-libblas-3.11.0       | 18 KB     | #################################################################################################################################################7                 |  90% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
-geos-3.13.1          | 1.8 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A
 
 
 
@@ -2334,14 +2332,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libjxl-0.11.1        | 1.7 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A
 
 
 
 
 
 
-gdal-3.11.0          | 1.7 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A
 
 
 
@@ -2355,6 +2351,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+liblapack-3.11.0     | 18 KB     | ########################################################################         |  90% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2377,7 +2374,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libgfortran-15.1.0   | 28 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2392,6 +2388,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libblas-3.11.0       | 18 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2412,13 +2409,11 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libbrotlidec-1.1.0   | 32 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
-geos-3.13.1          | 1.8 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A
 
 
 
@@ -2431,6 +2426,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+liblapack-3.11.0     | 18 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2457,7 +2453,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libcblas-3.11.0      | 18 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2470,6 +2465,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libcblas-3.11.0      | 18 KB     | ########################################################################         |  90% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2495,7 +2491,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-liblapack-3.11.0     | 18 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2503,17 +2498,18 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libjxl-0.11.1        | 1.7 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A
 
 
 
 
 
 
+libcblas-3.11.0      | 18 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
+openssl-3.6.1        | 3.0 MB    | ################################################################################ | 100% [A[A[A[A[A
 
 
 
@@ -2521,26 +2517,30 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libjxl-0.11.1        | 1.7 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A
 
 
 
 
 
 
+gdal-3.11.0          | 1.7 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A
 
 
 
 
 
+geos-3.13.1          | 1.8 MB    | ################################################################################ | 100% [A[A[A[A[A[A
 
 
 
 
 
+geos-3.13.1          | 1.8 MB    | ################################################################################ | 100% [A[A[A[A[A[A
 
+libopenblas-0.3.30   | 5.7 MB    | ################################################################################ | 100% [A[A
 
 
-libblas-3.11.0       | 18 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2548,6 +2548,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libgfortran5-15.1.0  | 1.5 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2557,6 +2558,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libgfortran5-15.1.0  | 1.5 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2565,6 +2567,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+xerces-c-3.2.5       | 1.6 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A
 
 
 
@@ -2573,10 +2576,10 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+xerces-c-3.2.5       | 1.6 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A
 
 
 
-libgfortran-15.1.0   | 28 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2586,6 +2589,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+sqlite-3.49.2        | 840 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2598,6 +2602,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+sqlite-3.49.2        | 840 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2611,7 +2616,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libbrotlidec-1.1.0   | 32 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+libjpeg-turbo-3.1.2  | 619 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2621,26 +2626,25 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libgfortran5-15.1.0  | 1.5 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A
 
 
 
 
+libjpeg-turbo-3.1.2  | 619 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
-libgfortran5-15.1.0  | 1.5 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
+libhwy-1.3.0         | 1.4 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A
 
 
 
-xerces-c-3.2.5       | 1.6 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A
 
 
 
@@ -2648,8 +2652,8 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libhwy-1.3.0         | 1.4 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A
 
-xerces-c-3.2.5       | 1.6 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A
 
 
 
@@ -2661,9 +2665,9 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-pcre2-10.45          | 1.1 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A
 
 
+libtiff-4.7.1        | 427 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2673,12 +2677,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-pcre2-10.45          | 1.1 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[Alibgdal-core-3.11.0  | 11.3 MB   | ################################################################################################################################################################## | 100% 
 
 
 
 
 
+libtiff-4.7.1        | 427 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2686,11 +2690,11 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-sqlite-3.49.2        | 840 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
+pcre2-10.45          | 1.1 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2699,10 +2703,10 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-sqlite-3.49.2        | 840 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
+pcre2-10.45          | 1.1 MB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2710,7 +2714,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libhwy-1.3.0         | 1.4 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2719,9 +2722,9 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libwebp-base-1.6.0   | 419 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
-libhwy-1.3.0         | 1.4 MB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2735,8 +2738,8 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libwebp-base-1.6.0   | 419 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
-libtiff-4.7.1        | 427 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2751,8 +2754,8 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libtiff-4.7.1        | 427 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
+libkml-1.3.0         | 393 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2765,11 +2768,11 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libjpeg-turbo-3.1.2  | 619 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
+libkml-1.3.0         | 393 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2779,7 +2782,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libjpeg-turbo-3.1.2  | 619 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2788,6 +2790,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libpng-1.6.55        | 310 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2798,7 +2801,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libbrotlienc-1.1.0   | 275 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2806,6 +2808,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libpng-1.6.55        | 310 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2817,7 +2820,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libbrotlienc-1.1.0   | 275 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2825,6 +2827,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libbrotlienc-1.1.0   | 275 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2835,7 +2838,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libpng-1.6.55        | 310 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2844,6 +2846,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libbrotlienc-1.1.0   | 275 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2853,7 +2856,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libpng-1.6.55        | 310 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2866,10 +2868,10 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+muparser-2.3.5       | 198 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
-libwebp-base-1.6.0   | 419 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2885,10 +2887,10 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libwebp-base-1.6.0   | 419 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
+muparser-2.3.5       | 198 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2905,11 +2907,11 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-lerc-4.0.0           | 258 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
+librttopo-1.1.0      | 227 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2925,12 +2927,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-lerc-4.0.0           | 258 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
+librttopo-1.1.0      | 227 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2942,7 +2944,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libkml-1.3.0         | 393 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2954,12 +2955,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+certifi-2026.2.25    | 148 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
-libkml-1.3.0         | 393 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -2977,12 +2978,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+certifi-2026.2.25    | 148 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
-certifi-2026.1.4     | 147 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3001,11 +3002,11 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+ca-certificates-2026 | 144 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
-certifi-2026.1.4     | 147 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3025,8 +3026,8 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+ca-certificates-2026 | 144 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
-librttopo-1.1.0      | 227 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3045,9 +3046,9 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+lerc-4.0.0           | 258 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
-librttopo-1.1.0      | 227 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3065,13 +3066,13 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+lerc-4.0.0           | 258 KB    | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
 
-ca-certificates-2026 | 143 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3091,11 +3092,11 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+zlib-1.3.1           | 90 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
-ca-certificates-2026 | 143 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3117,7 +3118,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-muparser-2.3.5       | 198 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+zlib-1.3.1           | 90 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[Alibgdal-core-3.11.0  | 11.3 MB   | ################################################################################ | 100% 
 
 
 
@@ -3139,12 +3140,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-muparser-2.3.5       | 198 KB    | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
+json-c-0.18          | 81 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3165,13 +3166,13 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-zlib-1.3.1           | 90 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
 
+json-c-0.18          | 81 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3191,12 +3192,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-zlib-1.3.1           | 90 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
+minizip-4.0.10       | 91 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3218,10 +3219,10 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-json-c-0.18          | 81 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
+minizip-4.0.10       | 91 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3245,12 +3246,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-json-c-0.18          | 81 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
+libdeflate-1.24      | 71 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3270,7 +3271,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-minizip-4.0.10       | 91 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3280,6 +3280,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libdeflate-1.24      | 71 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3295,7 +3296,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-minizip-4.0.10       | 91 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3310,6 +3310,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libbrotlicommon-1.1. | 67 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3323,7 +3324,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-giflib-5.2.2         | 75 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3340,6 +3340,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libbrotlicommon-1.1. | 67 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3351,7 +3352,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-giflib-5.2.2         | 75 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3368,6 +3368,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+giflib-5.2.2         | 75 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3380,7 +3381,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libdeflate-1.24      | 71 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3396,6 +3396,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+giflib-5.2.2         | 75 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3409,7 +3410,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libdeflate-1.24      | 71 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3428,6 +3428,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+blosc-1.21.6         | 47 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3439,7 +3440,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libbrotlicommon-1.1. | 67 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3460,6 +3460,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+blosc-1.21.6         | 47 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3469,7 +3470,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libbrotlicommon-1.1. | 67 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3491,6 +3491,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+freexl-2.0.0         | 58 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3502,7 +3503,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-uriparser-0.9.8      | 47 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3522,6 +3522,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+freexl-2.0.0         | 58 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3535,7 +3536,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-uriparser-0.9.8      | 47 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3556,6 +3556,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+snappy-1.2.2         | 45 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3567,7 +3568,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-blosc-1.21.6         | 47 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3590,6 +3590,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+snappy-1.2.2         | 45 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3599,7 +3600,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-blosc-1.21.6         | 47 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3623,6 +3623,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+uriparser-0.9.8      | 47 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3630,7 +3631,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-freexl-2.0.0         | 58 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3656,12 +3656,13 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+uriparser-0.9.8      | 47 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+numpy-2.4.2          | 8.4 MB    | ################################################################################ | 100% [A
 
 
 
 
 
-freexl-2.0.0         | 58 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3691,11 +3692,11 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libbrotlidec-1.1.0   | 32 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
-snappy-1.2.2         | 45 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3726,10 +3727,10 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libbrotlidec-1.1.0   | 32 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
-snappy-1.2.2         | 45 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3763,12 +3764,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libblas-3.11.0       | 18 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
-libcblas-3.11.0      | 18 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3800,13 +3801,13 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libblas-3.11.0       | 18 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
 
-liblapack-3.11.0     | 18 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3836,6 +3837,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libgfortran-15.1.0   | 28 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3843,7 +3845,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-libblas-3.11.0       | 18 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3872,13 +3873,13 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+libgfortran-15.1.0   | 28 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
 
-libbrotlidec-1.1.0   | 32 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3910,40 +3911,32 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+liblapack-3.11.0     | 18 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
-libgfortran-15.1.0   | 28 KB     | ################################################################################################################################################################## | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-numpy-2.4.2          | 8.4 MB    | ################################################################################################################################################################## | 100% [A                                                                                                                                                                                                             
-                                                                                                                                                                                                             [A
 
-                                                                                                                                                                                                             [A[A
 
 
-                                                                                                                                                                                                             [A[A[A
 
 
 
-                                                                                                                                                                                                             [A[A[A[A
 
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A
 
 
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A
 
 
 
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A
 
 
 
@@ -3951,16 +3944,15 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A
 
 
 
 
 
+liblapack-3.11.0     | 18 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A
 
 
 
@@ -3970,7 +3962,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3981,7 +3972,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -3993,12 +3983,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
+libcblas-3.11.0      | 18 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4006,7 +3996,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4020,7 +4009,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4035,41 +4023,47 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
+libcblas-3.11.0      | 18 KB     | ################################################################################ | 100% [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A                                                                                                                           
+                                                                                                                           [A
 
+                                                                                                                           [A[A
 
 
+                                                                                                                           [A[A[A
 
 
 
+                                                                                                                           [A[A[A[A
 
 
 
 
+                                                                                                                           [A[A[A[A[A
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
+                                                                                                                           [A[A[A[A[A[A
 
 
 
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A
 
 
 
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
+                                                                                                                           [A[A[A[A[A[A[A[A
 
 
 
@@ -4078,6 +4072,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A
 
 
 
@@ -4086,8 +4081,8 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4098,6 +4093,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4105,11 +4101,11 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4122,10 +4118,10 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4136,6 +4132,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4146,11 +4143,11 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4166,9 +4163,9 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4183,6 +4180,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4191,7 +4189,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4201,6 +4198,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4215,11 +4213,11 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4239,8 +4237,8 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4260,13 +4258,13 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4282,6 +4280,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4293,7 +4292,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4305,6 +4303,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4321,7 +4320,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4329,6 +4327,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4350,10 +4349,10 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4379,8 +4378,8 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4406,12 +4405,12 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4434,6 +4433,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4443,7 +4443,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4463,6 +4462,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4476,7 +4476,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4493,6 +4492,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4510,7 +4510,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4524,6 +4523,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4545,7 +4545,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4556,6 +4555,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4581,7 +4581,6 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4589,6 +4588,7 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4618,11 +4618,11 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4656,8 +4656,8 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -4693,17 +4693,129 @@ Downloading and Extracting Packages: ...working...libgdal-core-3.11.0  | 11.3 M
 
 
 
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
-                                                                                                                                                                                                             [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A done
-Preparing transaction: - done
-Verifying transaction: | / - \ | done
-Executing transaction: - \ | / - \ | / - \ | / done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                                           [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A done
+Preparing transaction: / - done
+Verifying transaction: | / - \ | / - \ done
+Executing transaction: / - \ | / - \ | / - \ | / - \ | done
 Requirement already satisfied: pip in /opt/conda/lib/python3.12/site-packages (25.1.1)
 Collecting pip
   Downloading pip-26.0.1-py3-none-any.whl.metadata (4.7 kB)
 Downloading pip-26.0.1-py3-none-any.whl (1.8 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 39.5 MB/s eta 0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 125.1 MB/s eta 0:00:00
 Installing collected packages: pip
   Attempting uninstall: pip
     Found existing installation: pip 25.1.1
@@ -4753,7 +4865,7 @@ Requirement already satisfied: pyyaml in /opt/conda/lib/python3.12/site-packages
 Requirement already satisfied: charset_normalizer<4,>=2 in /opt/conda/lib/python3.12/site-packages (from requests->-r requirements.txt (line 1)) (3.4.2)
 Requirement already satisfied: idna<4,>=2.5 in /opt/conda/lib/python3.12/site-packages (from requests->-r requirements.txt (line 1)) (3.10)
 Requirement already satisfied: urllib3<3,>=1.21.1 in /opt/conda/lib/python3.12/site-packages (from requests->-r requirements.txt (line 1)) (2.4.0)
-Requirement already satisfied: certifi>=2017.4.17 in /opt/conda/lib/python3.12/site-packages (from requests->-r requirements.txt (line 1)) (2026.1.4)
+Requirement already satisfied: certifi>=2017.4.17 in /opt/conda/lib/python3.12/site-packages (from requests->-r requirements.txt (line 1)) (2026.2.25)
 Requirement already satisfied: comm>=0.1.1 in /opt/conda/lib/python3.12/site-packages (from ipykernel->-r requirements.txt (line 2)) (0.2.2)
 Requirement already satisfied: debugpy>=1.6.5 in /opt/conda/lib/python3.12/site-packages (from ipykernel->-r requirements.txt (line 2)) (1.8.14)
 Requirement already satisfied: matplotlib-inline>=0.1 in /opt/conda/lib/python3.12/site-packages (from ipykernel->-r requirements.txt (line 2)) (0.1.7)
@@ -4830,43 +4942,43 @@ Requirement already satisfied: asttokens>=2.1.0 in /opt/conda/lib/python3.12/sit
 Requirement already satisfied: pure_eval in /opt/conda/lib/python3.12/site-packages (from stack_data->IPython->-r requirements.txt (line 3)) (0.2.3)
 Downloading OWSLib-0.28.1-py2.py3-none-any.whl (219 kB)
 Downloading matplotlib-3.10.8-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (8.7 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.7/8.7 MB 73.1 MB/s  0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.7/8.7 MB 246.4 MB/s  0:00:00
 Downloading pandas-3.0.1-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (10.9 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.9/10.9 MB 143.3 MB/s  0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.9/10.9 MB 246.6 MB/s  0:00:00
 Downloading flask-3.1.3-py3-none-any.whl (103 kB)
 Downloading Flask_RESTful-0.3.10-py2.py3-none-any.whl (26 kB)
 Downloading geojson-3.2.0-py3-none-any.whl (15 kB)
 Downloading contextily-1.7.0-py3-none-any.whl (16 kB)
 Downloading shapely-2.1.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (3.1 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.1/3.1 MB 130.4 MB/s  0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.1/3.1 MB 203.1 MB/s  0:00:00
 Downloading geopandas-1.1.2-py3-none-any.whl (341 kB)
 Downloading pillow-12.1.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (7.0 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 7.0/7.0 MB 147.4 MB/s  0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 7.0/7.0 MB 244.0 MB/s  0:00:00
 Downloading basemap-2.0.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.1 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 129.3 MB/s  0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 158.6 MB/s  0:00:00
 Downloading numpy-2.3.5-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.6 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.6/16.6 MB 166.6 MB/s  0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.6/16.6 MB 161.4 MB/s  0:00:00
 Downloading basemap_data-2.0.0-py3-none-any.whl (30.5 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 30.5/30.5 MB 143.0 MB/s  0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 30.5/30.5 MB 111.6 MB/s  0:00:00
 Downloading pyproj-3.7.2-cp312-cp312-manylinux_2_28_x86_64.whl (9.6 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 9.6/9.6 MB 155.3 MB/s  0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 9.6/9.6 MB 166.8 MB/s  0:00:00
 Downloading pyshp-2.3.1-py2.py3-none-any.whl (46 kB)
 Downloading seaborn-0.13.2-py3-none-any.whl (294 kB)
 Downloading colorcet-3.1.0-py3-none-any.whl (260 kB)
 Downloading influxdb-5.3.2-py2.py3-none-any.whl (79 kB)
 Downloading scipy-1.17.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (35.2 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 35.2/35.2 MB 156.6 MB/s  0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 35.2/35.2 MB 210.9 MB/s  0:00:00
 Downloading aniso8601-10.0.1-py2.py3-none-any.whl (52 kB)
 Downloading click-8.3.1-py3-none-any.whl (108 kB)
 Downloading contourpy-1.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (362 kB)
 Downloading cycler-0.12.1-py3-none-any.whl (8.3 kB)
 Downloading fonttools-4.61.1-cp312-cp312-manylinux1_x86_64.manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_5_x86_64.whl (5.0 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.0/5.0 MB 134.6 MB/s  0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.0/5.0 MB 204.8 MB/s  0:00:00
 Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
 Downloading kiwisolver-1.4.9-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (1.5 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.5/1.5 MB 150.5 MB/s  0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.5/1.5 MB 159.8 MB/s  0:00:00
 Downloading pyogrio-0.12.1-cp312-cp312-manylinux_2_28_x86_64.whl (32.5 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 32.5/32.5 MB 140.5 MB/s  0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 32.5/32.5 MB 162.1 MB/s  0:00:00
 Downloading pyparsing-3.3.2-py3-none-any.whl (122 kB)
 Downloading werkzeug-3.1.6-py3-none-any.whl (225 kB)
 Downloading geopy-2.4.1-py3-none-any.whl (125 kB)
@@ -4875,7 +4987,7 @@ Downloading joblib-1.5.3-py3-none-any.whl (309 kB)
 Downloading mercantile-1.2.1-py3-none-any.whl (14 kB)
 Downloading msgpack-1.1.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (427 kB)
 Downloading rasterio-1.5.0-cp312-cp312-manylinux_2_28_x86_64.whl (37.6 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 37.6/37.6 MB 139.1 MB/s  0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 37.6/37.6 MB 184.4 MB/s  0:00:00
 Downloading cligj-0.7.2-py3-none-any.whl (7.1 kB)
 Downloading affine-2.4.0-py3-none-any.whl (15 kB)
 Downloading xyzservices-2025.11.0-py3-none-any.whl (93 kB)
