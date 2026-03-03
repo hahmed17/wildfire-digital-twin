@@ -149,4 +149,6 @@ The landscape file (LCP) must cover the geographic extent of the new fire. If a 
 
 ## About
 
-This workspace is part of the [WIFIRE](https://wifire.ucsd.edu) project, an NSF-funded cyberinfrastructure for real-time data-driven wildfire simulation and visualization developed at UC San Diego.
+## About
+
+This workspace is part of the NSF-funded [National Data Platfrom](https://nationaldataplatform.org/) project at UC San Diego.
