@@ -1,4 +1,4 @@
-# WIFIRE Wildfire Digital Twin — EnKF Data Assimilation
+# Wildfire Digital Twin — WIFIRE Firemap with EnKF Data Assimilation
 
 This workspace extends the Firemap simulation pipeline with **Ensemble Kalman Filter (EnKF) data assimilation**. Rather than running FARSITE in open-loop (prediction only), this workflow incorporates observed fire perimeters at each timestep to continuously correct the simulation — producing a *analysis* state that is more accurate than either the model prediction or the observation alone.
 
