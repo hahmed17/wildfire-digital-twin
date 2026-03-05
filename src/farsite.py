@@ -268,11 +268,10 @@ class Farsite:
         Returns:
             Return code from FARSITE
         """
-        # Logs go into FARSITE_TMP_DIR/farsite_logs/
-        log_dir = FARSITE_TMP_DIR / "farsite_logs"
+        log_dir = self.tmpfolder
         log_dir.mkdir(parents=True, exist_ok=True)
         
-        out_log = log_dir / f"{self.id}.out"
+        out_log = log_dir / f"{self.id}.log"
         err_log = log_dir / f"{self.id}.err"
         
         cmd = ["timeout", f"{timeout}m", self.farsitepath, self.runpath, str(ncores)]
