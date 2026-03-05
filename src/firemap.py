@@ -56,7 +56,7 @@ def fetch_fire_perimeters(fire_name, year=2025, geoserver_layer='WIFIRE:view_his
         "VERSION":      "2.0.0",
         "REQUEST":      "GetFeature",
         "TYPENAMES":    f"{geoserver_layer}",
-        "CQL_FILTER":   f"fire_name = '{fire_name}'",  # Add year filter after updating data
+        "CQL_FILTER":   f"fire_name = '{fire_name}' AND year = {year}",  # Add year filter after updating data
         "OUTPUTFORMAT": "application/json",
         "SRSNAME":      "EPSG:4326",
     }
