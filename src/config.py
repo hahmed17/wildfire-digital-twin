@@ -6,6 +6,7 @@ Paths are resolved relative to this file so the repo is fully portable —
 clone anywhere and it just works.
 """
 from pathlib import Path
+import tempfile
 
 # ============================================================================
 # DIRECTORY PATHS  (all relative to repo root — no hard-coding)
@@ -14,7 +15,7 @@ SRC_DIR  = Path(__file__).parent          # .../repo/src/
 BASE_DIR = SRC_DIR.parent                 # .../repo/
 DATA_DIR = BASE_DIR / "data"              # .../repo/data/
 OUTPUT_DIR = BASE_DIR / "outputs"         # .../repo/outputs/
-TMP_DIR  = BASE_DIR / "tmp"               # .../repo/tmp/
+TMP_DIR  = Path(tempfile.gettempdir()) / "farsite"  # /tmp/farsite/
 
 # Executables and static assets
 FARSITE_EXECUTABLE = SRC_DIR / "TestFARSITE"
@@ -98,7 +99,6 @@ def ensure_directories():
     """Create necessary directories if they don't exist."""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    TMP_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def get_ensemble_size(n_vertices):
