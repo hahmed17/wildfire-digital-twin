@@ -1,104 +1,10 @@
-PWD: /home/jovyan/work/wildfire-digital-twin
+PWD: /home/jovyan/work/digital-twin-group/wildfire-digital-twin
 Python: /opt/conda/bin/python
 After conda activate:
 /opt/conda/bin/python
-Python 3.13.14
-pip 26.2.1 from /opt/conda/lib/python3.13/site-packages/pip (python 3.13)
-Channels:
- - conda-forge
-Platform: linux-aarch64
-Collecting package metadata (repodata.json): ...working... done
-Solving environment: ...working... done
+Python 3.11.6
+pip 23.3 from /opt/conda/lib/python3.11/site-packages/pip (python 3.11)
+Collecting package metadata (current_repodata.json): ...working... failed
 
+CondaError: KeyboardInterrupt
 
-==> WARNING: A newer version of conda exists. <==
-    current version: 26.7.0
-    latest version: 26.7.1
-
-Please update conda by running
-
-    $ conda self update
-
-
-
-# All requested packages already installed.
-
-Requirement already satisfied: pip in /opt/conda/lib/python3.13/site-packages (26.2.1)
-Requirement already satisfied: requests in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 1)) (2.34.2)
-Requirement already satisfied: ipykernel in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 2)) (7.3.0)
-Requirement already satisfied: IPython in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 3)) (9.16.1)
-Requirement already satisfied: jupyter_client in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 4)) (8.9.1)
-Requirement already satisfied: jupyter_core in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 5)) (5.9.1)
-Requirement already satisfied: matplotlib in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 6)) (3.10.9)
-Requirement already satisfied: pandas in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 7)) (3.0.5)
-Requirement already satisfied: numpy in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 8)) (2.3.5)
-Requirement already satisfied: flask in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 9)) (3.1.3)
-Requirement already satisfied: flask-restful in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 10)) (0.3.10)
-Requirement already satisfied: geojson in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 11)) (3.3.0)
-Requirement already satisfied: contextily in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 12)) (1.7.1)
-Requirement already satisfied: shapely in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 13)) (2.1.2)
-Requirement already satisfied: geopandas in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 14)) (1.1.4)
-Requirement already satisfied: pillow in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 15)) (12.3.0)
-Requirement already satisfied: basemap in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 16)) (2.0.0)
-Requirement already satisfied: seaborn in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 17)) (0.13.2)
-Requirement already satisfied: colorcet in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 18)) (3.2.1)
-Requirement already satisfied: OWSLib==0.28.1 in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 19)) (0.28.1)
-Requirement already satisfied: influxdb in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 20)) (5.3.2)
-Requirement already satisfied: scipy in /opt/conda/lib/python3.13/site-packages (from -r requirements.txt (line 21)) (1.18.1)
-Requirement already satisfied: lxml in /home/jovyan/.local/lib/python3.13/site-packages (from OWSLib==0.28.1->-r requirements.txt (line 19)) (6.1.2)
-Requirement already satisfied: python-dateutil>=1.5 in /opt/conda/lib/python3.13/site-packages (from OWSLib==0.28.1->-r requirements.txt (line 19)) (2.9.0.post0)
-Requirement already satisfied: pytz in /opt/conda/lib/python3.13/site-packages (from OWSLib==0.28.1->-r requirements.txt (line 19)) (2026.3.post1)
-Requirement already satisfied: pyyaml in /opt/conda/lib/python3.13/site-packages (from OWSLib==0.28.1->-r requirements.txt (line 19)) (6.0.3)
-Requirement already satisfied: charset_normalizer<4,>=2 in /opt/conda/lib/python3.13/site-packages (from requests->-r requirements.txt (line 1)) (3.4.9)
-Requirement already satisfied: idna<4,>=2.5 in /opt/conda/lib/python3.13/site-packages (from requests->-r requirements.txt (line 1)) (3.18)
-Requirement already satisfied: urllib3<3,>=1.26 in /opt/conda/lib/python3.13/site-packages (from requests->-r requirements.txt (line 1)) (2.7.0)
-Requirement already satisfied: certifi>=2023.5.7 in /opt/conda/lib/python3.13/site-packages (from requests->-r requirements.txt (line 1)) (2026.7.22)
-Requirement already satisfied: comm>=0.1.1 in /opt/conda/lib/python3.13/site-packages (from ipykernel->-r requirements.txt (line 2)) (0.2.3)
-Requirement already satisfied: debugpy>=1.6.5 in /opt/conda/lib/python3.13/site-packages (from ipykernel->-r requirements.txt (line 2)) (1.8.21)
-Requirement already satisfied: matplotlib-inline>=0.1 in /opt/conda/lib/python3.13/site-packages (from ipykernel->-r requirements.txt (line 2)) (0.2.2)
-Requirement already satisfied: nest-asyncio2>=1.7.0 in /opt/conda/lib/python3.13/site-packages (from ipykernel->-r requirements.txt (line 2)) (1.7.2)
-Requirement already satisfied: packaging>=22 in /opt/conda/lib/python3.13/site-packages (from ipykernel->-r requirements.txt (line 2)) (25.0)
-Requirement already satisfied: psutil>=5.7 in /opt/conda/lib/python3.13/site-packages (from ipykernel->-r requirements.txt (line 2)) (7.2.2)
-Requirement already satisfied: pyzmq>=25 in /opt/conda/lib/python3.13/site-packages (from ipykernel->-r requirements.txt (line 2)) (27.1.0)
-Requirement already satisfied: tornado>=6.4.1 in /opt/conda/lib/python3.13/site-packages (from ipykernel->-r requirements.txt (line 2)) (6.5.8)
-Requirement already satisfied: traitlets>=5.4.0 in /opt/conda/lib/python3.13/site-packages (from ipykernel->-r requirements.txt (line 2)) (5.16.1)
-Requirement already satisfied: ipython-pygments-lexers>=1.0.0 in /opt/conda/lib/python3.13/site-packages (from IPython->-r requirements.txt (line 3)) (1.1.1)
-Requirement already satisfied: jedi>=0.18.2 in /opt/conda/lib/python3.13/site-packages (from IPython->-r requirements.txt (line 3)) (0.20.0)
-Requirement already satisfied: pexpect>4.6 in /opt/conda/lib/python3.13/site-packages (from IPython->-r requirements.txt (line 3)) (4.9.0)
-Requirement already satisfied: prompt_toolkit<3.1.0,>=3.0.41 in /opt/conda/lib/python3.13/site-packages (from IPython->-r requirements.txt (line 3)) (3.0.53)
-Requirement already satisfied: pygments>=2.14.0 in /opt/conda/lib/python3.13/site-packages (from IPython->-r requirements.txt (line 3)) (2.20.0)
-Requirement already satisfied: stack_data>=0.6.0 in /opt/conda/lib/python3.13/site-packages (from IPython->-r requirements.txt (line 3)) (0.6.3)
-Requirement already satisfied: wcwidth>=0.1.4 in /opt/conda/lib/python3.13/site-packages (from prompt_toolkit<3.1.0,>=3.0.41->IPython->-r requirements.txt (line 3)) (0.8.2)
-Requirement already satisfied: typing-extensions>=4.13.0 in /opt/conda/lib/python3.13/site-packages (from jupyter_client->-r requirements.txt (line 4)) (4.16.0)
-Requirement already satisfied: platformdirs>=2.5 in /opt/conda/lib/python3.13/site-packages (from jupyter_core->-r requirements.txt (line 5)) (4.11.1)
-Requirement already satisfied: contourpy>=1.0.1 in /opt/conda/lib/python3.13/site-packages (from matplotlib->-r requirements.txt (line 6)) (1.3.3)
-Requirement already satisfied: cycler>=0.10 in /opt/conda/lib/python3.13/site-packages (from matplotlib->-r requirements.txt (line 6)) (0.12.1)
-Requirement already satisfied: fonttools>=4.22.0 in /opt/conda/lib/python3.13/site-packages (from matplotlib->-r requirements.txt (line 6)) (4.63.0)
-Requirement already satisfied: kiwisolver>=1.3.1 in /opt/conda/lib/python3.13/site-packages (from matplotlib->-r requirements.txt (line 6)) (1.5.0)
-Requirement already satisfied: pyparsing>=3 in /opt/conda/lib/python3.13/site-packages (from matplotlib->-r requirements.txt (line 6)) (3.3.2)
-Requirement already satisfied: blinker>=1.9.0 in /opt/conda/lib/python3.13/site-packages (from flask->-r requirements.txt (line 9)) (1.9.0)
-Requirement already satisfied: click>=8.1.3 in /opt/conda/lib/python3.13/site-packages (from flask->-r requirements.txt (line 9)) (8.4.2)
-Requirement already satisfied: itsdangerous>=2.2.0 in /opt/conda/lib/python3.13/site-packages (from flask->-r requirements.txt (line 9)) (2.2.0)
-Requirement already satisfied: jinja2>=3.1.2 in /opt/conda/lib/python3.13/site-packages (from flask->-r requirements.txt (line 9)) (3.1.6)
-Requirement already satisfied: markupsafe>=2.1.1 in /opt/conda/lib/python3.13/site-packages (from flask->-r requirements.txt (line 9)) (3.0.3)
-Requirement already satisfied: werkzeug>=3.1.0 in /opt/conda/lib/python3.13/site-packages (from flask->-r requirements.txt (line 9)) (3.1.8)
-Requirement already satisfied: aniso8601>=0.82 in /opt/conda/lib/python3.13/site-packages (from flask-restful->-r requirements.txt (line 10)) (10.0.1)
-Requirement already satisfied: six>=1.3.0 in /opt/conda/lib/python3.13/site-packages (from flask-restful->-r requirements.txt (line 10)) (1.17.0)
-Requirement already satisfied: geopy in /opt/conda/lib/python3.13/site-packages (from contextily->-r requirements.txt (line 12)) (2.5.0)
-Requirement already satisfied: mercantile in /opt/conda/lib/python3.13/site-packages (from contextily->-r requirements.txt (line 12)) (1.2.1)
-Requirement already satisfied: rasterio in /opt/conda/lib/python3.13/site-packages (from contextily->-r requirements.txt (line 12)) (1.5.1)
-Requirement already satisfied: joblib in /opt/conda/lib/python3.13/site-packages (from contextily->-r requirements.txt (line 12)) (1.5.3)
-Requirement already satisfied: xyzservices in /opt/conda/lib/python3.13/site-packages (from contextily->-r requirements.txt (line 12)) (2026.3.0)
-Requirement already satisfied: pyogrio>=0.7.2 in /opt/conda/lib/python3.13/site-packages (from geopandas->-r requirements.txt (line 14)) (0.13.0)
-Requirement already satisfied: pyproj>=3.5.0 in /opt/conda/lib/python3.13/site-packages (from geopandas->-r requirements.txt (line 14)) (3.7.2)
-Requirement already satisfied: basemap_data<3.0,>=2.0 in /opt/conda/lib/python3.13/site-packages (from basemap->-r requirements.txt (line 16)) (2.0.0)
-Requirement already satisfied: pyshp<2.4,>=2.0 in /opt/conda/lib/python3.13/site-packages (from basemap->-r requirements.txt (line 16)) (2.3.1)
-Requirement already satisfied: msgpack in /opt/conda/lib/python3.13/site-packages (from influxdb->-r requirements.txt (line 20)) (1.2.1)
-Requirement already satisfied: parso<0.9.0,>=0.8.6 in /opt/conda/lib/python3.13/site-packages (from jedi>=0.18.2->IPython->-r requirements.txt (line 3)) (0.8.7)
-Requirement already satisfied: ptyprocess>=0.5 in /opt/conda/lib/python3.13/site-packages (from pexpect>4.6->IPython->-r requirements.txt (line 3)) (0.7.0)
-Requirement already satisfied: executing>=1.2.0 in /opt/conda/lib/python3.13/site-packages (from stack_data>=0.6.0->IPython->-r requirements.txt (line 3)) (2.2.1)
-Requirement already satisfied: asttokens>=2.1.0 in /opt/conda/lib/python3.13/site-packages (from stack_data>=0.6.0->IPython->-r requirements.txt (line 3)) (3.0.2)
-Requirement already satisfied: pure_eval in /opt/conda/lib/python3.13/site-packages (from stack_data>=0.6.0->IPython->-r requirements.txt (line 3)) (0.2.3)
-Requirement already satisfied: geographiclib<3,>=1.52 in /opt/conda/lib/python3.13/site-packages (from geopy->contextily->-r requirements.txt (line 12)) (2.1)
-Requirement already satisfied: affine in /opt/conda/lib/python3.13/site-packages (from rasterio->contextily->-r requirements.txt (line 12)) (3.0.0)
-Requirement already satisfied: attrs in /opt/conda/lib/python3.13/site-packages (from rasterio->contextily->-r requirements.txt (line 12)) (26.1.0)

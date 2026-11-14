@@ -1,24 +1,32 @@
 #!/bin/bash
+set -euo pipefail
+mkdir -p src
 
 {
-    set -euo pipefail
-    
-    echo "PWD: $(pwd)"
-    echo "Python: $(python -c 'import sys; print(sys.executable)')"
-    
-    # Ensure conda commands work in non-interactive shells (safe even if already works)
     source "$(conda info --base)/etc/profile.d/conda.sh"
-    # conda update -n base -c conda-forge conda
-    conda activate base
-    
-    echo "After conda activate:"
-    which python
-    /opt/conda/bin/python -V
-    /opt/conda/bin/python -m pip -V
-    
-    conda install -c conda-forge -y gdal gcc gxx geos
-    
-    /opt/conda/bin/python -m pip install --upgrade pip
-    /opt/conda/bin/python -m pip install -r requirements.txt
-    
-} >install.log 2>&1
+    ENV=gdal_env
+
+    # Use mamba if available (much faster solver), otherwise conda's libmamba solver
+    if command -v mamba >/dev/null 2>&1; then
+        INSTALLER="mamba"
+    else
+        INSTALLER="conda --solver=libmamba"
+    fi
+
+    # Create a fresh env with the hard-to-build geo packages from conda-forge
+    if ! conda env list | grep -q "^${ENV} "; then
+        $INSTALLER create -n "$ENV" -c conda-forge --override-channels -y \
+            python=3.11 gdal geopandas shapely contextily basemap ipykernel
+    fi
+
+    conda activate "$ENV"
+    echo "Using: $(which python)"
+
+    python -m pip install --upgrade pip
+    python -m pip install -r requirements.txt
+
+    # Register the kernel the notebook expects
+    python -m ipykernel install --user --name gdal_env --display-name "Python (gdal_env)"
+
+    echo "Done."
+} 2>&1 | tee src/install.log
