@@ -87,7 +87,7 @@ The notebook calls `step()` at each assimilation cycle. The analysis state and u
 In the **Experiment Parameters** cell of `border2_experiment.ipynb`:
  
 ```python
-N_WORKERS = 6   # number of FARSITE members to run simultaneously
+N_WORKERS = 12   # number of FARSITE members to run simultaneously
 ```
  
 Each worker runs one FARSITE simulation in a separate process. Set this to the number of CPU cores available. Each FARSITE process is single-threaded, so `N_WORKERS = n_cores` gives near-linear speedup up to memory limits.
@@ -117,7 +117,7 @@ After the baseline run, vary one parameter at a time to build the orchestrator's
 | Parallel workers (`N_WORKERS`) | 1, 4, 8 |
 | Random seeds | 2–3 seeds for N ∈ {10, 25, 50} |
  
-Run the **baseline** (N=300, 150 m, N_WORKERS=6) first — it is the anchor row. Change only the parameter under test; keep everything else fixed.
+Run the **baseline** (N=300, 150 m, N_WORKERS=12) first — it is the anchor row. Change only the parameter under test; keep everything else fixed.
  
 **Logging (three CSV files)**
  
@@ -144,7 +144,7 @@ At runtime the orchestrator picks the *(N, resolution, workers)* configuration t
  
 ## Credentials (`user_info.env`)
  
-Create this file in the repo root (gitignored):
+Create this file in the repo root (gitignored) or copy `user_info_template.env`:
  
 ```
 LANDFIRE_EMAIL=<your registered LANDFIRE email>
@@ -158,7 +158,7 @@ FIRMS_MAP_KEY=<your NASA FIRMS API key>
  
 ## Requirements
  
-**Hardware**: at least 4 CPUs and 16 GB RAM recommended; ~40–50 min per timestep at N=300 with 6 workers (vs ~4 hours serial).
+**Hardware**: at least 4 CPUs and 16 GB RAM recommended; ~20-25 min per timestep at N=300 with 12 workers (vs ~4 hours serial).
  
 ```bash
 chmod +x install_packages.sh && ./install_packages.sh
