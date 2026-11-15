@@ -147,4 +147,4 @@ chmod +x install_packages.sh && ./install_packages.sh
 
 ## About
 
-This workspace is part of the NSF-funded [National Data Platform](https://nationaldataplatform.org/) project at UC San Diego, developed in collaboration with the Societal Computing and Innovation (SCIL) Lab.
+This workspace is part of the NSF-funded [National Data Platform](https://nationaldataplatform.org/) project at UC San Diego, developed in collaboration with the Societal Computing and Innovation Lab (SCIL).
