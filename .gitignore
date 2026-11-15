@@ -224,3 +224,4 @@ example_border2_synthetic/
 data/border2_inputs/landfire/
 .ipynb_checkpoints/
 data/border2_inputs/landscape.lcp
+src/.ipynb_checkpoints/
