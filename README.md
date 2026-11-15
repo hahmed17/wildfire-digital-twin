@@ -53,7 +53,6 @@ wildfire-digital-twin/
 ```
 chmod +x src/TestFARSITE src/lcpmake install_packages.sh
 bash install_packages.sh
-
 ```
 **Important**: Switch to the Python kernel named `Python (gdal_env)` before running any Jupyter Notebooks.
 
