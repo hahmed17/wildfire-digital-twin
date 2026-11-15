@@ -466,6 +466,95 @@ def fetch_fire_perimeters_firms_ogc(fire_name="BORDER 2", bbox=None,
 
 
 
+def _fetch_wfigs(fire_name, date_start, date_end, bbox):
+    """
+    Query the WFIGS Interagency Perimeters FeatureServer for a named fire.
+    Returns a GeoDataFrame in WGS84, or raises on failure.
+    """
+    base = (
+        'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services'
+        '/WFIGS_Interagency_Perimeters/FeatureServer/0/query'
+    )
+    minx, miny, maxx, maxy = bbox
+    name_upper = fire_name.upper()
+    where = (
+        f"IncidentName LIKE '%{name_upper}%'"
+        f" AND CreateDate >= DATE '{date_start}'"
+        f" AND CreateDate <= DATE '{date_end}'"
+    )
+    params = {
+        'where':         where,
+        'geometry':      f'{minx},{miny},{maxx},{maxy}',
+        'geometryType':  'esriGeometryEnvelope',
+        'inSR':          '4326',
+        'spatialRel':    'esriSpatialRelIntersects',
+        'outFields':     'IncidentName,GISAcres,CreateDate,PolygonDateTime',
+        'outSR':         '4326',
+        'f':             'geojson',
+        'returnGeometry': 'true',
+    }
+    r = requests.get(base, params=params, timeout=30)
+    r.raise_for_status()
+    gdf = gpd.read_file(r.text)
+    if gdf.empty:
+        raise ValueError('WFIGS returned 0 features')
+    # Normalise columns to match Firemap schema
+    gdf = gdf.rename(columns={
+        'GISAcres':        'acres',
+        'PolygonDateTime': 'datetime',
+        'IncidentName':    'fire_name',
+    })
+    # Parse datetime — WFIGS uses epoch-ms integers; convert if needed
+    if gdf['datetime'].dtype == object:
+        gdf['datetime'] = pd.to_datetime(gdf['datetime'], errors='coerce')
+    else:
+        gdf['datetime'] = pd.to_datetime(gdf['datetime'], unit='ms', errors='coerce')
+    gdf = gdf.sort_values('datetime').reset_index(drop=True)
+    return gdf
+
+
+    
+def _fetch_nifc(fire_name, date_start, date_end, bbox):
+    """
+    Query the NIFC open-data Current Wildland Fire Perimeters layer.
+    Returns a GeoDataFrame in WGS84, or raises on failure.
+    """
+    base = (
+        'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services'
+        '/WFIGS_Interagency_Perimeters_YearToDate/FeatureServer/0/query'
+    )
+    minx, miny, maxx, maxy = bbox
+    name_upper = fire_name.upper()
+    where = f"IncidentName LIKE '%{name_upper}%'"
+    params = {
+        'where':          where,
+        'geometry':       f'{minx},{miny},{maxx},{maxy}',
+        'geometryType':   'esriGeometryEnvelope',
+        'inSR':           '4326',
+        'spatialRel':     'esriSpatialRelIntersects',
+        'outFields':      'IncidentName,GISAcres,CreateDate,PolygonDateTime',
+        'outSR':          '4326',
+        'f':              'geojson',
+        'returnGeometry': 'true',
+    }
+    r = requests.get(base, params=params, timeout=30)
+    r.raise_for_status()
+    gdf = gpd.read_file(r.text)
+    if gdf.empty:
+        raise ValueError('NIFC YTD returned 0 features')
+    gdf = gdf.rename(columns={
+        'GISAcres':        'acres',
+        'PolygonDateTime': 'datetime',
+        'IncidentName':    'fire_name',
+    })
+    if gdf['datetime'].dtype == object:
+        gdf['datetime'] = pd.to_datetime(gdf['datetime'], errors='coerce')
+    else:
+        gdf['datetime'] = pd.to_datetime(gdf['datetime'], unit='ms', errors='coerce')
+    gdf = gdf.sort_values('datetime').reset_index(drop=True)
+    return gdf
+
+
 
 def fetch_weather_data(lat, lon, start_time, end_time, verbose=True):
     """

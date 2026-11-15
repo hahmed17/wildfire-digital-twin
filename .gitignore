@@ -216,12 +216,4 @@ __marimo__/
 .streamlit/secrets.toml
 
 # Temporary files for FARSITE simulations
-tmp/
-tmp2/
-data/
-landfire_*
-landscape.lcp
-outputs/
-weather_data/
-fire_perimeters/
-outputs/
+user_info.env

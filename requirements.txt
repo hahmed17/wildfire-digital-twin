@@ -19,3 +19,5 @@ colorcet
 OWSLib==0.28.1
 influxdb
 scipy
+dotenv
+tqdm

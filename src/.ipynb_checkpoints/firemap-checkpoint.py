@@ -12,8 +12,13 @@ import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Polygon, MultiPolygon
 
-from config import FIREMAP_WFS_URL, FIREMAP_WX_URL, FARSITE_CRS
+import time
+import json
+import numpy as np
 
+
+from config import FIREMAP_WFS_URL, FIREMAP_WX_URL, FARSITE_CRS
+import warnings
 
 # ============================================================================
 # PERIMETER RETRIEVAL
@@ -29,7 +34,7 @@ def _multipolygon_to_polygon(geom):
         raise TypeError(f"Unsupported geometry type: {type(geom)}")
 
 
-def fetch_fire_perimeters(fire_name, year, verbose=True, synthetic=False):
+def fetch_fire_perimeters(fire_name, year=2025, geoserver_layer='WIFIRE:view_historical_fires', verbose=True):
     """
     Fetch all mapped perimeters for a fire from WIFIRE Firemap GeoServer (WFS).
 
@@ -50,19 +55,20 @@ def fetch_fire_perimeters(fire_name, year, verbose=True, synthetic=False):
         "SERVICE":      "WFS",
         "VERSION":      "2.0.0",
         "REQUEST":      "GetFeature",
-        "TYPENAMES":    "WIFIRE:view_historical_fires",
-        "CQL_FILTER":   f"fire_name = '{fire_name}' AND year = {year}",
+        "TYPENAMES":    f"{geoserver_layer}",
+        "CQL_FILTER":   f"fire_name = '{fire_name}' AND year = {year}",  # Add year filter after updating data
         "OUTPUTFORMAT": "application/json",
         "SRSNAME":      "EPSG:4326",
     }
 
-    if synthetic:
-        raise NotImplementedError('Load synthetic fire perimeter not yet implemented!!')
-        data = load_synthetic_fire_perimeter()
-    else:
-        response = requests.get(FIREMAP_WFS_URL, params=params, timeout=30)
-        response.raise_for_status()
-        data = response.json()
+    warnings.warn(
+        "The 'year' parameter is currently not used for filtering perimeters. "
+        "Ensure the fire name is unique or includes the year if needed."
+    )
+
+    response = requests.get(FIREMAP_WFS_URL, params=params, timeout=30)
+    response.raise_for_status()
+    data = response.json()
 
     features = data.get("features", [])
     if not features:
@@ -101,15 +107,15 @@ def fetch_fire_perimeters(fire_name, year, verbose=True, synthetic=False):
         for i, row in gdf.iterrows():
             print(f"    [{i}] {row['datetime'].date()}  —  "
                   f"{row.geometry.area/1e6:.2f} km²  "
-                  f"({row['acres']:.0f} acres)")
-
+                #   f"({row['acres']:.0f} acres)"
+                    )
     return gdf
 
 
 # ============================================================================
 # WEATHER RETRIEVAL
 # ============================================================================
-def query_weather_for_timestep(lat, lon, start_time, end_time, verbose=False, synthetic=False):
+def query_weather_for_timestep(lat, lon, start_time, end_time, verbose=False):
     """
     Query weather data for a specific timestep.
     
@@ -132,50 +138,44 @@ def query_weather_for_timestep(lat, lon, start_time, end_time, verbose=False, sy
         print(f"  Querying weather: {start_time} to {end_time}")
 
 
-    if synthetic:
-        wind_speed_list = [20]
-        wind_direction_list = [90]
+    # Query Firemap API
+    timestamp = int(time.time() * 1000)
+    wx_params = {
+        'selection': 'closestTo',
+        'lat': str(lat),
+        'lon': str(lon),
+        'observable': ['wind_speed', 'wind_direction'],
+        'from': start_iso,
+        'to': end_iso,
+        'callback': 'wxData',
+        '_': str(timestamp)
+    }
 
+    try:
+        wx_response = requests.get(FIREMAP_WX_URL, params=wx_params, timeout=10)
+        wx_text = wx_response.text.strip()
+        
+        # Remove JSONP wrapper
+        if wx_text.startswith('wxData(') and wx_text.endswith(')'):
+            wx_json = wx_text[len('wxData('):-1]
+            wx_obs = json.loads(wx_json)
+        else:
+            wx_obs = wx_response.json()
+        
+        wind_speed_list = wx_obs["features"][0]["properties"]["wind_speed"]
+        wind_direction_list = wx_obs["features"][0]["properties"]["wind_direction"]
+        
+        if verbose:
+            print(f"  Retrieved {len(wind_speed_list)} observations")
+            print(f"  Wind: {np.mean(wind_speed_list):.1f} mph @ {np.mean(wind_direction_list):.0f}°")
+        
         return wind_speed_list, wind_direction_list
-    else:
-        # Query Firemap API
-        timestamp = int(time.time() * 1000)
-        wx_params = {
-            'selection': 'closestTo',
-            'lat': str(lat),
-            'lon': str(lon),
-            'observable': ['wind_speed', 'wind_direction'],
-            'from': start_iso,
-            'to': end_iso,
-            'callback': 'wxData',
-            '_': str(timestamp)
-        }
-
-        try:
-            wx_response = requests.get(FIREMAP_WX_URL, params=wx_params, timeout=10)
-            wx_text = wx_response.text.strip()
-            
-            # Remove JSONP wrapper
-            if wx_text.startswith('wxData(') and wx_text.endswith(')'):
-                wx_json = wx_text[len('wxData('):-1]
-                wx_obs = json.loads(wx_json)
-            else:
-                wx_obs = wx_response.json()
-            
-            wind_speed_list = wx_obs["features"][0]["properties"]["wind_speed"]
-            wind_direction_list = wx_obs["features"][0]["properties"]["wind_direction"]
-            
-            if verbose:
-                print(f"  Retrieved {len(wind_speed_list)} observations")
-                print(f"  Wind: {np.mean(wind_speed_list):.1f} mph @ {np.mean(wind_direction_list):.0f}°")
-            
-            return wind_speed_list, wind_direction_list
-            
-        except Exception as e:
-            print(f"  WARNING: Weather query failed: {e}")
-            print(f"  Using fallback values")
-            # Return fallback values
-            return [10.0], [225.0]  # Default 10 mph from SW
+        
+    except Exception as e:
+        print(f"  WARNING: Weather query failed: {e}")
+        print(f"  Using fallback values")
+        # Return fallback values
+        return [10.0], [225.0]  # Default 10 mph from SW
 
 
 def fetch_weather(lat, lon, start_dt, end_dt, verbose=True):
@@ -464,6 +464,95 @@ def fetch_fire_perimeters_firms_ogc(fire_name="BORDER 2", bbox=None,
     
     return perimeters_gdf
 
+
+
+def _fetch_wfigs(fire_name, date_start, date_end, bbox):
+    """
+    Query the WFIGS Interagency Perimeters FeatureServer for a named fire.
+    Returns a GeoDataFrame in WGS84, or raises on failure.
+    """
+    base = (
+        'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services'
+        '/WFIGS_Interagency_Perimeters/FeatureServer/0/query'
+    )
+    minx, miny, maxx, maxy = bbox
+    name_upper = fire_name.upper()
+    where = (
+        f"IncidentName LIKE '%{name_upper}%'"
+        f" AND CreateDate >= DATE '{date_start}'"
+        f" AND CreateDate <= DATE '{date_end}'"
+    )
+    params = {
+        'where':         where,
+        'geometry':      f'{minx},{miny},{maxx},{maxy}',
+        'geometryType':  'esriGeometryEnvelope',
+        'inSR':          '4326',
+        'spatialRel':    'esriSpatialRelIntersects',
+        'outFields':     'IncidentName,GISAcres,CreateDate,PolygonDateTime',
+        'outSR':         '4326',
+        'f':             'geojson',
+        'returnGeometry': 'true',
+    }
+    r = requests.get(base, params=params, timeout=30)
+    r.raise_for_status()
+    gdf = gpd.read_file(r.text)
+    if gdf.empty:
+        raise ValueError('WFIGS returned 0 features')
+    # Normalise columns to match Firemap schema
+    gdf = gdf.rename(columns={
+        'GISAcres':        'acres',
+        'PolygonDateTime': 'datetime',
+        'IncidentName':    'fire_name',
+    })
+    # Parse datetime — WFIGS uses epoch-ms integers; convert if needed
+    if gdf['datetime'].dtype == object:
+        gdf['datetime'] = pd.to_datetime(gdf['datetime'], errors='coerce')
+    else:
+        gdf['datetime'] = pd.to_datetime(gdf['datetime'], unit='ms', errors='coerce')
+    gdf = gdf.sort_values('datetime').reset_index(drop=True)
+    return gdf
+
+
+    
+def _fetch_nifc(fire_name, date_start, date_end, bbox):
+    """
+    Query the NIFC open-data Current Wildland Fire Perimeters layer.
+    Returns a GeoDataFrame in WGS84, or raises on failure.
+    """
+    base = (
+        'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services'
+        '/WFIGS_Interagency_Perimeters_YearToDate/FeatureServer/0/query'
+    )
+    minx, miny, maxx, maxy = bbox
+    name_upper = fire_name.upper()
+    where = f"IncidentName LIKE '%{name_upper}%'"
+    params = {
+        'where':          where,
+        'geometry':       f'{minx},{miny},{maxx},{maxy}',
+        'geometryType':   'esriGeometryEnvelope',
+        'inSR':           '4326',
+        'spatialRel':     'esriSpatialRelIntersects',
+        'outFields':      'IncidentName,GISAcres,CreateDate,PolygonDateTime',
+        'outSR':          '4326',
+        'f':              'geojson',
+        'returnGeometry': 'true',
+    }
+    r = requests.get(base, params=params, timeout=30)
+    r.raise_for_status()
+    gdf = gpd.read_file(r.text)
+    if gdf.empty:
+        raise ValueError('NIFC YTD returned 0 features')
+    gdf = gdf.rename(columns={
+        'GISAcres':        'acres',
+        'PolygonDateTime': 'datetime',
+        'IncidentName':    'fire_name',
+    })
+    if gdf['datetime'].dtype == object:
+        gdf['datetime'] = pd.to_datetime(gdf['datetime'], errors='coerce')
+    else:
+        gdf['datetime'] = pd.to_datetime(gdf['datetime'], unit='ms', errors='coerce')
+    gdf = gdf.sort_values('datetime').reset_index(drop=True)
+    return gdf
 
 
 
