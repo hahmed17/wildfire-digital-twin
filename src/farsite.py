@@ -299,7 +299,7 @@ def cleanup_farsite_outputs(run_id, base_dir):
 
 
 # ============================================================================
-# HIGH-LEVEL FORWARD PASS — exact copy of working forward_pass_farsite
+# HIGH-LEVEL FORWARD PASS
 # ============================================================================
 
 def forward_pass_farsite(poly, params, start_time, lcppath,
