@@ -57,6 +57,7 @@ bash install_packages.sh
 **Important**: Switch to the Python kernel named `Python (gdal_env)` before running any Jupyter Notebooks.
 
 
+
 ### Step 1 — `border2_prepare_data.ipynb`
 
 Fetches and validates all inputs. Every step is idempotent — re-running skips outputs that already exist.
@@ -146,4 +147,4 @@ chmod +x install_packages.sh && ./install_packages.sh
 
 ## About
 
-This workspace is part of the NSF-funded [National Data Platform](https://nationaldataplatform.org/) project at UC San Diego, developed in collaboration with the WIFIRE Lab.
+This workspace is part of the NSF-funded [National Data Platform](https://nationaldataplatform.org/) project at UC San Diego, developed in collaboration with the Societal Computing and Innovation (SCIL) Lab.
