@@ -1,3 +1,0 @@
-action,step,detail,elapsed_s,status
-init_state,-1,"initial perimeter -> 20 vertices, cov=1000*I",0.006,ok
-query_weather,0,ws=9.2 wd=83.3 n_obs=148,1.103,ok
