@@ -383,7 +383,7 @@ def forward_pass_farsite(poly, params, start_time, lcppath,
 def forward_pass_farsite_multistep(poly, params, start_time, lcppath,
                          dist_res=30, perim_res=60, debug=False):
     dt      = params['dt']
-    STEP_MINUTES = 30  # step size
+    STEP_MINUTES = int(params.get('farsite_dt_minutes', 30))  # step size
 
     if dist_res > 500:
         warnings.warn(f'dist_res ({dist_res}) must be 1-500. Setting to 500')

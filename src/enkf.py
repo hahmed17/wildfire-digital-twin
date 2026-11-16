@@ -72,6 +72,7 @@ def _run_one_member(args):
         'temperature':   int(params.get('temperature', 66)),
         'humidity':      float(params.get('humidity', 0.08)),
         'dt':            args['dt'],
+        'farsite_dt_minutes': args.get('farsite_dt_minutes', 30)
     }
     input_poly = state_to_geom(xkhat_col)
     start_time = obs_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -116,6 +117,7 @@ def run_ensemble(
     X=None,           # (n_states, n_states) prior covariance — used for Cholesky perturbations
     params=None,
     n_workers=1,
+    farsite_dt_minutes=30,
     # logging
     members_csv=None,
     fire_name='unknown',
@@ -194,6 +196,7 @@ def run_ensemble(
             n_vertex=n_vertex,
             initial_state_arr=initial_state.tolist(),
             dt=dt,
+            farsite_dt_minutes=farsite_dt_minutes,
             run_id=run_id or str(uuid.uuid4())[:8],
             fire_name=fire_name,
             step_idx=step_idx,
@@ -396,6 +399,7 @@ def step(
     dist_res, perim_res, lcppath,
     params=None,
     n_workers=1,
+    farsite_dt_minutes=30,
     # logging
     members_csv=None,
     steps_csv=None,
@@ -436,6 +440,7 @@ def step(
         X=X,          # pass updated covariance for prior perturbations
         params=params,
         n_workers=n_workers,
+        farsite_dt_minutes=farsite_dt_minutes,
         members_csv=members_csv,
         fire_name=fire_name,
         step_idx=t,
