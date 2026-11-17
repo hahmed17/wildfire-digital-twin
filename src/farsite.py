@@ -421,7 +421,6 @@ def forward_pass_farsite_multistep(poly, params, start_time, lcppath,
             return None
         poly = validate_geom(out)
         current_time += datetime.timedelta(minutes=STEP_MINUTES)
-        print(f"  Step {i+1}/{number_of_steps}: {poly.area/1e6:.3f} km2")
 
     # Handle remainder
     if remaining_minutes >= 10:
