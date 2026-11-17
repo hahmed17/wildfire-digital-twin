@@ -1,0 +1,2 @@
+run_id,step,t_obs,N,n_valid,t_ensemble_s,t_enkf_s,vsize,wsize
+fed3e7b0,0,2025-01-24 20:36:00+00:00,300,248,15462.768,1.188,300.0,100.0
