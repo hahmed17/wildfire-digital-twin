@@ -114,7 +114,7 @@ class EnsembleResult:
     member_wall_s: list[float]    # timing per member (from her logs or measured)
 
 
-def load_observation(event: ObservationEvent): ...
+def load_observation(event: ObservationEvent) -> list: ...
     # perimeter -> geometry.geom_to_state ; FIRMS -> hotspot points (for checks only)
 
 def fetch_weather(lat, lon, start, end): ...
@@ -128,7 +128,7 @@ def run_ensemble(state_vec, cov_X, plan: ForecastPlan, weather, dt, lcp) -> Ense
 def enkf_update(ens: EnsembleResult, obs_vec, vsize_m, wsize_m, inflation): ...
     # after refactor: her enkf_update(...) -> (analysis_vec, new_cov_X)
 
-def save_state(path, ...): ...    # enkf.save_enkf_state
+def save_state(path, **arrays): ...    # enkf.save_enkf_state
 def load_state(path): ...         # enkf.load_enkf_state
 
 

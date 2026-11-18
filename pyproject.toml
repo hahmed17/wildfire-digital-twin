@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wildfire-digital-twin"
+version = "0.1.0"
+description = "Agentic orchestration for EnKF + FARSITE wildfire digital twin"
+requires-python = ">=3.11"
+# Dependencies are installed from requirements.txt (geo stack via conda-forge).
+
+[tool.setuptools]
+# Hena's src/ modules import each other by bare name (`from farsite import ...`),
+# so they are installed as top-level modules, unchanged.
+py-modules = ["config", "geometry", "farsite", "enkf", "firemap"]
+# Our code: the `orchestrator` package (lives at the repo root, not in src/).
+packages = ["orchestrator"]
+package-dir = { "" = "src", "orchestrator" = "orchestrator" }
