@@ -21,3 +21,4 @@ influxdb
 scipy
 dotenv
 tqdm
+pydantic
