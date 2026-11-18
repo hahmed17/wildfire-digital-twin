@@ -42,17 +42,33 @@ Each returns one field of `Signals`. Inputs are state vectors / shapely polygons
 - [ ] [H] `load_hotspots(path, start, end)` + `agrees_with_firms(perimeter, hotspots, buffer_m=500) -> bool | None`
 - [ ] [H] `wind_shift(weather_prev, weather_now, deg_thresh=45, speed_thresh=10) -> bool`
 
-## §6 Agents — one per data decision, each with Fixed + Rule policies  [T]
+## §6 Agents — one per data decision, each with Fixed + Rule policies
 Each agent = menu (pydantic) + policy interface + guardrail + `DecisionRecord`.
-- [ ] [T] Observation agent: use / downweight / reject + vsize
-- [ ] [T] Weather agent: use readings / widen noise / reuse last window
-- [ ] [T] Assimilation agent: assimilate / inflate / reinitialize
-- [ ] [T] Guardrails per agent (e.g. reject only if an independent check failed; streak ≥ 3 → reinit)
+The observation agent is built first and is the **template** the other agents copy.
+- [ ] [T] Observation agent: use / downweight / reject + vsize (+ its guardrail)
+- [ ] [H] Weather agent: use readings / widen noise / reuse last window (+ its guardrail)
+- [ ] [H] Assimilation agent: assimilate / inflate / reinitialize (+ its guardrail; streak ≥ 3 → reinit)
 
-## §8 graph.py — LangGraph wiring  [T]
-- [ ] [T] Nodes: observation → weather → forecast → assimilation → update
-- [ ] [T] Routing in `routing.py` (conditional edges; e.g. rejected obs → skip to next event)
-- [ ] [T] Run end to end with Fixed policies on Border 2
+## §8 Pipeline organizer — `graph.py` + `routing.py`  [H]
+No LLM: the graph is the organizer. Order lives in one list; exceptions live in `routing.py`.
+
+**Rule every step follows (agents and plain steps alike):** one function that takes the state
+and returns only the keys it changed, e.g.
+`def observation_agent(state: TwinState) -> dict: return {"obs_verdict": v, "log": [record]}`
+
+- [ ] [T] Add the verdict keys the routing reads to `TwinState` (`obs_verdict`, `weather_verdict`, ...)
+- [ ] [H] `graph.py`: `PIPELINE = ["receive", "observation", "weather", "forecast", "assimilation", "update"]`
+- [ ] [H] `routing.py`:
+      `after_observation(state)` → `"update"` if `obs_verdict.action == "reject"` else `"weather"`;
+      `after_update(state)` → `"receive"` if `state["pending"]` else `"end"`
+- [ ] [H] `build_pipeline(nodes: dict)`: `StateGraph(TwinState)`, add each node in `PIPELINE`,
+      plain edges for the fixed order, `add_conditional_edges` for the two routing functions, `compile()`
+- [ ] [H] Plain steps: `receive` (pop next event, advance clock), `forecast` (calls `adapter.run_ensemble`),
+      `update` (save state, append metrics)
+- [ ] [H] Test with **placeholder agents** that return fixed verdicts: check the order, that a
+      rejected observation skips to `update`, and that the loop ends when `pending` is empty
+- [ ] [T+H] Swap in the real agents; run end to end with Fixed policies on Border 2
+- Later: a smarter organizer (LLM / resource decisions) only replaces the functions in `routing.py`
 
 ## §9 replay.py — Border 2 scenarios  [H]
 - [ ] [H] `build_events(fire, scenario) -> list[ObservationEvent]` from `data/border2_inputs/`
