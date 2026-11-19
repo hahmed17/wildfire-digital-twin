@@ -15,7 +15,10 @@ Owners: **[T]** Taina · **[H]** Hena. Contracts both sides code against: `state
 ## §1 state.py — data types  (done)
 - [x] [T] `ObservationEvent`, `OperatorRequest`, `ForecastPlan`, `AssimilationDecision`,
       `VSIZE_PRESETS`, `BASELINE`, `Signals`, `DecisionRecord`, `TwinState`
-- [ ] [T] Add a verdict type per agent (`ObservationVerdict`, `WeatherVerdict`) + their `TwinState` keys
+- [ ] [T] Add a verdict type per agent (`ObservationVerdict`, `WeatherVerdict`)
+- [x] [H] `TwinState` keys `obs_verdict`, `weather_verdict`, `assim_verdict` (typed `Any` until the verdict
+      classes exist; routing only reads `.action`). Cache keys: `weather_last` (last weather window, for
+      "reuse last window" and synthetic perimeters), `good_obs` (last two accepted observations)
 
 ## §2 adapter.py — the only file that calls `src/`
 - [x] [T] `load_observation`
@@ -56,18 +59,31 @@ No LLM: the graph is the organizer. Order lives in one list; exceptions live in 
 and returns only the keys it changed, e.g.
 `def observation_agent(state: TwinState) -> dict: return {"obs_verdict": v, "log": [record]}`
 
-- [ ] [T] Add the verdict keys the routing reads to `TwinState` (`obs_verdict`, `weather_verdict`, ...)
-- [ ] [H] `graph.py`: `PIPELINE = ["receive", "observation", "weather", "forecast", "assimilation", "update"]`
-- [ ] [H] `routing.py`:
-      `after_observation(state)` → `"update"` if `obs_verdict.action == "reject"` else `"weather"`;
-      `after_update(state)` → `"receive"` if `state["pending"]` else `"end"`
-- [ ] [H] `build_pipeline(nodes: dict)`: `StateGraph(TwinState)`, add each node in `PIPELINE`,
-      plain edges for the fixed order, `add_conditional_edges` for the two routing functions, `compile()`
-- [ ] [H] Plain steps: `receive` (pop next event, advance clock), `forecast` (calls `adapter.run_ensemble`),
-      `update` (save state, append metrics)
-- [ ] [H] Test with **placeholder agents** that return fixed verdicts: check the order, that a
-      rejected observation skips to `update`, and that the loop ends when `pending` is empty
+**Decision (2026-11-18):** a rejected observation does **not** skip the forecast. It is replaced by a
+synthetic perimeter (`synthesize` step): the last accepted perimeter grown by the fire's observed spread
+rate, stretched downwind (Anderson 1983 length-to-breadth). It is tagged `source="synthetic_perimeter"`,
+so assimilation trusts it less (vsize 500 m). If there is no accepted perimeter yet, the cycle goes
+straight to `update`.
+
+- [x] [H] Verdict keys in `TwinState` (see §1)
+- [x] [H] `graph.py`: `PIPELINE = ["receive", "observation", "weather", "forecast", "assimilation", "update"]`
+      + off-path `synthesize`; `build_pipeline(nodes)`; `run_pipeline()` sets LangGraph's recursion limit
+      from the number of events (default 25 stops a replay after ~3 observations);
+      `memory_checkpointer()` registers our pydantic types
+- [x] [H] `routing.py`: `after_observation` → `"synthesize"` if reject else `"weather"`;
+      `after_synthesize` → `"weather"` (or `"update"` if nothing to grow); `after_update` → `"receive"` / `"end"`
+- [x] [H] `synthetic.py`: `grow_perimeter`, `make_synthetic_event` (writes GeoJSON, returns an `ObservationEvent`)
+- [x] [H] Plain steps (`steps.py`): `receive` (pop next event, advance clock, clear verdicts),
+      `synthesize`, `update` (remember accepted obs, append metrics)
+- [ ] [H] `forecast` step: contract written in `steps.forecast`; needs `adapter.load_state` / `save_state` [T]
+- [ ] [H] `update`: also save the EnKF analysis once `adapter.save_state` exists
+- [x] [H] Tests with **placeholder agents** (`placeholders.py`, `tests/test_pipeline.py`, 14 tests): order,
+      reject → synthesize → forecast still runs, first-obs reject, loop ends, 10-event replay, checkpointing
 - [ ] [T+H] Swap in the real agents; run end to end with Fixed policies on Border 2
+      (real agent nodes plug into `build_pipeline(nodes)`; the weather agent should store its window
+      in `cache["weather_last"]`)
+- [ ] [T] Observation agent can use only the forecast-independent signals (it runs before the forecast);
+      `normalized_innovation` is filled in later for the assimilation agent: split `Signals` or make it optional
 - Later: a smarter organizer (LLM / resource decisions) only replaces the functions in `routing.py`
 
 ## §9 replay.py — Border 2 scenarios  [H]

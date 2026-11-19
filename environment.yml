@@ -1,0 +1,59 @@
+# Conda environment for wildfire-digital-twin (src/ simulation code, orchestrator/, notebooks, tests).
+#
+# Set up or update with:   bash setup_env.sh
+# (creates ~/envs/wildfire-twin, installs this repo with `pip install -e .`,
+#  and registers the Jupyter kernel "Python (wildfire-twin)")
+#
+# Add new dependencies here, then re-run setup_env.sh. Prefer conda-forge packages;
+# put pip-only packages under `pip:`.
+name: wildfire-twin
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+
+  # geospatial stack (conda-forge builds share one GDAL/PROJ, incl. proj.db)
+  - gdal                 # osgeo: LANDFIRE rasters → ASCII for lcpmake
+  - proj
+  - pyproj
+  - geopandas
+  - pyogrio
+  - shapely>=2
+  - rasterio
+  - contextily           # basemaps in figures
+  - basemap
+  - owslib=0.28.1        # WFS/WMS clients (pinned as in the old requirements.txt)
+
+  # numerics, data, plotting
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - pillow
+  - seaborn
+  - colorcet
+  - tqdm
+
+  # data services, APIs and config
+  - requests
+  - python-dotenv        # provides `from dotenv import load_dotenv`
+  - geojson
+  - flask
+  - flask-restful
+
+  # orchestrator
+  - pydantic>=2
+
+  # notebooks, parallel runs, tests
+  - ipykernel
+  - nbformat
+  - nbclient
+  - nbconvert
+  - pytest
+
+  - pip:
+      - influxdb             # InfluxDB 1.x client
+      - langgraph           # orchestrator graph (StateGraph)
+      - langchain-core       # LLM policies (structured output); add the provider package when chosen,
+                             # e.g. langchain-anthropic or langchain-openai

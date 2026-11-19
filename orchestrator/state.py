@@ -192,8 +192,15 @@ class TwinState(TypedDict):  # The shared dictionary LangGraph passes from node 
     plan: ForecastPlan | None
     ensemble_path: str | None          # latest forecast ensemble on disk
     signals: Signals | None
+    # One key per agent, so agents never overwrite each other and later agents can read
+    # earlier verdicts. Typed Any until the verdict classes exist (ObservationVerdict,
+    # WeatherVerdict, AssimilationDecision); routing only needs a `.action` attribute.
+    obs_verdict: Any | None
+    weather_verdict: Any | None
+    assim_verdict: Any | None
     drift_history: list[float]         # recent normalized innovations
-    cache: dict[str, Any]              # LCP, weather pulls, warm-start states
+    cache: dict[str, Any]              # LCP, weather pulls ("weather_last"), warm-start states,
+                                       # accepted observations ("good_obs", for synthetic perimeters)
     # Annotated[..., operator.add] = reducer: nodes return only NEW items and LangGraph appends them
     log: Annotated[list[DecisionRecord], operator.add]
     metrics: Annotated[list[dict], operator.add]
@@ -215,6 +222,9 @@ def initial_state(events: list[ObservationEvent], request: OperatorRequest,
         plan=None,
         ensemble_path=None,
         signals=None,
+        obs_verdict=None,
+        weather_verdict=None,
+        assim_verdict=None,
         drift_history=[],
         cache={},
         log=[],
