@@ -22,6 +22,17 @@ wildfire-digital-twin/
 ├── border2_prepare_data.ipynb   # Step 1: Fetch and validate all inputs
 ├── border2_experiment.ipynb     # Step 2: EnKF assimilation loop + parameter sweep logging
 │
+├── orchestrator/                # Step 3: LangGraph agentic orchestration pipeline
+│   ├── graph.py                 # StateGraph definition: build_pipeline(), run_pipeline()
+│   ├── state.py                 # TwinState TypedDict
+│   ├── routing.py               # Branch rules (after observation / weather / update)
+│   ├── steps.py                 # Agent node implementations
+│   ├── synthetic.py             # Synthetic perimeter growth (no-obs fallback)
+│   ├── adapter.py               # Bridges src/ modules to LangGraph state
+│   ├── placeholders.py          # Stub agents for testing
+│   ├── test_pipeline.py         # pytest suite
+│   └── test_orchestrator.ipynb  # Notebook walkthrough
+│
 ├── data/
 │   └── border2_inputs/          # All inputs written by Step 1
 │       ├── border_2_perimeters.geojson   # Fire perimeters (live fetch or repo fallback)
@@ -38,6 +49,10 @@ wildfire-digital-twin/
 │   ├── lcpmake                  # Landscape file builder binary (in src/)
 │   ├── NoBarrier/               # FARSITE no-barrier shapefile
 │   └── TestFARSITE              # FARSITE executable
+│
+├── environment.yml              # Conda environment spec (all dependencies)
+├── setup_env.sh                 # One-command environment setup + kernel registration
+├── pyproject.toml               # Package metadata (makes orchestrator importable)
 │
 └── outputs/                     # Simulation results and sweep CSVs
     └── Border_2_Real/
@@ -132,13 +147,34 @@ Before starting a fresh run (e.g. a new sweep configuration), use the cleanup ce
  
 ---
  
-### Step 3 — Orchestrator (forthcoming)
- 
-The orchestrator uses the sweep outputs to build two empirical models:
- 
+### Step 3 — Orchestrator
+
+The orchestrator is a [LangGraph](https://github.com/langchain-ai/langgraph) pipeline that wraps the EnKF assimilation loop with agent-based decision making. It uses the sweep outputs to build two empirical models:
+
 - **Runtime model**: `wall_s ≈ fixed_cost + N × per_member_time / n_workers` — fit from `members.csv`
 - **Error-vs-N curve** at each resolution — from `steps.csv` area errors
-At runtime the orchestrator picks the *(N, resolution, workers)* configuration that minimises analysis error subject to a wall-clock budget, replacing the fixed-policy baseline. The `step()` interface (`run_ensemble` → `enkf_update`) is the hook the orchestrator calls; it can invoke forecast-only or forecast+correct depending on observation availability.
+
+At runtime the orchestrator picks the *(N, resolution, workers)* configuration that minimises analysis error subject to a wall-clock budget. The `step()` interface (`run_ensemble` → `enkf_update`) is the hook it calls; depending on observation availability it can invoke forecast-only or forecast+correct.
+
+**Orchestrator structure (`orchestrator/`)**
+
+| File | Role |
+|------|------|
+| `graph.py` | LangGraph `StateGraph`; exports `build_pipeline()`, `run_pipeline()`, `memory_checkpointer()` |
+| `state.py` | `TwinState` TypedDict — holds `obs_verdict`, `weather_verdict`, `assim_verdict` and the current fire state |
+| `routing.py` | Three branch functions that decide what happens after each agent node (observation check → weather check → assimilation or loop) |
+| `steps.py` | Agent node implementations: `receive`, `synthesize`, `update`, `forecast` |
+| `synthetic.py` | Grows the last accepted perimeter using spread rate + Anderson length-to-breadth ratio, for when no new observation arrives |
+| `adapter.py` | Bridges `src/enkf.py` and `src/farsite.py` to the LangGraph state dict |
+| `placeholders.py` | Fixed-verdict stub agents for unit testing the graph routing |
+
+**Testing the orchestrator**
+
+```bash
+# from the repo root, after running setup_env.sh:
+python -m pytest orchestrator/test_pipeline.py -v
+# or open orchestrator/test_orchestrator.ipynb in Jupyter
+```
  
 ---
  
@@ -157,12 +193,24 @@ FIRMS_MAP_KEY=<your NASA FIRMS API key>
 ---
  
 ## Requirements
- 
+
 **Hardware**: at least 4 CPUs and 16 GB RAM recommended; ~20-25 min per timestep at N=300 with 12 workers (vs ~4 hours serial).
- 
+
+**Setup** — run once from the repo root (or whenever `environment.yml` changes):
+
 ```bash
-chmod +x install_packages.sh && ./install_packages.sh
+bash setup_env.sh
 ```
+
+This script:
+1. Creates (or updates) a conda environment at `~/envs/wildfire-twin` from `environment.yml`
+2. Installs the repo in editable mode (`pip install -e .`) so the `orchestrator` package is importable
+3. Makes `src/TestFARSITE` and `src/lcpmake` executable
+4. Registers the **Python (wildfire-twin)** Jupyter kernel
+
+After setup, open any notebook and select **Kernel → Change Kernel → Python (wildfire-twin)**. Jupyter remembers the kernel per notebook, so you only need to do this once.
+
+> **Note**: `~/envs/` survives JupyterHub server restarts; `/opt/conda/envs/` may not. The script uses `mamba` if available, otherwise `conda`.
  
 ---
 
