@@ -32,9 +32,18 @@ Owners: **[T]** Taina · **[H]** Hena. Contracts both sides code against: `state
 - [ ] [H] Live smoke test: `adapter.run_ensemble` with N=4, workers=4 on her machine (has `landscape.lcp`)
 
 ## Hena: EnKF / FARSITE side (in `src/`, her files)
-- [ ] [H] Answer: is the predicted observation `ykhat` (from the prior `xkhat`) intended, or should it be the forecast `zkphat`?
-- [x] [H] Answer: wind speed units — **mph** end to end. `query_weather_for_timestep` returns mph
-      (`RAWS_UNITS='English'`), FARSITE expects mph, and `members.csv` converts to m/s for logging only
+- [x] Answer: it must be the forecast `zkphat`. Built from the prior, the innovation is
+      (obs - prior) rather than (obs - forecast), so FARSITE's prediction never enters it, and the
+      state/observation cross-covariance is estimated from prior-space anomalies while the gain is
+      applied to forecast-space ones. Measured on a forecast that under-predicts (prior 1499 m,
+      forecast 1799 m, obs 2598 m, spread 400 m): analysis error 781 m before, 477 m after. With a
+      perfect forecast the fixed version correctly leaves it alone. Fixed in `src_fixes.patch`;
+      **[H] please confirm before the rerun**, since it changes every analysis
+- [x] [H] Answer: wind speed units — **mph** end to end, with no conversion anywhere.
+      `query_weather_for_timestep` returns mph (`RAWS_UNITS='English'`), FARSITE is given the same
+      numbers, and `members.csv` logged them unchanged. The column was named `wind_speed_ms` by
+      mistake — it always held mph (baseline step 0 mean 8.78 is mph, not m/s). Renamed to
+      `wind_speed_mph`; any existing CSV's `wind_speed_ms` column is already mph, so read it as such
 - [~] [H] `enkf_update`: an `inflation` parameter. Not needed for now — `adapter.enkf_update` does it
       by pre-scaling the `zkphat` anomalies. Still worth doing natively if the update changes
 - [ ] [H] Define reinitialize: new state = observation, and what covariance `X` to restart with
@@ -77,53 +86,8 @@ No LLM: the graph is the organizer. Order lives in one list; exceptions live in 
 and returns only the keys it changed, e.g.
 `def observation_agent(state: TwinState) -> dict: return {"obs_verdict": v, "log": [record]}`
 
-**Decision (2026-11-18):** a rejected observation does **not** skip the forecast. It is replaced by a
+A rejected observation does **not** skip the forecast. It is replaced by a
 synthetic perimeter (`synthesize` step): the last accepted perimeter grown by the fire's observed spread
 rate, stretched downwind (Anderson 1983 length-to-breadth). It is tagged `source="synthetic_perimeter"`,
 so assimilation trusts it less (vsize 500 m). If there is no accepted perimeter yet, the cycle goes
 straight to `update`.
-
-- [x] [H] Verdict keys in `TwinState` (see §1)
-- [x] [H] `graph.py`: `PIPELINE = ["receive", "observation", "weather", "forecast", "assimilation", "update"]`
-      + off-path `synthesize`; `build_pipeline(nodes)`; `run_pipeline()` sets LangGraph's recursion limit
-      from the number of events (default 25 stops a replay after ~3 observations);
-      `memory_checkpointer()` registers our pydantic types
-- [x] [H] `routing.py`: `after_observation` → `"synthesize"` if reject else `"weather"`;
-      `after_synthesize` → `"weather"` (or `"update"` if nothing to grow); `after_update` → `"receive"` / `"end"`
-- [x] [H] `synthetic.py`: `grow_perimeter`, `make_synthetic_event` (writes GeoJSON, returns an `ObservationEvent`)
-- [x] [H] Plain steps (`steps.py`): `receive` (pop next event, advance clock, clear verdicts),
-      `synthesize`, `update` (remember accepted obs, append metrics)
-- [ ] [H] `forecast` step: contract written in `steps.forecast`; needs `adapter.load_state` / `save_state` [T]
-- [ ] [H] `update`: also save the EnKF analysis once `adapter.save_state` exists
-- [x] [H] Tests with **placeholder agents** (`placeholders.py`, `tests/test_pipeline.py`, 14 tests): order,
-      reject → synthesize → forecast still runs, first-obs reject, loop ends, 10-event replay, checkpointing
-- [~] [T] Swap in the real agents: all three plug into `build_pipeline(nodes)` and a 4-cycle replay
-      runs with Fixed and with Rule policies (verified: identical inputs, Rule inflates on the
-      wind-shift cycle where Fixed does a plain update). Still to do: run it against real FARSITE
-      instead of `placeholder_forecast` — blocked on the `forecast` step below
-- [x] [T] Resolved without splitting `Signals`: it is filled progressively. The observation agent
-      writes every forecast-independent check (and a one-cycle-lagged `wind_shift`, which is the right
-      question anyway: did the wind shift during the interval that produced this perimeter). The weather
-      agent overwrites `wind_shift` for the window being forecast. The assimilation agent fills
-      `normalized_innovation` once the ensemble exists, and sets `cache["innovation_available"]` so a
-      missing innovation is never read as a low one
-- Later: a smarter organizer (LLM / resource decisions) only replaces the functions in `routing.py`
-
-## §9 replay.py — Border 2 scenarios  [H]
-- [ ] [H] `build_events(fire, scenario) -> list[ObservationEvent]` from `data/border2_inputs/`
-      (her selected rows + exact timestamps from the notebook)
-- [ ] [H] Scenario injections: `bad_obs` (shift 2 km / stale / mislabeled), `wind_shift`, `failures`
-- [ ] [T] `replay(policies, scenario)` runs the graph and writes results JSON
-
-## §10 metrics.py
-- [ ] [H] Accuracy: area error and IoU of the analysis vs the observed perimeter
-- [ ] [T] Per run: decisions per agent, guardrail overrides, agent latency / tokens
-
-## Then
-- [ ] [T] LLM policy per agent (structured output, always through guardrails)
-- [ ] [T+H] Run all policies × scenarios; results table for the paper
-
-## Later (resource decisions)
-- [ ] `executors.py` (TraceExecutor / LiveExecutor)
-- [ ] `costmodel.py` from `members.csv` / `steps.csv` (needs the parameter sweep)
-- [ ] Resource agent + `clamp_plan`; LLM organizer only if routing becomes ambiguous

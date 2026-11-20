@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 import time
@@ -221,12 +221,12 @@ def run_ensemble(state_vec: np.ndarray,
                           wind_directions=directions, wall_s=wall_s)
 
 
-MPH_TO_MS = 1.0 / 2.23694   # firemap returns mph; members.csv logs m/s
-
-
-def mph_to_ms(speeds_mph: np.ndarray) -> np.ndarray:
-    """Convert wind speeds from mph (firemap / FARSITE English units) to m/s (logging)."""
-    return np.asarray(speeds_mph, dtype=float) * MPH_TO_MS
+# Wind speed is mph everywhere in this pipeline and is never converted:
+# firemap.query_weather_for_timestep returns mph because config.RAWS_UNITS == 'English',
+# FARSITE is given the same numbers, and members.csv logs them unchanged. That column
+# used to be named wind_speed_ms, which was a naming mistake rather than a conversion;
+# it is wind_speed_mph now. Don't add a conversion helper here — if a consumer wants
+# m/s it should convert at the point of display.
 
 
 # ---------------------------------------------------------------------------
@@ -236,6 +236,8 @@ def mph_to_ms(speeds_mph: np.ndarray) -> np.ndarray:
 def enkf_update(
     ens: EnsembleResult,
     obs_vec: np.ndarray,
+    prior_state: np.ndarray,
+    prior_cov_X: np.ndarray,
     vsize_m: float,
     wsize_m: float,
     inflation: float = 1.0,
@@ -245,15 +247,24 @@ def enkf_update(
     """
     Run the EnKF analysis step given a completed forecast ensemble.
 
+    `prior_state` and `prior_cov_X` are the analysis and covariance carried forward from
+    the previous cycle, and both must be passed explicitly. The experiment notebook
+    threads them through its loop as `current_state` and `X`; the forecast ensemble dict
+    from enkf.run_ensemble contains neither, so reading them off it would silently
+    substitute the ensemble mean for the analysis and reset the covariance every cycle.
+
     Args:
-        ens:       EnsembleResult from run_ensemble (holds raw forecast dict + plan)
-        obs_vec:   (2*n_vertex, 1) observed perimeter state vector in EPSG:5070 metres
-        vsize_m:   Observation noise std (m) — how much to trust the observation
-        wsize_m:   Model noise std (m) — how much to trust the forecast
-        inflation: Ensemble spread multiplier applied before the update (1.0 = no inflation).
-                   Use > 1.0 (e.g. 1.4) after a wind shift to widen the prior spread.
-        n_vertex:  Vertices per perimeter state vector (must match ens)
-        rng:       Numpy RNG; uses a new default_rng() if None
+        ens:         EnsembleResult from run_ensemble (holds raw forecast dict + plan)
+        obs_vec:     (2*n_vertex, 1) observed perimeter state vector in EPSG:5070 metres
+        prior_state: (2*n_vertex, 1) previous analysis — the notebook's `current_state`
+        prior_cov_X: (2*n_vertex, 2*n_vertex) previous posterior covariance — the
+                     notebook's `X`, initialised to 1000 * I before the first step
+        vsize_m:     Observation noise std (m) — how much to trust the observation
+        wsize_m:     Model noise std (m) — how much to trust the forecast
+        inflation:   Ensemble spread multiplier applied before the update (1.0 = none).
+                     Use > 1.0 (e.g. 1.4) after a wind shift to widen the prior spread.
+        n_vertex:    Vertices per perimeter state vector (must match ens)
+        rng:         Numpy RNG; uses a new default_rng() if None
 
     Returns:
         (analysis_vec, new_cov_X):
@@ -278,15 +289,11 @@ def enkf_update(
     else:
         raw_for_update = raw
 
-    # enkf.enkf_update expects the initial_state for alignment; use the analysis mean
-    # of the prior ensemble (mean of xkhat) as the reference state.
-    prior_mean = raw["xkhat_ensemble"].mean(axis=1, keepdims=True)   # (n_states, 1)
-
     result = enkf.enkf_update(
         ensemble=raw_for_update,
-        initial_state=prior_mean,
+        initial_state=prior_state,
         observation_state=obs_vec,
-        X=ens.raw.get("X", 1000.0 * np.eye(n_states)),   # fallback if not in raw
+        X=prior_cov_X,
         n_states=n_states,
         n_output=n_states,
         n_vertex=n_vertex,
