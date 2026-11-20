@@ -70,6 +70,7 @@ CHECKPOINT_TYPES = [
     ("orchestrator.state", "ObservationEvent"), ("orchestrator.state", "OperatorRequest"),
     ("orchestrator.state", "ForecastPlan"), ("orchestrator.state", "AssimilationDecision"),
     ("orchestrator.state", "Signals"), ("orchestrator.state", "DecisionRecord"),
+    ("orchestrator.state", "ObservationVerdict"), ("orchestrator.state", "WeatherVerdict"),
     ("orchestrator.placeholders", "PlaceholderVerdict"),
 ]
 
@@ -89,7 +90,15 @@ def run_pipeline(graph, state: TwinState, config: dict | None = None) -> TwinSta
     pending observations so long replays aren't cut off.
     """
     n_events = len(state.get("pending") or [])
-    cfg = {"recursion_limit": len(ALL_STEPS) * (n_events + 1) + 10}
+    cfg = {
+        "recursion_limit": len(ALL_STEPS) * (n_events + 1) + 10,
+        "configurable": {"thread_id": "default"},
+    }
     if config:
-        cfg.update(config)
+        # Deep-merge so a caller's "configurable" dict extends rather than replaces ours.
+        for k, v in config.items():
+            if k == "configurable" and isinstance(v, dict):
+                cfg["configurable"].update(v)
+            else:
+                cfg[k] = v
     return graph.invoke(state, cfg)

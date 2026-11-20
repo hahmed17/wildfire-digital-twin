@@ -221,9 +221,156 @@ def run_ensemble(state_vec: np.ndarray,
                           wind_directions=directions, wall_s=wall_s)
 
 
-def enkf_update(ens: EnsembleResult, obs_vec, vsize_m, wsize_m, inflation): ...
-    # after refactor: her enkf_update(...) -> (analysis_vec, new_cov_X)
+MPH_TO_MS = 1.0 / 2.23694   # firemap returns mph; members.csv logs m/s
 
-def save_state(path, **arrays): ...    # enkf.save_enkf_state
-def load_state(path): ...         # enkf.load_enkf_state
 
+def mph_to_ms(speeds_mph: np.ndarray) -> np.ndarray:
+    """Convert wind speeds from mph (firemap / FARSITE English units) to m/s (logging)."""
+    return np.asarray(speeds_mph, dtype=float) * MPH_TO_MS
+
+
+# ---------------------------------------------------------------------------
+# EnKF update
+# ---------------------------------------------------------------------------
+
+def enkf_update(
+    ens: EnsembleResult,
+    obs_vec: np.ndarray,
+    vsize_m: float,
+    wsize_m: float,
+    inflation: float = 1.0,
+    n_vertex: int = 20,
+    rng: np.random.Generator | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Run the EnKF analysis step given a completed forecast ensemble.
+
+    Args:
+        ens:       EnsembleResult from run_ensemble (holds raw forecast dict + plan)
+        obs_vec:   (2*n_vertex, 1) observed perimeter state vector in EPSG:5070 metres
+        vsize_m:   Observation noise std (m) — how much to trust the observation
+        wsize_m:   Model noise std (m) — how much to trust the forecast
+        inflation: Ensemble spread multiplier applied before the update (1.0 = no inflation).
+                   Use > 1.0 (e.g. 1.4) after a wind shift to widen the prior spread.
+        n_vertex:  Vertices per perimeter state vector (must match ens)
+        rng:       Numpy RNG; uses a new default_rng() if None
+
+    Returns:
+        (analysis_vec, new_cov_X):
+            analysis_vec  (2*n_vertex, 1) — posterior fire state estimate
+            new_cov_X     (2*n_vertex, 2*n_vertex) — updated covariance
+    """
+    if rng is None:
+        rng = np.random.default_rng()
+
+    n_states  = 2 * n_vertex
+    n_samples = ens.plan.ensemble_size
+    raw       = ens.raw
+
+    # Apply covariance inflation by scaling forecast anomalies.
+    # We achieve this by temporarily widening zkphat_ensemble around its mean
+    # before passing to enkf_update, then restoring the original dict.
+    if inflation != 1.0:
+        Z = raw["zkphat_ensemble"]                        # (n_states, N)
+        mean = Z.mean(axis=1, keepdims=True)
+        inflated_Z = mean + inflation * (Z - mean)
+        raw_for_update = {**raw, "zkphat_ensemble": inflated_Z}
+    else:
+        raw_for_update = raw
+
+    # enkf.enkf_update expects the initial_state for alignment; use the analysis mean
+    # of the prior ensemble (mean of xkhat) as the reference state.
+    prior_mean = raw["xkhat_ensemble"].mean(axis=1, keepdims=True)   # (n_states, 1)
+
+    result = enkf.enkf_update(
+        ensemble=raw_for_update,
+        initial_state=prior_mean,
+        observation_state=obs_vec,
+        X=ens.raw.get("X", 1000.0 * np.eye(n_states)),   # fallback if not in raw
+        n_states=n_states,
+        n_output=n_states,
+        n_vertex=n_vertex,
+        n_samples=n_samples,
+        rng=rng,
+        vsize=vsize_m,
+        wsize=wsize_m,
+    )
+
+    analysis_vec = result["adjusted_state"]   # (n_states, 1)
+    new_cov_X    = result["X"]                # (n_states, n_states)
+    return analysis_vec, new_cov_X
+
+
+# ---------------------------------------------------------------------------
+# State persistence
+# ---------------------------------------------------------------------------
+
+def save_state(
+    path: str | Path,
+    state_vec: np.ndarray,
+    cov_X: np.ndarray,
+    rng: np.random.Generator,
+    ensemble: EnsembleResult | None = None,
+) -> None:
+    """
+    Save the current EnKF state (and optionally the last forecast ensemble) to disk.
+
+    Args:
+        path:      Output .npz path (created or overwritten)
+        state_vec: (2*n_vertex, 1) analysis state vector
+        cov_X:     (2*n_vertex, 2*n_vertex) posterior covariance
+        rng:       Numpy RNG whose state is saved for reproducibility
+        ensemble:  If provided, the forecast ensemble arrays are also saved
+                   (zkphat, xkhat, ykhat, zero_samples) for agent development
+                   without re-running FARSITE.
+    """
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    kwargs: dict = dict(
+        adjusted_state=state_vec,
+        initial_state=state_vec,   # save as both for enkf.load_enkf_state compat
+        X=cov_X,
+        rng_state=np.array(rng.bit_generator.state, dtype=object),
+    )
+    if ensemble is not None:
+        raw = ensemble.raw
+        kwargs["zkphat_ensemble"] = raw["zkphat_ensemble"]
+        kwargs["xkhat_ensemble"]  = raw["xkhat_ensemble"]
+        kwargs["ykhat_ensemble"]  = raw["ykhat_ensemble"]
+        kwargs["xkphat_ensemble"] = raw.get("xkphat_ensemble",
+                                            np.zeros_like(raw["zkphat_ensemble"]))
+        kwargs["zero_samples"]    = np.array(raw["zero_samples"], dtype=int)
+
+    np.savez(path, **kwargs)
+
+
+def load_state(
+    path: str | Path,
+    rng: np.random.Generator | None = None,
+) -> tuple[np.ndarray, np.ndarray, np.random.Generator]:
+    """
+    Load an EnKF state saved by save_state.
+
+    Args:
+        path: .npz file written by save_state (or enkf.save_enkf_state)
+        rng:  If provided, its state is restored from the file.
+              If None, a new default_rng() is returned with the saved state.
+
+    Returns:
+        (state_vec, cov_X, rng):
+            state_vec  (2*n_vertex, 1) — analysis state
+            cov_X      (2*n_vertex, 2*n_vertex) — posterior covariance
+            rng        numpy Generator with restored state
+    """
+    data = np.load(path, allow_pickle=True)
+
+    state_vec = data["adjusted_state"]
+    cov_X     = data["X"]
+
+    if rng is None:
+        rng = np.random.default_rng()
+    if "rng_state" in data:
+        rng.bit_generator.state = data["rng_state"].item()
+
+    return state_vec, cov_X, rng

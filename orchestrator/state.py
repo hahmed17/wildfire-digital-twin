@@ -88,6 +88,43 @@ class ForecastPlan(BaseModel):
         description="One or two sentences explaining why these settings were chosen.")
 
 
+ObsAction = Literal["accept", "reject"]
+WeatherAction = Literal["normal", "wind_shift_detected", "fallback_weather"]
+
+
+class ObservationVerdict(BaseModel):
+    """Decision made by the observation agent about whether to trust the new perimeter."""
+    action: ObsAction = Field(
+        description="'accept': use the observation as-is. "
+                    "'reject': discard it and ask synthesize to build a synthetic one.")
+    reason: str = Field(
+        default="",
+        description="One sentence explaining the decision, citing the check(s) that drove it.")
+    override_guardrail: bool = Field(
+        default=False,
+        description="True if a guardrail overrode the agent's initial action.")
+
+
+class WeatherVerdict(BaseModel):
+    """Decision made by the weather agent about conditions for the forecast window."""
+    action: WeatherAction = Field(
+        description="'normal': no special treatment needed. "
+                    "'wind_shift_detected': a large wind shift was flagged; the assimilation "
+                    "agent should consider inflate_and_assimilate. "
+                    "'fallback_weather': firemap returned the static fallback; forecast "
+                    "uncertainty is higher than usual.")
+    used_fallback: bool = Field(
+        default=False,
+        description="True if firemap returned the static fallback (10 mph, 225°) instead "
+                    "of live RAWS data.")
+    wind_shift: bool = Field(
+        default=False,
+        description="True if wind direction or speed changed sharply since the last cycle.")
+    reason: str = Field(
+        default="",
+        description="One sentence noting any notable weather conditions.")
+
+
 AssimAction = Literal["assimilate", "inflate_and_assimilate", "skip", "reinitialize_from_obs"]
 
 
@@ -193,10 +230,9 @@ class TwinState(TypedDict):  # The shared dictionary LangGraph passes from node 
     ensemble_path: str | None          # latest forecast ensemble on disk
     signals: Signals | None
     # One key per agent, so agents never overwrite each other and later agents can read
-    # earlier verdicts. Typed Any until the verdict classes exist (ObservationVerdict,
-    # WeatherVerdict, AssimilationDecision); routing only needs a `.action` attribute.
-    obs_verdict: Any | None
-    weather_verdict: Any | None
+    # earlier verdicts. Routing only needs a `.action` attribute, so plain dicts also work.
+    obs_verdict: ObservationVerdict | None
+    weather_verdict: WeatherVerdict | None
     assim_verdict: Any | None
     drift_history: list[float]         # recent normalized innovations
     cache: dict[str, Any]              # LCP, weather pulls ("weather_last"), warm-start states,

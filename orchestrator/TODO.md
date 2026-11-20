@@ -15,42 +15,56 @@ Owners: **[T]** Taina · **[H]** Hena. Contracts both sides code against: `state
 ## §1 state.py — data types  (done)
 - [x] [T] `ObservationEvent`, `OperatorRequest`, `ForecastPlan`, `AssimilationDecision`,
       `VSIZE_PRESETS`, `BASELINE`, `Signals`, `DecisionRecord`, `TwinState`
-- [ ] [T] Add a verdict type per agent (`ObservationVerdict`, `WeatherVerdict`)
-- [x] [H] `TwinState` keys `obs_verdict`, `weather_verdict`, `assim_verdict` (typed `Any` until the verdict
-      classes exist; routing only reads `.action`). Cache keys: `weather_last` (last weather window, for
+- [x] [T] Add a verdict type per agent (`ObservationVerdict`, `WeatherVerdict`)
+- [x] [H] `TwinState` keys `obs_verdict`, `weather_verdict`, `assim_verdict` (now typed
+      `ObservationVerdict` / `WeatherVerdict` / `AssimilationDecision`; routing still only reads
+      `.action`, so plain dicts and placeholders keep working). Cache keys: `weather_last` (last weather window, for
       "reuse last window" and synthetic perimeters), `good_obs` (last two accepted observations)
 
 ## §2 adapter.py — the only file that calls `src/`
 - [x] [T] `load_observation`
 - [x] [T] `fetch_weather`
 - [x] [T] `sample_winds` + `run_ensemble` wrapper (tested with fake FARSITE)
-- [ ] [T] `enkf_update` wrapper (assimilate / inflate / skip / reinit)
-- [ ] [T] `save_state` / `load_state`
+- [x] [T] `enkf_update` wrapper (inflation applied by scaling `zkphat` anomalies around their
+      mean, so `src/enkf.py` needs no change)
+- [x] [T] `save_state` / `load_state` (+ `mph_to_ms` / `MPH_TO_MS`: firemap returns mph,
+      `members.csv` logs m/s)
 - [ ] [H] Live smoke test: `adapter.run_ensemble` with N=4, workers=4 on her machine (has `landscape.lcp`)
 
 ## Hena: EnKF / FARSITE side (in `src/`, her files)
 - [ ] [H] Answer: is the predicted observation `ykhat` (from the prior `xkhat`) intended, or should it be the forecast `zkphat`?
-- [ ] [H] Answer: wind speed units — mph (firemap) or m/s (`members.csv` column `wind_speed_ms`)?
-- [ ] [H] `enkf_update`: add an `inflation` parameter (multiply forecast anomalies before the update)
+- [x] [H] Answer: wind speed units — **mph** end to end. `query_weather_for_timestep` returns mph
+      (`RAWS_UNITS='English'`), FARSITE expects mph, and `members.csv` converts to m/s for logging only
+- [~] [H] `enkf_update`: an `inflation` parameter. Not needed for now — `adapter.enkf_update` does it
+      by pre-scaling the `zkphat` anomalies. Still worth doing natively if the update changes
 - [ ] [H] Define reinitialize: new state = observation, and what covariance `X` to restart with
 - [ ] [H] Save each step's forecast ensemble (`zkphat`, `xkhat`, `zero_samples`) to `.npz` from the
       baseline run, so agents can be developed without rerunning FARSITE
 - [ ] [H] Optional: `query_weather_for_timestep` reports when it used the fallback (flag or exception)
 
-## §3 checks.py — signals, pure functions, no LLM  [H]
+## §3 checks.py — signals, pure functions, no LLM  (done)
 Each returns one field of `Signals`. Inputs are state vectors / shapely polygons in EPSG:5070.
-- [ ] [H] `normalized_innovation(ensemble, obs_vec, vsize_m) -> float`
-- [ ] [H] `contains_previous(perimeter, prev_perimeter, tol=0.9) -> bool`
-- [ ] [H] `growth_plausible(perimeter, prev_perimeter, dt, wind) -> bool`
-- [ ] [H] `load_hotspots(path, start, end)` + `agrees_with_firms(perimeter, hotspots, buffer_m=500) -> bool | None`
-- [ ] [H] `wind_shift(weather_prev, weather_now, deg_thresh=45, speed_thresh=10) -> bool`
+- [x] [T] `normalized_innovation(ensemble, obs_vec, vsize_m, valid_mask=None) -> float`
+- [x] [T] `contains_previous(perimeter, prev_perimeter, tol=0.9) -> bool`
+- [x] [T] `growth_plausible(perimeter, prev_perimeter, dt_minutes, wind_speed_mph) -> bool`
+- [x] [T] `load_hotspots(path, start, end)` + `agrees_with_firms(perimeter, hotspots, buffer_m=500) -> bool | None`
+- [x] [T] `wind_shift(weather_prev, weather_now, deg_thresh=45, speed_thresh_mph=10) -> bool`
 
-## §6 Agents — one per data decision, each with Fixed + Rule policies
+## §6 Agents — one per data decision, each with Fixed + Rule policies  (done)
 Each agent = menu (pydantic) + policy interface + guardrail + `DecisionRecord`.
-The observation agent is built first and is the **template** the other agents copy.
-- [ ] [T] Observation agent: use / downweight / reject + vsize (+ its guardrail)
-- [ ] [H] Weather agent: use readings / widen noise / reuse last window (+ its guardrail)
-- [ ] [H] Assimilation agent: assimilate / inflate / reinitialize (+ its guardrail; streak ≥ 3 → reinit)
+All three live in `orchestrator/agents/` and share one shape: a `*Policy` ABC with
+`decide(...)`, a `FixedPolicy` (reproduces the baseline) and a `RulePolicy`, wrapped by
+`make_*_agent(policy, ...)` into a LangGraph node. Every external call the node makes is
+injectable (`fetch`, `load_ensemble`), so policy logic is testable without FARSITE.
+- [x] [T] Observation agent (`agents/observation.py`): accept / reject + `ForecastPlan`.
+      Guardrail: always accept the first observation (no previous perimeter to check against).
+      `compute_signals()` runs every forecast-independent check
+- [x] [T] Weather agent (`agents/weather.py`): normal / wind_shift_detected / fallback_weather.
+      Owns the weather cache (`weather_last` + `weather_prev`), refines the plan in high wind.
+      Guardrail: a fetch failure is always flagged as `fallback_weather`
+- [x] [T] Assimilation agent (`agents/assimilation.py`): assimilate / inflate_and_assimilate /
+      skip / reinitialize_from_obs; streak >= 3 -> reinit; vsize from `VSIZE_PRESETS[source]`.
+      Guardrail: never skip when there is no established state to keep
 
 ## §8 Pipeline organizer — `graph.py` + `routing.py`  [H]
 No LLM: the graph is the organizer. Order lives in one list; exceptions live in `routing.py`.
@@ -79,11 +93,16 @@ straight to `update`.
 - [ ] [H] `update`: also save the EnKF analysis once `adapter.save_state` exists
 - [x] [H] Tests with **placeholder agents** (`placeholders.py`, `tests/test_pipeline.py`, 14 tests): order,
       reject → synthesize → forecast still runs, first-obs reject, loop ends, 10-event replay, checkpointing
-- [ ] [T+H] Swap in the real agents; run end to end with Fixed policies on Border 2
-      (real agent nodes plug into `build_pipeline(nodes)`; the weather agent should store its window
-      in `cache["weather_last"]`)
-- [ ] [T] Observation agent can use only the forecast-independent signals (it runs before the forecast);
-      `normalized_innovation` is filled in later for the assimilation agent: split `Signals` or make it optional
+- [~] [T] Swap in the real agents: all three plug into `build_pipeline(nodes)` and a 4-cycle replay
+      runs with Fixed and with Rule policies (verified: identical inputs, Rule inflates on the
+      wind-shift cycle where Fixed does a plain update). Still to do: run it against real FARSITE
+      instead of `placeholder_forecast` — blocked on the `forecast` step below
+- [x] [T] Resolved without splitting `Signals`: it is filled progressively. The observation agent
+      writes every forecast-independent check (and a one-cycle-lagged `wind_shift`, which is the right
+      question anyway: did the wind shift during the interval that produced this perimeter). The weather
+      agent overwrites `wind_shift` for the window being forecast. The assimilation agent fills
+      `normalized_innovation` once the ensemble exists, and sets `cache["innovation_available"]` so a
+      missing innovation is never read as a low one
 - Later: a smarter organizer (LLM / resource decisions) only replaces the functions in `routing.py`
 
 ## §9 replay.py — Border 2 scenarios  [H]
