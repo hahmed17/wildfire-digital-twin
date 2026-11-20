@@ -171,6 +171,74 @@ class TestObservationAgent:
         assert out["signals"].wind_shift is True
 
 
+class TestHotspotLoading:
+    """FIRMS downloads carry acq_date + acq_time (HHMM int), not a single datetime
+    column. load_hotspots used to pass parse_dates=["acq_datetime"] to read_csv,
+    which raises on that shape; the bare except swallowed it and agrees_with_firms
+    returned None forever, silently disabling the check."""
+
+    @staticmethod
+    def _raw_firms(tmp_path):
+        import pandas as pd
+        path = tmp_path / "firms.csv"
+        pd.DataFrame({
+            "latitude":  [32.5959, 32.5970],
+            "longitude": [-116.8571, -116.8560],
+            "acq_date":  ["2025-01-24", "2025-01-24"],
+            "acq_time":  [945, 2036],          # 09:45 and 20:36, unpadded
+            "sensor":    ["VIIRS_SNPP_SP"] * 2,
+        }).to_csv(path, index=False)
+        return str(path)
+
+    def test_reads_raw_acq_date_and_acq_time(self, tmp_path):
+        from orchestrator.checks import load_hotspots
+        hs = load_hotspots(self._raw_firms(tmp_path),
+                           datetime(2025, 1, 24, 20, 0, tzinfo=timezone.utc),
+                           datetime(2025, 1, 24, 21, 0, tzinfo=timezone.utc))
+        assert hs is not None and len(hs) == 1          # only the 20:36 detection
+        assert hs[0] == pytest.approx((-116.8560, 32.5970))
+
+    def test_reads_a_single_datetime_column_too(self, tmp_path):
+        import pandas as pd
+        from orchestrator.checks import load_hotspots
+        path = tmp_path / "firms2.csv"
+        pd.DataFrame({"latitude": [32.5959], "longitude": [-116.8571],
+                      "acq_datetime": ["2025-01-24 20:36:00"]}).to_csv(path, index=False)
+        hs = load_hotspots(str(path),
+                           datetime(2025, 1, 24, 20, 0, tzinfo=timezone.utc),
+                           datetime(2025, 1, 24, 21, 0, tzinfo=timezone.utc))
+        assert hs is not None and len(hs) == 1
+
+    def test_window_with_no_detections_gives_none_not_empty(self, tmp_path):
+        """None means 'cannot judge'; the rules must not read it as disagreement."""
+        from orchestrator.checks import load_hotspots
+        hs = load_hotspots(self._raw_firms(tmp_path),
+                           datetime(2020, 1, 1, tzinfo=timezone.utc),
+                           datetime(2020, 1, 2, tzinfo=timezone.utc))
+        assert hs is None
+
+    def test_unreadable_file_gives_none(self):
+        from orchestrator.checks import load_hotspots
+        assert load_hotspots("/nonexistent/firms.csv",
+                             datetime(2025, 1, 1), datetime(2025, 1, 2)) is None
+
+    def test_agrees_with_firms_distinguishes_none_from_false(self, tmp_path):
+        from shapely.geometry import Point
+        from orchestrator.checks import agrees_with_firms, load_hotspots
+        import pyproj
+        x, y = pyproj.Transformer.from_crs(
+            "EPSG:4326", "EPSG:5070", always_xy=True).transform(-116.8571, 32.5959)
+
+        hs = load_hotspots(self._raw_firms(tmp_path),
+                           datetime(2025, 1, 24, 9, 0, tzinfo=timezone.utc),
+                           datetime(2025, 1, 24, 21, 0, tzinfo=timezone.utc))
+        assert agrees_with_firms(Point(x, y).buffer(3000), hs) is True
+        # same hotspots, perimeter 100 km away -> False, a real disagreement
+        assert agrees_with_firms(Point(x + 100_000, y).buffer(3000), hs) is False
+        # no hotspots at all -> None, not False
+        assert agrees_with_firms(Point(x, y).buffer(3000), None) is None
+
+
 class TestGoodObsTimeParsing:
     """steps.update stores good_obs as model_dump(mode="json") dicts, so obs_time
     arrives as an ISO string. Reading it with getattr returns None, which silently

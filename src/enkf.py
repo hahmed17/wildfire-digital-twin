@@ -1,779 +1,500 @@
 """
-Ensemble Kalman Filter (EnKF) module for fire data assimilation.
-Implements EnKF with FARSITE forward model for wildfire state estimation.
-
-Architecture
-------------
-run_ensemble(t, obs, ...)   – runs N FARSITE members in parallel, returns forecast ensemble
-enkf_update(ensemble, obs, ...)  – pure EnKF math, returns analysis state + updated covariance
-step(t, obs, ...)           – convenience wrapper: run_ensemble → enkf_update → checkpoint
-
-The step() interface is what the agentic orchestrator calls. It can override N, resolution,
-and n_workers at runtime based on its empirical cost/accuracy models.
+Geometry utilities for fire modeling.
+Includes validation, coordinate conversion, alignment, and plotting functions.
 """
-import os
-import csv
-import time
-import uuid
 import numpy as np
-import pandas as pd
-from pathlib import Path
-from tqdm import tqdm
-from concurrent.futures import ProcessPoolExecutor, as_completed
-
-from farsite import forward_pass_farsite_multistep, cleanup_farsite_outputs
-from geometry import (
-    state_to_geom, geom_to_state, align_states,
-    resample_state_to_vertex_count, validate_geom
-)
-from config import FARSITE_TMP_DIR
+import matplotlib.pyplot as plt
+from shapely.geometry import Polygon, MultiPolygon, GeometryCollection, LineString, MultiLineString
+from shapely.ops import polygonize, unary_union
+from shapely import make_valid
 
 
 # ============================================================================
-# TOP-LEVEL WORKER FUNCTION (must be module-level for ProcessPoolExecutor)
+# GEOMETRY VALIDATION AND CONVERSION
 # ============================================================================
 
-def _run_one_member(args):
+def calculate_max_area_geom(multigeom):
     """
-    Run a single FARSITE ensemble member. Must be a top-level function so it
-    is picklable by ProcessPoolExecutor.
-
+    Extract the largest polygon from a MultiPolygon or GeometryCollection.
+    
     Args:
-        args: dict with keys:
-            s, seed, xkhat_col, ws, wd, observation_time, lcppath,
-            dist_res, perim_res, params, n_vertex, initial_state_arr,
-            run_id, fire_name, step_idx
-
+        multigeom: MultiPolygon or GeometryCollection
+        
     Returns:
-        dict with keys: s, zkphat_col (or None), status, wall_s, cpu_s
+        Polygon with the largest area
     """
-    import numpy as _np
-    from farsite import forward_pass_farsite_multistep
-    from geometry import state_to_geom, geom_to_state, align_states
-
-    s           = args['s']
-    xkhat_col   = _np.array(args['xkhat_col'])   # (n_states, 1)
-    ws          = args['ws']
-    wd          = args['wd']
-    obs_time    = args['observation_time']
-    lcppath     = args['lcppath']
-    dist_res    = args['dist_res']
-    perim_res   = args['perim_res']
-    params      = args['params'] or {}
-    n_vertex    = args['n_vertex']
-    initial_state_arr = _np.array(args['initial_state_arr'])
-
-    t0_wall = time.time()
-    t0_cpu  = time.process_time()
-
-    farsite_params = {
-        'windspeed':     int(ws),
-        'winddirection': int(wd),
-        'temperature':   int(params.get('temperature', 66)),
-        'humidity':      float(params.get('humidity', 0.08)),
-        'dt':            args['dt'],
-        'farsite_dt_minutes': args.get('farsite_dt_minutes', 30)
-    }
-    input_poly = state_to_geom(xkhat_col)
-    start_time = obs_time.strftime("%Y-%m-%d %H:%M:%S")
-
-    try:
-        forward_geom = forward_pass_farsite_multistep(
-            poly=input_poly,
-            params=farsite_params,
-            start_time=start_time,
-            lcppath=lcppath,
-            dist_res=dist_res,
-            perim_res=perim_res,
-        )
-    except Exception as e:
-        wall_s = time.time() - t0_wall
-        cpu_s  = time.process_time() - t0_cpu
-        return dict(s=s, zkphat_col=None, status=f'error:{e}',
-                    wall_s=wall_s, cpu_s=cpu_s)
-
-    wall_s = time.time() - t0_wall
-    cpu_s  = time.process_time() - t0_cpu
-
-    if forward_geom is None:
-        return dict(s=s, zkphat_col=None, status='farsite_failed',
-                    wall_s=wall_s, cpu_s=cpu_s)
-
-    forward_state = geom_to_state(forward_geom)
-    aligned = align_states([initial_state_arr, forward_state], vertex_count=n_vertex)
-    return dict(s=s, zkphat_col=aligned[1], status='ok',
-                wall_s=wall_s, cpu_s=cpu_s)
+    if isinstance(multigeom, (GeometryCollection, MultiPolygon)):
+        max_area = 0
+        max_area_idx = 0
+        for ix, g in enumerate(multigeom.geoms):
+            if g.area > max_area:
+                max_area = g.area
+                max_area_idx = ix
+        return calculate_max_area_geom(multigeom.geoms[max_area_idx])
+    
+    return multigeom
 
 
-# ============================================================================
-# RUN ENSEMBLE
-# ============================================================================
-
-def run_ensemble(
-    initial_state, observation_time,
-    n_states, n_vertex, n_samples, rng,
-    sampled_wslst, sampled_wdlst, dt,
-    dist_res, perim_res, lcppath,
-    X=None,           # (n_states, n_states) prior covariance — used for Cholesky perturbations
-    params=None,
-    n_workers=1,
-    farsite_dt_minutes=30,
-    # logging
-    members_csv=None,
-    fire_name='unknown',
-    step_idx=0,
-    run_id=None,
-):
+def lines_to_polygon(geom):
     """
-    Run N FARSITE ensemble members in parallel and return the forecast ensemble.
-
+    Convert LineString/MultiLineString perimeter boundaries to a Polygon/MultiPolygon.
+    
     Args:
-        initial_state:    Initial fire perimeter state vector (2*n_vertex, 1)
-        observation_time: Datetime of observation (start of forecast window)
-        n_states:         State dimension (2 * n_vertex)
-        n_vertex:         Number of perimeter vertices
-        n_samples:        Number of ensemble members (N)
-        rng:              Numpy random number generator (used for perturbations)
-        sampled_wslst:    Wind speed samples [n_samples]
-        sampled_wdlst:    Wind direction samples [n_samples]
-        dt:               Forecast time step (pandas Timedelta)
-        dist_res:         FARSITE distance resolution (m)
-        perim_res:        FARSITE perimeter resolution (m)
-        lcppath:          Path to landscape (.lcp) file
-        params:           Extra FARSITE params dict (temperature, humidity, …)
-        n_workers:        ProcessPoolExecutor max_workers (1 = serial)
-        members_csv:      Path to members.csv log (None = no logging)
-        fire_name:        Fire identifier for logging
-        step_idx:         Assimilation step index for logging
-        run_id:           Sweep run identifier for logging
-
+        geom: Shapely geometry (LineString, MultiLineString, or already polygonal)
+        
     Returns:
-        dict with keys:
-            xkhat_ensemble   (n_states, n_samples) – prior ensemble (with noise)
-            zkphat_ensemble  (n_states, n_samples) – FARSITE forecast ensemble
-            ykhat_ensemble   (n_states, n_samples) – predicted observations (xkhat + obs noise)
-            zero_samples     list[int]             – member indices that failed
-            member_results   list[dict]            – per-member timing + status
+        Polygon or MultiPolygon, or None if polygonization fails
     """
-    initial_state = np.asarray(initial_state).reshape(-1, 1)
-    initial_state = resample_state_to_vertex_count(initial_state, n_vertex)
-    n_states = 2 * n_vertex
+    if geom is None or geom.is_empty:
+        print("Geometry is None or empty.")
+        return None
 
-    xkhat_ensemble  = np.zeros((n_states, n_samples))
-    zkphat_ensemble = np.zeros((n_states, n_samples))
-    ykhat_ensemble  = np.zeros((n_states, n_samples))
+    gt = geom.geom_type
 
-    # Resolve prior covariance — use caller's X if provided, else identity * 1000
-    if X is None:
-        X_prior = 1000.0 * np.eye(n_states)
-    else:
-        X_prior = np.asarray(X)
-        if X_prior.shape != (n_states, n_states):
-            X_prior = 1000.0 * np.eye(n_states)
+    # Already polygonal
+    if gt in ("Polygon", "MultiPolygon"):
+        return geom
 
-    # Pre-generate all perturbations in the main process (reproducible)
-    xkhat_perturbations = rng.normal(size=(n_states, n_samples))   # (n_states, N)
+    # Line boundaries -> polygonize
+    if gt in ("LineString", "MultiLineString"):
+        merged = unary_union(geom)
+        polys = list(polygonize(merged))
+        if not polys:
+            return None
+        if len(polys) == 1:
+            return polys[0]
+        return MultiPolygon(polys)
 
-    # Build prior ensemble using Cholesky of X (main process, cheap)
-    Xs = np.linalg.cholesky(X_prior)
-    for s in range(n_samples):
-        xkhat_ensemble[:, s:s+1] = initial_state + Xs @ xkhat_perturbations[:, s:s+1]
+    # GeometryCollection: try to extract polygonal parts first, else polygonize line parts
+    if gt == "GeometryCollection":
+        polys = [g for g in geom.geoms if g.geom_type in ("Polygon", "MultiPolygon")]
+        if polys:
+            return unary_union(polys)
 
-    # Build job list for workers
-    jobs = []
-    for s in range(n_samples):
-        jobs.append(dict(
-            s=s,
-            seed=int(rng.integers(0, 2**31)),
-            xkhat_col=xkhat_ensemble[:, s:s+1].tolist(),
-            ws=float(sampled_wslst[s]),
-            wd=float(sampled_wdlst[s]),
-            observation_time=observation_time,
-            lcppath=str(lcppath),
-            dist_res=dist_res,
-            perim_res=perim_res,
-            params=params,
-            n_vertex=n_vertex,
-            initial_state_arr=initial_state.tolist(),
-            dt=dt,
-            farsite_dt_minutes=farsite_dt_minutes,
-            run_id=run_id or str(uuid.uuid4())[:8],
-            fire_name=fire_name,
-            step_idx=step_idx,
-        ))
+        lines = [g for g in geom.geoms if g.geom_type in ("LineString", "MultiLineString")]
+        if lines:
+            merged = unary_union(lines)
+            polys2 = list(polygonize(merged))
+            if not polys2:
+                return None
+            return MultiPolygon(polys2) if len(polys2) > 1 else polys2[0]
 
-    zero_samples   = []
-    member_results = []
-    result_map     = {}
-
-    t_ensemble_start = time.time()
-
-    if n_workers <= 1:
-        # Serial path (keeps tqdm progress bar)
-        for job in tqdm(jobs, desc="Running ensemble"):
-            res = _run_one_member(job)
-            result_map[res['s']] = res
-    else:
-        with ProcessPoolExecutor(max_workers=n_workers) as pool:
-            futures = {pool.submit(_run_one_member, job): job['s'] for job in jobs}
-            for fut in tqdm(as_completed(futures), total=n_samples, desc="Running ensemble"):
-                res = fut.result()
-                result_map[res['s']] = res
-
-    # Collect results in order
-    for s in range(n_samples):
-        res = result_map[s]
-        member_results.append(res)
-        if res['zkphat_col'] is None:
-            zero_samples.append(s)
-        else:
-            zkphat_ensemble[:, s:s+1] = np.array(res['zkphat_col'])
-
-    # Build predicted observation ensemble (obs noise on prior)
-    # vsize handled in enkf_update; here we just store xkhat + unit noise placeholder.
-    # enkf_update will re-add obs noise with the correct vsize.
-    ykhat_ensemble = xkhat_ensemble.copy()   # obs model is identity; enkf_update adds noise
-
-    # Logging
-    if members_csv is not None:
-        _append_members_csv(members_csv, member_results, jobs, n_samples,
-                            dist_res, perim_res, n_workers, fire_name, step_idx, run_id)
-
-    print(f"Ensemble done: {n_samples - len(zero_samples)}/{n_samples} valid "
-          f"({time.time() - t_ensemble_start:.1f}s, {n_workers} workers)")
-
-    return dict(
-        xkhat_ensemble=xkhat_ensemble,
-        zkphat_ensemble=zkphat_ensemble,
-        ykhat_ensemble=ykhat_ensemble,
-        zero_samples=zero_samples,
-        member_results=member_results,
-    )
+    return None
 
 
-# ============================================================================
-# ENKF UPDATE (pure math, no FARSITE calls)
-# ============================================================================
-
-def enkf_update(
-    ensemble,         # dict returned by run_ensemble
-    initial_state,    # (2*n_vertex, 1) — used for obs alignment
-    observation_state,
-    X,                # (n_states, n_states) prior covariance
-    n_states,
-    n_output,
-    n_vertex,
-    n_samples,
-    rng,
-    vsize,            # observation noise std (m)
-    wsize,            # model noise std (m)
-):
+def validate_geom(poly):
     """
-    Pure EnKF analysis step. No FARSITE calls.
-
+    Validate and clean a geometry.
+    Converts lines to polygons, makes geometry valid, and extracts largest polygon.
+    
     Args:
-        ensemble:          Output dict from run_ensemble
-        initial_state:     (2*n_vertex, 1) prior mean
-        observation_state: (2*n_vertex, 1) observed perimeter
-        X:                 (n_states, n_states) prior covariance matrix
-        n_states:          State dimension (2 * n_vertex)
-        n_output:          Output dimension (equals n_states)
-        n_vertex:          Number of perimeter vertices
-        n_samples:         Number of ensemble members
-        rng:               Numpy RNG (for obs noise)
-        vsize:             Observation noise std (m)
-        wsize:             Model noise std (m)
-
+        poly: Shapely geometry
+        
     Returns:
-        dict with keys:
-            adjusted_state   (n_states, 1) – analysis mean
-            X                (n_states, n_states) – updated covariance
-            xkphat_ensemble  (n_states, n_samples) – analysis ensemble
-            zkphat_ensemble  (n_states, n_samples) – forecast ensemble (passthrough)
-            xkhat_ensemble   (n_states, n_samples) – prior ensemble (passthrough)
-            ykhat_ensemble   (n_output, n_samples) – predicted obs ensemble
+        Valid Polygon, or None if validation fails
     """
-    initial_state     = np.asarray(initial_state).reshape(-1, 1)
-    observation_state = np.asarray(observation_state).reshape(-1, 1)
-    initial_state     = resample_state_to_vertex_count(initial_state, n_vertex)
-    observation_state = resample_state_to_vertex_count(observation_state, n_vertex)
-    n_states = 2 * n_vertex
-    n_output = n_states
+    poly = lines_to_polygon(poly)
+    if poly is None:
+        return None
 
-    if isinstance(X, list):
-        X = X[0]
-    X = np.asarray(X)
-    if X.shape != (n_states, n_states):
-        X = 1000.0 * np.eye(n_states)
-
-    xkhat_ensemble  = ensemble['xkhat_ensemble']
-    zkphat_ensemble = ensemble['zkphat_ensemble']
-    zero_samples    = ensemble['zero_samples']
-
-    # Re-build ykhat with correct vsize obs noise
-    ykhat_ensemble = xkhat_ensemble + rng.normal(0, scale=vsize, size=(n_output, n_samples))
-
-    valid_mask = np.ones(n_samples, dtype=bool)
-    valid_mask[zero_samples] = False
-    Ne = int(valid_mask.sum())
-
-    print(f"Valid samples: {Ne}, Failed samples: {len(zero_samples)}")
-    if Ne <= 1:
-        raise RuntimeError(f"Too few valid FARSITE samples ({Ne}/{n_samples}). EnKF cannot proceed.")
-
-    # Slice valid ensembles
-    Z = zkphat_ensemble[:, valid_mask]   # (n_states, Ne)
-    Y = ykhat_ensemble[:, valid_mask]    # (n_output, Ne)
-
-    zkphat_mean = Z.mean(axis=1, keepdims=True)
-    ykhat_mean  = Y.mean(axis=1, keepdims=True)
-
-    Z_anom = Z - zkphat_mean
-    if float(wsize) > 0:
-        Z_anom = Z_anom + rng.normal(0.0, float(wsize), size=Z_anom.shape)
-    Y_anom = Y - ykhat_mean
-
-    # Align observation
-    aligned_states = align_states([initial_state, observation_state], vertex_count=n_vertex)
-    yk = aligned_states[1]                           # (n_output, 1)
-    innovation = yk - ykhat_mean                     # (n_output, 1)
-
-    # Ensemble-space Kalman gain
-    r2   = float(vsize) ** 2
-    if r2 <= 0:
-        raise ValueError("vsize must be > 0")
-    rinv = 1.0 / r2
-
-    S     = rinv * (Y_anom.T @ Y_anom) + (Ne - 1) * np.eye(Ne)
-    eps   = 1e-10 * (np.trace(S) / S.shape[0])
-    S_reg = S + eps * np.eye(Ne)
-
-    rhs           = rinv * (Y_anom.T @ innovation)
-    w             = np.linalg.solve(S_reg, rhs)
-    adjusted_state = zkphat_mean + (Z_anom @ w)
-
-    # Analysis ensemble
-    xkphat_ensemble = np.zeros((n_states, n_samples))
-    innovation_all  = yk - Y                                      # (n_output, Ne)
-    rhs_all         = rinv * (Y_anom.T @ innovation_all)         # (Ne, Ne)
-    W_all           = np.linalg.solve(S_reg, rhs_all)            # (Ne, Ne)
-    xkphat_valid    = Z + (Z_anom @ W_all)                       # (n_states, Ne)
-    xkphat_ensemble[:, valid_mask]  = xkphat_valid
-    xkphat_ensemble[:, ~valid_mask] = adjusted_state
-
-    # Update covariance
-    xkphat_mean = xkphat_ensemble.mean(axis=1, keepdims=True)
-    ex = xkphat_ensemble - xkphat_mean
-    X  = (ex @ ex.T) / (n_samples - 1) + 1e-10 * np.eye(n_states)
-
-    # Validate / align analysis state geometry
-    adjusted_geom  = validate_geom(state_to_geom(adjusted_state))
-    adjusted_state = geom_to_state(adjusted_geom)
-    adjusted_state = align_states([initial_state, adjusted_state], vertex_count=n_vertex)[1]
-
-    print("Calculating adjusted state (ensemble-space)")
-
-    return dict(
-        adjusted_state=adjusted_state,
-        X=X,
-        xkphat_ensemble=xkphat_ensemble,
-        zkphat_ensemble=zkphat_ensemble,
-        xkhat_ensemble=xkhat_ensemble,
-        ykhat_ensemble=ykhat_ensemble,
-    )
+    poly = make_valid(poly)
+    if isinstance(poly, (GeometryCollection, MultiPolygon)):
+        poly = calculate_max_area_geom(poly)
+    
+    if not isinstance(poly, Polygon):
+        print(f'Validated geometry is not a Polygon. Type: {type(poly)}')
+        
+    return poly
 
 
-# ============================================================================
-# STEP — orchestrator interface
-# ============================================================================
-
-def step(
-    t,                   # int – assimilation step index
-    initial_state,       # (2*n_vertex, 1)
-    observation_state,   # (2*n_vertex, 1)
-    observation_time,    # datetime
-    X,                   # (n_states, n_states) prior covariance
-    n_vertex, n_samples, rng,
-    sampled_wslst, sampled_wdlst, dt,
-    vsize, wsize,
-    dist_res, perim_res, lcppath,
-    params=None,
-    n_workers=1,
-    farsite_dt_minutes=30,
-    # logging
-    members_csv=None,
-    steps_csv=None,
-    fire_name='unknown',
-    run_id=None,
-):
+def multipolygon_to_polygon(geom):
     """
-    One full assimilation cycle: run_ensemble → enkf_update → optional checkpointing.
-
-    This is the interface the agentic orchestrator calls. The orchestrator can override
-    N (n_samples), resolution (dist_res / perim_res), and n_workers at each step based
-    on its runtime cost and accuracy models.
-
+    Convert MultiPolygon to single Polygon by taking the largest area polygon.
+    
+    Args:
+        geom: Polygon or MultiPolygon
+        
     Returns:
-        dict with all keys from enkf_update, plus:
-            t_ensemble_s   wall time for FARSITE ensemble (s)
-            t_enkf_s       wall time for EnKF update (s)
-            n_valid        number of valid ensemble members
+        Single Polygon
     """
-    n_states = 2 * n_vertex
-    run_id   = run_id or str(uuid.uuid4())[:8]
-
-    # --- Ensemble forecast ---
-    t0_ens = time.time()
-    ens = run_ensemble(
-        initial_state=initial_state,
-        observation_time=observation_time,
-        n_states=n_states,
-        n_vertex=n_vertex,
-        n_samples=n_samples,
-        rng=rng,
-        sampled_wslst=sampled_wslst,
-        sampled_wdlst=sampled_wdlst,
-        dt=dt,
-        dist_res=dist_res,
-        perim_res=perim_res,
-        lcppath=lcppath,
-        X=X,          # pass updated covariance for prior perturbations
-        params=params,
-        n_workers=n_workers,
-        farsite_dt_minutes=farsite_dt_minutes,
-        members_csv=members_csv,
-        fire_name=fire_name,
-        step_idx=t,
-        run_id=run_id,
-    )
-    t_ensemble_s = time.time() - t0_ens
-
-    # --- EnKF update ---
-    t0_enkf = time.time()
-    result = enkf_update(
-        ensemble=ens,
-        initial_state=initial_state,
-        observation_state=observation_state,
-        X=X,
-        n_states=n_states,
-        n_output=n_states,
-        n_vertex=n_vertex,
-        n_samples=n_samples,
-        rng=rng,
-        vsize=vsize,
-        wsize=wsize,
-    )
-    t_enkf_s = time.time() - t0_enkf
-
-    n_valid = n_samples - len(ens['zero_samples'])
-    result['t_ensemble_s'] = t_ensemble_s
-    result['t_enkf_s']     = t_enkf_s
-    result['n_valid']      = n_valid
-
-    # --- Log step ---
-    if steps_csv is not None:
-        _append_steps_csv(steps_csv, t, observation_time, n_samples, n_valid,
-                          t_ensemble_s, t_enkf_s, vsize, wsize, run_id)
-
-    return result
-
-
-# ============================================================================
-# LEGACY WRAPPER — backward compatible with existing experiment notebook
-# ============================================================================
-
-def adjusted_state_EnKF_farsite(
-    initial_state, observation_state, observation_time,
-    X, n_states, n_output, n_vertex, n_samples, rng,
-    sampled_wslst, sampled_wdlst, dt,
-    vsize, wsize,
-    dist_res, perim_res, lcppath,
-    params=None,
-    n_workers=1,
-    members_csv=None,
-    steps_csv=None,
-    fire_name='unknown',
-    step_idx=0,
-    run_id=None,
-):
-    """
-    Legacy interface — calls step() internally.
-
-    New code should call step() directly. The orchestrator uses step().
-
-    Returns:
-        (adjusted_state, X, zkphat_ensemble, xkhat_ensemble,
-         ykhat_ensemble, xkphat_ensemble)
-    """
-    # Unwrap X if accidentally wrapped in list
-    if isinstance(X, list):
-        X = X[0]
-    X = np.asarray(X)
-
-    # Resample states to target vertex count
-    initial_state     = np.asarray(initial_state).reshape(-1, 1)
-    observation_state = np.asarray(observation_state).reshape(-1, 1)
-    initial_state     = resample_state_to_vertex_count(initial_state, n_vertex)
-    observation_state = resample_state_to_vertex_count(observation_state, n_vertex)
-    n_states = 2 * n_vertex
-    n_output = n_states
-
-    if X.shape != (n_states, n_states):
-        X = 1000.0 * np.eye(n_states)
-
-    # Pre-generate perturbations so rng sequence matches the old function exactly
-    # (xkhat perturbations come from Xs @ rng.normal)
-    Xs = np.linalg.cholesky(X)
-
-    # Build prior ensemble in main process (same as old code)
-    xkhat_ensemble = np.zeros((n_states, n_samples))
-    ykhat_ensemble = np.zeros((n_states, n_samples))
-    for s in range(n_samples):
-        xkhat_ensemble[:, s:s+1] = initial_state + Xs @ rng.normal(size=(n_states, 1))
-        ykhat_ensemble[:, s:s+1] = xkhat_ensemble[:, s:s+1] + rng.normal(0, scale=vsize, size=(n_states, 1))
-
-    # Debug bounds
-    init_geom = state_to_geom(initial_state)
-    print("Initial bounds:", init_geom.bounds)
-    obs_geom = state_to_geom(observation_state)
-    print("Observation bounds:", obs_geom.bounds)
-
-    # Build job list
-    jobs = []
-    _run_id = run_id or str(uuid.uuid4())[:8]
-    for s in range(n_samples):
-        jobs.append(dict(
-            s=s,
-            seed=int(rng.integers(0, 2**31)),
-            xkhat_col=xkhat_ensemble[:, s:s+1].tolist(),
-            ws=float(sampled_wslst[s]),
-            wd=float(sampled_wdlst[s]),
-            observation_time=observation_time,
-            lcppath=str(lcppath),
-            dist_res=dist_res,
-            perim_res=perim_res,
-            params=params,
-            n_vertex=n_vertex,
-            initial_state_arr=initial_state.tolist(),
-            dt=dt,
-            run_id=_run_id,
-            fire_name=fire_name,
-            step_idx=step_idx,
-        ))
-
-    zero_samples = []
-    result_map   = {}
-    zkphat_ensemble = np.zeros((n_states, n_samples))
-
-    if n_workers <= 1:
-        for job in tqdm(jobs, desc="Running ensemble"):
-            res = _run_one_member(job)
-            result_map[res['s']] = res
+    if isinstance(geom, Polygon):
+        return geom
+    elif isinstance(geom, MultiPolygon):
+        return max(geom.geoms, key=lambda g: g.area)
     else:
-        with ProcessPoolExecutor(max_workers=n_workers) as pool:
-            futures = {pool.submit(_run_one_member, job): job['s'] for job in jobs}
-            for fut in tqdm(as_completed(futures), total=n_samples, desc="Running ensemble"):
-                res = fut.result()
-                result_map[res['s']] = res
-
-    member_results = []
-    for s in range(n_samples):
-        res = result_map[s]
-        member_results.append(res)
-        if res['zkphat_col'] is None:
-            zero_samples.append(s)
-        else:
-            zkphat_ensemble[:, s:s+1] = np.array(res['zkphat_col'])
-
-    if members_csv is not None:
-        _append_members_csv(members_csv, member_results, jobs, n_samples,
-                            dist_res, perim_res, n_workers, fire_name, step_idx, _run_id)
-
-    # EnKF update
-    valid_mask = np.ones(n_samples, dtype=bool)
-    valid_mask[zero_samples] = False
-    Ne = int(valid_mask.sum())
-
-    print(f"Valid samples: {Ne}, Failed samples: {len(zero_samples)}")
-    if Ne <= 1:
-        raise RuntimeError(f"Too few valid FARSITE samples ({Ne}/{n_samples}). EnKF cannot proceed.")
-
-    Z = zkphat_ensemble[:, valid_mask]
-    Y = ykhat_ensemble[:, valid_mask]
-
-    zkphat_mean = Z.mean(axis=1, keepdims=True)
-    ykhat_mean  = Y.mean(axis=1, keepdims=True)
-
-    Z_anom = Z - zkphat_mean
-    if float(wsize) > 0:
-        Z_anom = Z_anom + rng.normal(0.0, float(wsize), size=Z_anom.shape)
-    Y_anom = Y - ykhat_mean
-
-    aligned_states = align_states([initial_state, observation_state], vertex_count=n_vertex)
-    yk             = aligned_states[1]
-    innovation     = yk - ykhat_mean
-
-    r2   = float(vsize) ** 2
-    if r2 <= 0:
-        raise ValueError("vsize must be > 0")
-    rinv = 1.0 / r2
-
-    S     = rinv * (Y_anom.T @ Y_anom) + (Ne - 1) * np.eye(Ne)
-    eps   = 1e-10 * (np.trace(S) / S.shape[0])
-    S_reg = S + eps * np.eye(Ne)
-
-    rhs            = rinv * (Y_anom.T @ innovation)
-    w              = np.linalg.solve(S_reg, rhs)
-    adjusted_state = zkphat_mean + (Z_anom @ w)
-
-    xkphat_ensemble  = np.zeros((n_states, n_samples))
-    innovation_all   = yk - Y
-    rhs_all          = rinv * (Y_anom.T @ innovation_all)
-    W_all            = np.linalg.solve(S_reg, rhs_all)
-    xkphat_valid     = Z + (Z_anom @ W_all)
-    xkphat_ensemble[:, valid_mask]  = xkphat_valid
-    xkphat_ensemble[:, ~valid_mask] = adjusted_state
-
-    xkphat_mean = xkphat_ensemble.mean(axis=1, keepdims=True)
-    ex = xkphat_ensemble - xkphat_mean
-    X  = (ex @ ex.T) / (n_samples - 1) + 1e-10 * np.eye(n_states)
-
-    adjusted_geom  = validate_geom(state_to_geom(adjusted_state))
-    adjusted_state = geom_to_state(adjusted_geom)
-    adjusted_state = align_states([initial_state, adjusted_state], vertex_count=n_vertex)[1]
-
-    if steps_csv is not None:
-        _append_steps_csv(steps_csv, step_idx, observation_time, n_samples, Ne,
-                          0.0, 0.0, vsize, wsize, _run_id)
-
-    print("REACHED RETURN")
-    return adjusted_state, X, zkphat_ensemble, xkhat_ensemble, ykhat_ensemble, xkphat_ensemble
+        raise TypeError(f"Unsupported geometry type: {type(geom)}")
 
 
 # ============================================================================
-# CSV LOGGING HELPERS
+# STATE CONVERSION (Geometry <-> State Vector)
 # ============================================================================
 
-_MEMBERS_HEADER = [
-    'run_id', 'fire', 'step', 'member', 'N',
-    'dist_res', 'perim_res', 'ncores', 'n_parallel_workers',
-    'wall_s', 'cpu_s', 'peak_mem_mb', 'status',
-    'forecast_interval_min', 'perimeter_vertex_count',
-    'perimeter_area_m2', 'wind_speed_ms', 'wind_dir_deg',
-]
-
-_STEPS_HEADER = [
-    'run_id', 'step', 't_obs',
-    'N', 'n_valid',
-    't_ensemble_s', 't_enkf_s',
-    'vsize', 'wsize',
-]
-
-
-def _append_members_csv(csv_path, member_results, jobs, n_samples,
-                        dist_res, perim_res, n_workers, fire_name, step_idx, run_id):
-    csv_path = Path(csv_path)
-    write_header = not csv_path.exists()
-    with open(csv_path, 'a', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=_MEMBERS_HEADER)
-        if write_header:
-            writer.writeheader()
-        for res, job in zip(member_results, jobs):
-            writer.writerow({
-                'run_id':               run_id,
-                'fire':                 fire_name,
-                'step':                 step_idx,
-                'member':               res['s'],
-                'N':                    n_samples,
-                'dist_res':             dist_res,
-                'perim_res':            perim_res,
-                'ncores':               1,   # FARSITE uses 1 core per member
-                'n_parallel_workers':   n_workers,
-                'wall_s':               round(res.get('wall_s', 0), 3),
-                'cpu_s':                round(res.get('cpu_s', 0), 3),
-                'peak_mem_mb':          '',
-                'status':               res.get('status', ''),
-                'forecast_interval_min':'',
-                'perimeter_vertex_count':'',
-                'perimeter_area_m2':    '',
-                'wind_speed_ms':        job.get('ws', ''),
-                'wind_dir_deg':         job.get('wd', ''),
-            })
+def geom_to_state(geom):
+    """
+    Convert a Shapely Polygon to a state vector (numpy array).
+    State format: [x0, y0, x1, y1, ..., xn, yn]
+    
+    Args:
+        geom: Shapely Polygon
+        
+    Returns:
+        State vector as numpy array of shape (2*n_vertices, 1)
+    """
+    geom = multipolygon_to_polygon(geom)
+    coords = np.array(geom.exterior.coords[:-1])  # Exclude closing point
+    return coords.reshape(2 * len(coords), 1)
 
 
-def _append_steps_csv(csv_path, step_idx, observation_time, n_samples, n_valid,
-                      t_ensemble_s, t_enkf_s, vsize, wsize, run_id):
-    csv_path = Path(csv_path)
-    write_header = not csv_path.exists()
-    with open(csv_path, 'a', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=_STEPS_HEADER)
-        if write_header:
-            writer.writeheader()
-        writer.writerow({
-            'run_id':       run_id,
-            'step':         step_idx,
-            't_obs':        str(observation_time),
-            'N':            n_samples,
-            'n_valid':      n_valid,
-            't_ensemble_s': round(t_ensemble_s, 3),
-            't_enkf_s':     round(t_enkf_s, 3),
-            'vsize':        vsize,
-            'wsize':        wsize,
-        })
+def state_to_geom(state):
+    """
+    Convert a state vector to a Shapely Polygon.
+    
+    Args:
+        state: State vector of shape (2*n_vertices, 1) or (2*n_vertices,)
+        
+    Returns:
+        Validated Shapely Polygon
+    """
+    state = np.asarray(state).flatten()
+    return validate_geom(Polygon(zip(state[::2], state[1::2])))
+
+
+def xy_to_state(x, y):
+    """
+    Convert separate x and y coordinate lists to a state vector.
+    
+    Args:
+        x: List of x coordinates
+        y: List of y coordinates
+        
+    Returns:
+        State vector as numpy array of shape (2*len(x), 1)
+    """
+    ret = []
+    for i in range(len(x)):
+        ret.append(x[i])
+        ret.append(y[i])
+    return np.array(ret).reshape((2*len(x), 1))
 
 
 # ============================================================================
-# SAMPLING UTILITIES
+# GEOMETRY ALIGNMENT AND INTERPOLATION
 # ============================================================================
 
-def sample_geometry(geom, rng, sigma=1):
-    """Sample a perturbed geometry by adding Gaussian noise to vertices."""
-    sampled_vertices = []
-    for (x, y) in geom.exterior.coords[:-1]:
-        randx = rng.normal(0, sigma)
-        randy = rng.normal(0, sigma)
-        sampled_vertices.append((x + randx, y + randy))
-    from shapely.geometry import Polygon
-    return Polygon(sampled_vertices)
+def make_ccw(geom):
+    """
+    Ensure polygon vertices are in counter-clockwise order.
+    
+    Args:
+        geom: Shapely Polygon
+        
+    Returns:
+        Polygon with CCW vertices
+    """
+    if not geom.exterior.is_ccw:
+        return geom.reverse()
+    return geom
 
 
-def sample_windspeed(loc, sigma, rng):
-    """Sample wind speed from Gaussian distribution (non-negative)."""
-    ws = rng.normal(loc, sigma)
-    return max(ws, 0)
+def interpolate_perimeter(vertices, target_count):
+    """
+    Interpolate vertices along a perimeter to achieve a target vertex count.
+    
+    Args:
+        vertices: List of (x, y) tuples
+        target_count: Desired number of vertices
+        
+    Returns:
+        List of interpolated (x, y) tuples
+    """
+    vertices = np.array(vertices)
+    step_len = np.sqrt(np.sum(np.diff(vertices, 1, 0)**2, 1))
+    step_len = np.append([0], step_len)
+    cumulative_len = np.cumsum(step_len)
+    interpolation_loc = np.linspace(0, cumulative_len[-1], target_count)
+    X = np.interp(interpolation_loc, cumulative_len, vertices[:, 0])
+    Y = np.interp(interpolation_loc, cumulative_len, vertices[:, 1])
+    return list(zip(X, Y))
 
 
-def sample_winddirection(loc, sigma, rng):
-    """Sample wind direction from Gaussian distribution (wrapped to 0-360)."""
-    return np.fmod(rng.normal(loc, sigma) + 360, 360)
+def align_vertices(interpolated_vertices):
+    """
+    Align vertices across multiple geometries by minimizing L2 distance.
+    Finds the optimal rotation for each geometry to align with the first.
+    
+    Args:
+        interpolated_vertices: List of numpy arrays of vertices
+        
+    Returns:
+        List of aligned vertex arrays
+    """
+    minroll_lst = []
+    aligned_vertices = [interpolated_vertices[0]]
+    
+    for i in range(len(interpolated_vertices) - 1):
+        right_vertices = interpolated_vertices[i + 1]
+        
+        # Find optimal roll by minimizing L2 distance.
+        # range() must cover every roll: with range(n - 1) the last roll is never
+        # tested, so a pair needing that roll comes back badly misaligned (about
+        # 1 call in n, and alignment runs several times per assimilation step).
+        l2perroll = []
+        for roll in range(len(right_vertices)):
+            diff = aligned_vertices[0] - right_vertices
+            diff2sum = (diff[:, 0]**2 + diff[:, 1]**2).sum()
+            l2perroll.append(diff2sum)
+            right_vertices = np.roll(right_vertices, 1, axis=0)
+        
+        minroll_lst.append(np.argmin(l2perroll))
+    
+    # Apply optimal rolls
+    for i in range(len(interpolated_vertices) - 1):
+        aligned_vertices.append(np.roll(interpolated_vertices[i + 1], minroll_lst[i], axis=0))
+    
+    return aligned_vertices
+
+
+def interpolate_geom(geom, vertex_count):
+    """
+    Interpolate a geometry to have a specific number of vertices.
+    
+    Args:
+        geom: Shapely Polygon
+        vertex_count: Target number of vertices
+        
+    Returns:
+        Interpolated Polygon
+    """
+    interpolated_geom = Polygon(interpolate_perimeter(geom.exterior.coords, vertex_count))
+    
+    # Handle off-by-one errors
+    actual_count = len(interpolated_geom.exterior.coords[:-1])
+    if actual_count == vertex_count - 1:
+        interpolated_geom = Polygon(interpolate_perimeter(geom.exterior.coords, vertex_count + 1))
+    elif actual_count == vertex_count + 1:
+        interpolated_geom = Polygon(interpolate_perimeter(geom.exterior.coords, vertex_count - 1))
+    
+    return interpolated_geom
+
+
+def interpolate_geoms(geoms, vertex_count):
+    """
+    Interpolate multiple geometries to have the same number of vertices.
+    
+    Args:
+        geoms: List of Shapely Polygons
+        vertex_count: Target number of vertices
+        
+    Returns:
+        List of interpolated Polygons
+    """
+    return [interpolate_geom(geom, vertex_count) for geom in geoms]
+
+
+def align_geoms(geoms, vertex_count):
+    """
+    Align all geometries based on the first geometry.
+    Ensures all have the same vertex count and optimal rotation.
+    
+    Args:
+        geoms: List of Shapely Polygons
+        vertex_count: Target number of vertices
+        
+    Returns:
+        List of aligned Polygons
+    """
+    # Interpolate to same vertex count
+    interpolated_geoms = interpolate_geoms(geoms, vertex_count)
+    
+    # Extract vertices as CCW arrays
+    interpolated_vertices = [make_ccw(interpolated_geoms[0]).exterior.coords[:-1]]
+    for geom in interpolated_geoms[1:]:
+        interpolated_vertices.append(make_ccw(geom).exterior.coords[:-1])
+    
+    # Align and return as Polygons
+    return [Polygon(vertices) for vertices in align_vertices(np.array(interpolated_vertices))]
+
+
+def align_states(state_lst, vertex_count=None):
+    """
+    Align two state vectors to have the same vertex count and optimal rotation.
+    
+    Args:
+        state_lst: List of two state vectors
+        vertex_count: Target vertex count (None = use maximum)
+        
+    Returns:
+        List of two aligned state vectors
+    """
+    if vertex_count is None:
+        vertex_count = max(len(st) for st in state_lst) // 2
+    
+    # Convert states to geometries
+    # Ensure we have 1D numpy arrays
+    state0 = np.asarray(state_lst[0]).flatten()
+    state1 = np.asarray(state_lst[1]).flatten()
+    
+    x0, y0 = state0[::2], state0[1::2]
+    x1, y1 = state1[::2], state1[1::2]
+    
+    # Convert to coordinate pairs (list of (float, float) tuples)
+    coords0 = [(float(x), float(y)) for x, y in zip(x0, y0)]
+    coords1 = [(float(x), float(y)) for x, y in zip(x1, y1)]
+    
+    geom0 = make_ccw(Polygon(coords0))
+    geom1 = make_ccw(Polygon(coords1))
+    
+    # Align geometries
+    geom0, geom1 = align_geoms([geom0, geom1], vertex_count)
+    
+    # Convert back to states
+    x, y = geom0.exterior.coords.xy
+    state0 = xy_to_state(x.tolist()[:-1], y.tolist()[:-1])
+    
+    x, y = geom1.exterior.coords.xy
+    state1 = xy_to_state(x.tolist()[:-1], y.tolist()[:-1])
+    
+    return [state0, state1]
+
+
+def resample_state_to_vertex_count(state, vertex_count):
+    """
+    Resample a state vector to have a specific vertex count.
+    
+    Args:
+        state: State vector of shape (2*M, 1)
+        vertex_count: Target number of vertices
+        
+    Returns:
+        Resampled state vector of shape (2*vertex_count, 1)
+    """
+    geom = state_to_geom(state)
+    geom = interpolate_geom(geom, vertex_count)
+    return geom_to_state(geom)
 
 
 # ============================================================================
-# I/O UTILITIES
+# GEOMETRY BOUNDS
 # ============================================================================
 
-def save_enkf_state(filepath, initial_state, adjusted_state, X,
-                    zkphat_ensemble, xkhat_ensemble, ykhat_ensemble,
-                    xkphat_ensemble, rng):
-    """Save EnKF state to disk for checkpointing or analysis."""
-    np.savez(
-        filepath,
-        initial_state=initial_state,
-        adjusted_state=adjusted_state,
-        X=X,
-        zkphat_ensemble=zkphat_ensemble,
-        xkhat_ensemble=xkhat_ensemble,
-        ykhat_ensemble=ykhat_ensemble,
-        xkphat_ensemble=xkphat_ensemble,
-        rng_state=rng.bit_generator.state
-    )
-    print(f"EnKF state saved to {filepath}")
+def geom_bounds(g):
+    """Get geometry bounds as (minx, miny, maxx, maxy)."""
+    return g.bounds
 
 
-def load_enkf_state(filepath):
-    """Load EnKF state from disk."""
-    data = np.load(filepath, allow_pickle=True)
-    rng = np.random.default_rng()
-    if "rng_state" in data:
-        rng.bit_generator.state = data["rng_state"].item()
-    return data, rng
+def state_bounds(st):
+    """Get state vector bounds as (minx, miny, maxx, maxy)."""
+    g = state_to_geom(st)
+    return geom_bounds(g)
+
+
+# ============================================================================
+# PLOTTING FUNCTIONS
+# ============================================================================
+
+def plot_geometry(geom, ax=None, **kwargs):
+    """
+    Plot a Shapely geometry.
+    
+    Args:
+        geom: Shapely Polygon or MultiPolygon
+        ax: Matplotlib axis (creates new if None)
+        **kwargs: Additional plotting arguments
+    """
+    if ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=(4, 4))
+    
+    if isinstance(geom, MultiPolygon):
+        for g in geom.geoms:
+            x, y = g.exterior.coords.xy
+            ax.plot(x, y, **kwargs)
+    else:
+        x, y = geom.exterior.coords.xy
+        ax.plot(x, y, **kwargs)
+    
+    ax.set_aspect('equal')
+    return ax
+
+
+def plot_matrix(X, ax=None, show_stdev=False, **kwargs):
+    """
+    Plot ensemble matrix (state vectors as columns).
+    
+    Args:
+        X: Matrix of shape (2*n_vertices, n_samples)
+        ax: Matplotlib axis (creates new if None)
+        show_stdev: Whether to plot standard deviation circles
+        **kwargs: Additional plotting arguments
+    """
+    vcounts = X.shape[0] // 2
+    
+    if ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=(4, 4))
+    
+    color = kwargs.get('color', (1, 0, 0, 0.9))
+    
+    # Plot mean
+    X_mean = np.mean(X, axis=1)
+    ax.plot(X_mean[::2], X_mean[1::2], **kwargs)
+    
+    # Plot standard deviation circles
+    if show_stdev:
+        x0, y0 = X_mean[::2], X_mean[1::2]
+        radstd = np.zeros_like(x0)
+        
+        for vix in range(vcounts):
+            print(f'Calculating {vix}/{vcounts}..', end='\r', flush=True)
+            x, y = X[2*vix, :], X[2*vix+1, :]
+            radius = np.sqrt((x - x0[vix])**2 + (y - y0[vix])**2)
+            radstd[vix] = np.std(radius)
+        print()
+        
+        for vix in range(vcounts):
+            print(f'Drawing {vix}/{vcounts}..', end='\r', flush=True)
+            circle = plt.Circle((x0[vix], y0[vix]), radius=radstd[vix], 
+                              fill=False, edgecolor=(0, 0, 0, 0.4), lw=0.3)
+            ax.add_artist(circle)
+    
+    ax.set_aspect('equal')
+    return ax
+
+
+def plot_matrix_ensemble(X, ax=None, plot_alix=None, alpha=0.1, **kwargs):
+    """
+    Plot all ensemble members.
+    
+    Args:
+        X: Matrix of shape (2*n_vertices, n_samples)
+        ax: Matplotlib axis (creates new if None)
+        plot_alix: Vertex index to highlight with scatter plot
+        alpha: Transparency for ensemble members
+        **kwargs: Additional plotting arguments
+    """
+    if ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=(4, 4))
+    
+    # Plot all ensemble members
+    for vix in range(X.shape[1]):
+        ax.plot(X[::2, vix], X[1::2, vix], **kwargs)
+    
+    # Highlight specific vertex if requested
+    if plot_alix is not None:
+        ax.scatter(X[2*plot_alix, :], X[2*plot_alix+1, :], 
+                  alpha=alpha, color=kwargs.get('color'), edgecolors=(0, 0, 0, 0))
+    
+    ax.set_aspect('equal')
+    return ax
+
+
+def save_svg(geom, filepath):
+    """
+    Save geometry as SVG file.
+    (Placeholder - requires minidom import and specific viewport settings)
+    
+    Args:
+        geom: Shapely geometry
+        filepath: Output SVG file path
+    """
+    # This is a simplified version - original implementation required xml.dom.minidom
+    # and specific viewport coordinates
+    raise NotImplementedError("SVG export requires xml.dom.minidom - see original putils for full implementation")

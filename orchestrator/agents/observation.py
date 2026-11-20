@@ -338,7 +338,7 @@ class RulePolicy(ObservationPolicy):
 # Node factory — wrap a policy into a LangGraph node function
 # ---------------------------------------------------------------------------
 
-def make_observation_agent(policy: ObservationPolicy):
+def make_observation_agent(policy: ObservationPolicy, hotspot_path: str | None = None):
     """
     Return a LangGraph node function that applies `policy` to each observation.
 
@@ -348,17 +348,28 @@ def make_observation_agent(policy: ObservationPolicy):
       3. Wraps the verdict + plan in a DecisionRecord
       4. Returns {"obs_verdict", "signals", "plan" (if policy returned one), "log"}
 
+    Args:
+        policy: FixedPolicy() or RulePolicy()
+        hotspot_path: FIRMS CSV that enables the agrees_with_firms check. Without one
+            that signal stays None ("cannot judge") and only the geometry checks run.
+            For Border 2: "data/border2_inputs/firms_hotspots.csv".
+
     Example
     -------
         from orchestrator.agents.observation import make_observation_agent, RulePolicy
-        nodes["observation"] = make_observation_agent(RulePolicy())
+        nodes["observation"] = make_observation_agent(
+            RulePolicy(), hotspot_path="data/border2_inputs/firms_hotspots.csv")
     """
     policy_name = type(policy).__name__
 
     def _node(state: TwinState) -> dict:
         t0 = time.time()
 
-        # 1. Compute signals (forecast-independent checks + obs age + wind shift)
+        # 1. Compute signals (forecast-independent checks + obs age + wind shift).
+        #    A path given to the factory wins over one left in the cache.
+        if hotspot_path is not None:
+            state = {**state, "cache": {**(state.get("cache") or {}),
+                                        "hotspot_path": hotspot_path}}
         signals = compute_signals(state)
 
         # 2. Policy decides

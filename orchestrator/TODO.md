@@ -48,6 +48,10 @@ Each returns one field of `Signals`. Inputs are state vectors / shapely polygons
 - [x] [T] `contains_previous(perimeter, prev_perimeter, tol=0.9) -> bool`
 - [x] [T] `growth_plausible(perimeter, prev_perimeter, dt_minutes, wind_speed_mph) -> bool`
 - [x] [T] `load_hotspots(path, start, end)` + `agrees_with_firms(perimeter, hotspots, buffer_m=500) -> bool | None`
+      Verified against `data/border2_inputs/firms_hotspots.csv` (334 detections): reads the raw FIRMS
+      `acq_date` + `acq_time` (HHMM int) shape as well as a single datetime column. Enable per run with
+      `make_observation_agent(policy, hotspot_path=...)`. This is the only check that brings in data
+      from outside the perimeter series, so it can catch a perimeter that is self-consistent but wrong
 - [x] [T] `wind_shift(weather_prev, weather_now, deg_thresh=45, speed_thresh_mph=10) -> bool`
 
 ## §6 Agents — one per data decision, each with Fixed + Rule policies  (done)

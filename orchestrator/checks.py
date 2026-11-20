@@ -206,6 +206,31 @@ def spread_ceiling(wind_speed_mph: float,
 # § agrees_with_firms  (forecast-independent)
 # ---------------------------------------------------------------------------
 
+def _hotspot_timestamps(df, dt_col: str = "acq_datetime"):
+    """Acquisition timestamps from a FIRMS table, as a tz-naive pandas Series.
+
+    FIRMS downloads carry `acq_date` plus `acq_time` as an HHMM integer (945 means
+    09:45), not a single datetime column. data/border2_inputs/firms_hotspots.csv is
+    in that raw form, so accept either shape. Returns None if neither is present.
+    """
+    import pandas as pd
+
+    if dt_col in df.columns:
+        ts = pd.to_datetime(df[dt_col], errors="coerce")
+    elif "acq_date" in df.columns and "acq_time" in df.columns:
+        hhmm = df["acq_time"].astype(int).astype(str).str.zfill(4)
+        ts = pd.to_datetime(df["acq_date"].astype(str) + " " + hhmm,
+                            format="%Y-%m-%d %H%M", errors="coerce")
+    elif "acq_date" in df.columns:
+        ts = pd.to_datetime(df["acq_date"], errors="coerce")
+    else:
+        return None
+
+    if getattr(ts.dtype, "tz", None) is not None:
+        ts = ts.dt.tz_localize(None)
+    return None if ts.isna().all() else ts
+
+
 def load_hotspots(
     path: str,
     start: datetime,
@@ -234,17 +259,13 @@ def load_hotspots(
     """
     try:
         import pandas as pd
-        df = pd.read_csv(path, parse_dates=[dt_col])
+        df = pd.read_csv(path)
     except Exception:
         return None
 
-    if dt_col not in df.columns:
+    ts = _hotspot_timestamps(df, dt_col)   # already tz-naive
+    if ts is None:
         return None
-
-    ts = df[dt_col]
-    # Strip tz if mixed awareness
-    if hasattr(ts.dtype, "tz") and ts.dtype.tz is not None:
-        ts = ts.dt.tz_localize(None)
     start_naive = start.replace(tzinfo=None) if hasattr(start, "tzinfo") and start.tzinfo else start
     end_naive   = end.replace(tzinfo=None)   if hasattr(end,   "tzinfo") and end.tzinfo   else end
     buf = pd.Timedelta(hours=buffer_hours)

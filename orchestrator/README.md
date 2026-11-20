@@ -64,7 +64,7 @@ for m in final["metrics"]:
 
 Swap `RulePolicy` for `FixedPolicy` in all three to get the baseline configuration: every observation accepted, baseline FARSITE settings, a plain EnKF update with `vsize=300, wsize=100`. That reproduces `outputs/Border_2_Real` and is the control the agentic runs are compared against.
 
-Or open `test_orchestrator.ipynb` for a walkthrough with the Border 2 perimeters, and `demo_agents.ipynb` for a per-node walkthrough with placeholders.
+Or open `test_orchestrator.ipynb` for a walkthrough with the Border 2 perimeters, and `demo_placeholders.ipynb` for a per-node walkthrough with placeholders.
 
 ---
 
@@ -221,11 +221,11 @@ levels of detail:
 | `test_pipeline.py` | graph wiring, with placeholder agents |
 | `test_agents.py` | the three real agents, with `fetch` / `load_ensemble` injected |
 | `test_agents.ipynb` | the readable version of `test_agents.py` — every decision with the state shown before and after, then a Fixed-vs-Rule replay |
-| `demo_agents.ipynb` | the graph itself, with placeholder agents: routing, branches, state handoff |
+| `demo_placeholders.ipynb` | the graph itself, with placeholder agents: routing, branches, state handoff |
 | `test_orchestrator.ipynb` | a walkthrough against the real Border 2 perimeters |
 
 Start with `test_agents.ipynb` if you want to understand what the agents decide and why;
-start with `demo_agents.ipynb` if you want to understand how the graph moves state around.
+start with `demo_placeholders.ipynb` if you want to understand how the graph moves state around.
 
 **`test_pipeline.py` (14 tests)** — the graph wiring, using `make_placeholder_nodes()`:
 - the graph compiles without errors
@@ -320,4 +320,3 @@ A *new* step needs three edits: add its name to `PIPELINE` (or `OFF_PATH`) in `g
 from orchestrator.routing import after_observation
 assert after_observation({"obs_verdict": {"action": "reject"}}) == "synthesize"
 assert after_observation({"obs_verdict": {"action": "accept"}}) == "weather"
-```
