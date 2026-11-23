@@ -1,0 +1,2 @@
+action,step,detail,elapsed_s,status
+init_state,-1,"initial perimeter -> 20 vertices, cov=1000*I",0.001,ok
