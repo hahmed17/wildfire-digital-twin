@@ -215,11 +215,11 @@ def make_nodes(policies: Policies, run_dir: Path, lcp_path: str | Path,
     elif policies == "rule":
         obs_p, wx_p, as_p = O.RulePolicy(), W.RulePolicy(), A.RulePolicy()
     elif policies == "llm":
-        # LLM observation + assimilation agents (one shared model, fixed for every run:
-        # orchestrator/llm.py); weather stays rule-based until its LLM policy exists.
+        # All three agents use the LLM (one shared model, fixed for every run:
+        # orchestrator/llm.py).
         from orchestrator.llm import get_llm
         llm = get_llm()
-        obs_p, wx_p, as_p = O.LLMPolicy(llm), W.RulePolicy(), A.LLMPolicy(llm)
+        obs_p, wx_p, as_p = O.LLMPolicy(llm), W.LLMPolicy(llm), A.LLMPolicy(llm)
     else:
         raise ValueError(f"unknown policies {policies!r}; expected 'fixed', 'rule' or 'llm'")
 

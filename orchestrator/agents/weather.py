@@ -34,8 +34,10 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Literal
 
 import numpy as np
+from pydantic import BaseModel, Field
 
 from orchestrator import checks
 from orchestrator.state import (
@@ -247,6 +249,144 @@ class RulePolicy(WeatherPolicy):
 
 
 # ---------------------------------------------------------------------------
+# LLMPolicy — same verdict, made by an LLM from the actual wind numbers
+# ---------------------------------------------------------------------------
+
+class LLMWeatherChoice(BaseModel):
+    """The part of the verdict the LLM makes. used_fallback is a fact, filled in by code."""
+    action: Literal["normal", "wind_shift_detected", "fallback_weather"] = Field(
+        description=WeatherVerdict.model_fields["action"].description)
+    reason: str = Field(
+        description="One or two sentences on the weather conditions, citing the numbers.")
+
+
+LLM_SYSTEM_PROMPT = """\
+You are the weather agent in a wildfire digital twin. Each cycle, wind observations from the \
+nearest weather station (RAWS) are fetched for the forecast window, and FARSITE uses them to \
+predict fire spread. You summarise the conditions for the rest of the pipeline with one label:
+
+- normal: nothing that changes how the forecast or the data correction should be treated.
+- wind_shift_detected: the wind changed enough since the previous window that the fire's \
+behaviour likely changed (e.g. it turned or sped up). Downstream, this tells the assimilation \
+agent that a surprising fire observation this cycle is probably real, so it should be trusted \
+rather than dismissed. Do not raise it for small, ordinary fluctuations.
+- fallback_weather: no real data for this window; the weather service returned a static guess \
+(10 mph from 225°). The forecast is running on made-up wind, so its uncertainty is higher.
+
+Notes:
+- Speeds are in mph; directions are degrees the wind blows FROM (0 = north, 90 = east).
+- Direction changes are circular: 350° to 10° is a 20° change, not 340°.
+- Guidance from the rule-based policy: it flags a shift when the mean direction rotates by \
+{deg_thresh:.0f}° or more, or the mean speed changes by {speed_thresh_mph:.0f} mph or more. These \
+are guidelines, not hard limits — a smaller rotation together with a large speed increase, or \
+very strong winds, can matter more than either number alone; light, variable winds matter less.
+- If the data is the fallback, say fallback_weather unless there is a real reason not to.
+"""
+
+LLM_HUMAN_PROMPT = """\
+Wind for this forecast window:
+{now}
+
+Wind for the previous window:
+{prev}
+
+Change between windows:
+{change}
+
+Choose the label and explain why in one or two sentences citing the numbers."""
+
+
+def _summarise_window(weather: dict | None) -> str:
+    if weather is None:
+        return "- none (first cycle: no previous window to compare against)"
+    speeds, directions = checks.finite_readings(weather.get("wind_speeds"),
+                                                weather.get("wind_directions"))
+    lines = [f"- readings: {len(speeds)}",
+             f"- used fallback (made-up data): {_is_fallback(weather)}"]
+    if speeds:
+        lines += [f"- mean speed: {np.mean(speeds):.1f} mph (min {min(speeds):.1f}, "
+                  f"max {max(speeds):.1f})"]
+    if directions:
+        lines += [f"- mean direction: {checks.mean_direction_deg(directions):.0f}°"]
+    return "\n".join(lines)
+
+
+def _describe_change(prev: dict | None, now: dict) -> str:
+    if prev is None:
+        return "- not available (first cycle)"
+    d_speed = _mean_speed_mph(now) - _mean_speed_mph(prev)
+    raw = abs(checks.mean_direction_deg(now.get("wind_directions"))
+              - checks.mean_direction_deg(prev.get("wind_directions"))) % 360
+    d_dir = min(raw, 360 - raw)
+    return f"- mean speed change: {d_speed:+.1f} mph\n- mean direction change: {d_dir:.0f}°"
+
+
+class LLMPolicy(WeatherPolicy):
+    """
+    The LLM labels the weather window (normal / wind_shift_detected / fallback_weather)
+    from the actual wind numbers for this window and the previous one. used_fallback is
+    filled in by code, and the plan refinement is RulePolicy's, so the LLM and rule arms
+    use the same resources.
+
+    The verdict's wind_shift is the LLM's judgment (action == "wind_shift_detected"); the
+    threshold-based value is still logged by the node as inputs["wind_shift"].
+
+    If the LLM call fails or returns something unparsable, the RulePolicy verdict is used
+    and the reason says so. After each decide(): `last_tokens` and `last_fallback`.
+    """
+
+    def __init__(self, llm, deg_thresh: float = 45.0, speed_thresh_mph: float = 10.0,
+                 high_wind_mph: float = 25.0):
+        from langchain_core.prompts import ChatPromptTemplate
+        from orchestrator.llm import STRUCTURED_OUTPUT_METHOD
+
+        # The node reads these two to compute its threshold-based wind_shift.
+        self.deg_thresh = deg_thresh
+        self.speed_thresh_mph = speed_thresh_mph
+        self.rule = RulePolicy(deg_thresh=deg_thresh, speed_thresh_mph=speed_thresh_mph,
+                               high_wind_mph=high_wind_mph)
+        prompt = ChatPromptTemplate.from_messages(
+            [("system", LLM_SYSTEM_PROMPT), ("human", LLM_HUMAN_PROMPT)]
+        ).partial(deg_thresh=deg_thresh, speed_thresh_mph=speed_thresh_mph)
+        self.chain = prompt | llm.with_structured_output(
+            LLMWeatherChoice, method=STRUCTURED_OUTPUT_METHOD, include_raw=True)
+        self.last_tokens = 0
+        self.last_fallback = False
+
+    def decide(
+        self, state: TwinState, weather: dict, wind_shift: bool
+    ) -> tuple[WeatherVerdict, ForecastPlan | None]:
+        from orchestrator.llm import total_tokens
+
+        plan = self.rule._refine_plan(state, _mean_speed_mph(weather))
+        prev = (state.get("cache") or {}).get("weather_last")   # not rotated yet here
+        self.last_tokens, self.last_fallback = 0, False
+
+        try:
+            out = self.chain.invoke({"now": _summarise_window(weather),
+                                     "prev": _summarise_window(prev),
+                                     "change": _describe_change(prev, weather)})
+            self.last_tokens = total_tokens(out.get("raw"))
+            choice = out.get("parsed")
+            if choice is None:
+                raise ValueError(f"unparsable LLM output: {out.get('parsing_error')}")
+        except Exception as e:
+            self.last_fallback = True
+            verdict, _ = self.rule.decide(state, weather, wind_shift)
+            return verdict.model_copy(update={
+                "reason": f"LLM unavailable ({type(e).__name__}); rule fallback: {verdict.reason}"
+            }), plan
+
+        verdict = WeatherVerdict(
+            action=choice.action,
+            used_fallback=_is_fallback(weather),
+            wind_shift=choice.action == "wind_shift_detected",
+            reason=choice.reason,
+        )
+        return verdict, plan
+
+
+# ---------------------------------------------------------------------------
 # Node factory
 # ---------------------------------------------------------------------------
 
@@ -361,10 +501,13 @@ def make_weather_agent(
                 "used_fallback": _is_fallback(weather),
                 "wind_shift": shift,
                 "fetch_error": fetch_error,
+                # LLMPolicy only: True if the LLM call failed and the rule decided instead.
+                "llm_fallback": getattr(policy, "last_fallback", None),
             },
             decision=verdict.model_dump(),
             overridden_by_guardrail=overridden,
             agent_latency_s=round(time.perf_counter() - t0, 4),
+            tokens=getattr(policy, "last_tokens", 0) or 0,
         )
         out["log"] = [record]
         return out
