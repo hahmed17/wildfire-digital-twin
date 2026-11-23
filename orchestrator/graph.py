@@ -69,7 +69,8 @@ def build_pipeline(nodes: dict[str, Callable[[TwinState], dict]], checkpointer=N
 CHECKPOINT_TYPES = [
     ("orchestrator.state", "ObservationEvent"), ("orchestrator.state", "OperatorRequest"),
     ("orchestrator.state", "ForecastPlan"), ("orchestrator.state", "AssimilationDecision"),
-    ("orchestrator.state", "Signals"), ("orchestrator.state", "DecisionRecord"),
+    ("orchestrator.state", "Signals"), ("orchestrator.state", "CheckDetail"),
+    ("orchestrator.state", "DecisionRecord"),
     ("orchestrator.state", "ObservationVerdict"), ("orchestrator.state", "WeatherVerdict"),
     ("orchestrator.placeholders", "PlaceholderVerdict"),
 ]

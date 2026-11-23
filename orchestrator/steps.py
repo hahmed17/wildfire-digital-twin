@@ -238,13 +238,7 @@ def seed_state(path: str | Path, event: ObservationEvent, n_vertex: int = 20,
     adapter.save_state(path, state_vec, cov_X, np.random.default_rng(seed))
 
 
-# Covariance to restart from on reinitialize_from_obs. OPEN QUESTION ([H] in TODO.md:
-# "Define reinitialize: new state = observation, and what covariance X to restart with").
-# Default here: the observation's own error, X = vsize_m^2 * I, which says "the state is
-# now the observation, known no better than the observation is". The alternative is the
-# notebook's initial prior (1000 * I), which is much tighter than any vsize and so claims
-# more confidence after a reinitialisation than before it. Settle this before publishing
-# numbers that depend on it; pass reinit_cov="initial" to use the notebook's value.
+
 REINIT_COV_INITIAL = 1000.0
 
 

@@ -37,6 +37,7 @@ from shapely.geometry import Polygon
 
 from orchestrator import checks
 from orchestrator.state import (
+    CheckDetail,
     DecisionRecord,
     ForecastPlan,
     ObservationVerdict,
@@ -177,6 +178,29 @@ def compute_signals(state: TwinState) -> Signals:
 
     source: Source = current.source if current else "mapped_perimeter"
 
+    # --- the numbers behind the True/False checks (read only by the LLM policies) ---
+    details = {
+        "contains_previous": CheckDetail(
+            passed=_contains_prev, value=checks.containment_fraction(cur_poly, prev_poly),
+            threshold=0.90, unit="fraction of the previous perimeter's area inside the new one"),
+        "growth_plausible": CheckDetail(
+            passed=_growth_ok, value=checks.implied_spread_rate(cur_poly, prev_poly, dt_minutes),
+            threshold=checks.spread_ceiling(wind_speed_mph),
+            unit=(f"equivalent-radius spread rate, m/min, over {dt_minutes:.0f} min; "
+                  f"threshold = physical ceiling at {wind_speed_mph:.1f} mph wind")),
+    }
+    counts = checks.firms_inside(cur_poly, hotspots)
+    details["agrees_with_firms"] = CheckDetail(
+        passed=_agrees_firms,
+        value=None if counts is None else counts[0],
+        threshold=1.0,
+        unit=("no hotspots in this window" if counts is None else
+              f"hotspots inside the perimeter (+500 m buffer), out of {counts[1]}"))
+    if cur_poly is not None and prev_poly is not None and prev_poly.area > 0:
+        details["area_ratio"] = CheckDetail(
+            passed=None, value=float(cur_poly.area / prev_poly.area),
+            unit="new perimeter area / previous perimeter area (fires rarely shrink)")
+
     return Signals(
         normalized_innovation=0.0,          # placeholder; overwritten by assimilation agent
         agrees_with_firms=_agrees_firms,
@@ -186,6 +210,7 @@ def compute_signals(state: TwinState) -> Signals:
         source=source,
         wind_shift=_wind_shift,
         consecutive_disagreements=consec,
+        details=details,
     )
 
 
@@ -399,8 +424,20 @@ Context:
 
 Accept or reject, and explain why in one or two sentences citing the signals."""
 
-# Signals that do not exist yet when this agent runs (the forecast comes later).
-_NOT_YET_AVAILABLE = {"normalized_innovation"}
+# Signals that do not exist yet when this agent runs (the forecast comes later);
+# details are shown separately, as numbers.
+_NOT_YET_AVAILABLE = {"normalized_innovation", "details"}
+
+
+def _format_details(signals: Signals) -> str:
+    """The numbers behind the True/False checks, one line each (empty if none)."""
+    lines = []
+    for name, d in signals.details.items():
+        val = "n/a" if d.value is None else f"{d.value:.3g}"
+        thr = "" if d.threshold is None else f" (threshold {d.threshold:.3g})"
+        res = "" if d.passed is None else f" -> {d.passed}"
+        lines.append(f"- {name}: {val}{thr}{res} — {d.unit}")
+    return "\n".join(lines)
 
 
 def _describe_signals(signals: Signals) -> str:
@@ -409,6 +446,10 @@ def _describe_signals(signals: Signals) -> str:
              if name not in _NOT_YET_AVAILABLE]
     lines.append(f"- independent_check_failed: {signals.independent_check_failed} — True if "
                  "any forecast-independent check says the observation is wrong.")
+    numbers = _format_details(signals)
+    if numbers:
+        lines.append("\nThe numbers behind the checks (a value just past its threshold is a "
+                     "near miss; one far past it is a clear failure):\n" + numbers)
     return "\n".join(lines)
 
 
@@ -544,6 +585,7 @@ def make_observation_agent(policy: ObservationPolicy, hotspot_path: str | None =
                 "wind_shift": signals.wind_shift,
                 "consecutive_disagreements": signals.consecutive_disagreements,
                 "injected": current.injected if current else None,
+                "details": {k: v.model_dump() for k, v in signals.details.items()},
                 # LLMPolicy only: True if the LLM call failed and the rule decided instead.
                 "llm_fallback": getattr(policy, "last_fallback", None),
             },

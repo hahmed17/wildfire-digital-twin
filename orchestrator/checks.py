@@ -154,7 +154,8 @@ def normalized_innovation(
     Z_anom  = Z - z_mean                                      # (n_states, Ne)
     spread  = float(np.linalg.norm(Z_anom, axis=0).mean())   # scalar
 
-    denom = spread + float(vsize_m)
+    # denom = spread + float(vsize_m)
+    denom = np.sqrt(spread**2 + Z.shape[0] * float(vsize_m)**2)   # both on the 40-number scale
     return inn_norm / denom if denom > 0 else float("inf")
 
 
@@ -262,6 +263,57 @@ def spread_ceiling(wind_speed_mph: float,
     """Fastest equivalent-radius growth (m/min) treated as physically possible."""
     return min(max_rate_m_per_min,
                CALM_RATE_M_PER_MIN + RATE_PER_MPH * max(0.0, wind_speed_mph))
+
+
+# ---------------------------------------------------------------------------
+# § The numbers behind the True/False checks (for the LLM policies)
+# Same math as contains_previous / growth_plausible / agrees_with_firms, which are left
+# untouched so the rule-based behaviour cannot change. Each returns None when the
+# matching check has nothing to judge.
+# ---------------------------------------------------------------------------
+
+def containment_fraction(perimeter: Polygon | None,
+                         prev_perimeter: Polygon | None) -> float | None:
+    """Fraction of the previous perimeter's area inside the new one (contains_previous
+    is True when this is >= its tol, 0.90)."""
+    if prev_perimeter is None or prev_perimeter.is_empty or prev_perimeter.area <= 0:
+        return None
+    if perimeter is None or perimeter.is_empty:
+        return 0.0
+    return float(perimeter.intersection(prev_perimeter).area / prev_perimeter.area)
+
+
+def implied_spread_rate(perimeter: Polygon | None, prev_perimeter: Polygon | None,
+                        dt_minutes: float) -> float | None:
+    """Equivalent-radius growth rate in m/min (growth_plausible compares it with
+    spread_ceiling(wind))."""
+    if (prev_perimeter is None or prev_perimeter.is_empty or perimeter is None
+            or perimeter.is_empty or dt_minutes <= 0):
+        return None
+    r_new = math.sqrt(perimeter.area / math.pi)
+    r_prev = math.sqrt(prev_perimeter.area / math.pi)
+    return max(0.0, r_new - r_prev) / dt_minutes
+
+
+def firms_inside(perimeter: Polygon | None,
+                 hotspots_wgs84: list[tuple[float, float]] | None,
+                 buffer_m: float = 500.0) -> tuple[int, int] | None:
+    """(hotspots inside the buffered perimeter, total hotspots). agrees_with_firms is
+    True when at least one is inside."""
+    if not hotspots_wgs84:
+        return None
+    if perimeter is None or perimeter.is_empty:
+        return 0, len(hotspots_wgs84)
+    try:
+        import pyproj
+        from shapely.geometry import Point
+        transformer = pyproj.Transformer.from_crs("EPSG:4326", "EPSG:5070", always_xy=True)
+        buffered = perimeter.buffer(buffer_m)
+        inside = sum(buffered.contains(Point(*transformer.transform(lon, lat)))
+                     for lon, lat in hotspots_wgs84)
+        return int(inside), len(hotspots_wgs84)
+    except Exception:
+        return None
 
 
 # ---------------------------------------------------------------------------

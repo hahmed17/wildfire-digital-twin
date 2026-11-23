@@ -161,6 +161,15 @@ class AssimilationDecision(BaseModel):
 # Signals (§3 output) — computed before any policy decides, no LLM
 # ---------------------------------------------------------------------------
 
+class CheckDetail(BaseModel):
+    """The number behind one True/False check, so an LLM can tell a near miss from a
+    clear failure. Rule and Fixed policies only read the True/False fields."""
+    passed: bool | None = Field(description="The check's True/False result (None = could not judge).")
+    value: float | None = Field(default=None, description="The measured value.")
+    threshold: float | None = Field(default=None, description="The cutoff the True/False uses.")
+    unit: str = Field(default="", description="What the value and threshold measure.")
+
+
 class Signals(BaseModel):
     """Checks run on a new observation before any decision is made. Some compare it
     with the forecast; others are independent of the forecast and can catch a bad
@@ -189,6 +198,11 @@ class Signals(BaseModel):
         ge=0,
         description="How many steps in a row the forecast has missed in the same direction. "
                     "A long streak means the model, not the observation, is the problem.")
+    details: dict[str, CheckDetail] = Field(
+        default_factory=dict,
+        description="Optional numbers behind the True/False checks, keyed by check name "
+                    "(e.g. 'contains_previous'). Empty when not computed. Only the LLM "
+                    "policies read it; the True/False fields above are unchanged.")
 
     @computed_field
     @property

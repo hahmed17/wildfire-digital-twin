@@ -12,6 +12,7 @@ import numpy as np
 import pytest
 
 from orchestrator.agents.assimilation import (
+    SURPRISE_THRESHOLD,
     make_assimilation_agent,
     FixedPolicy as AsFixed,
     RulePolicy as AsRule,
@@ -512,6 +513,93 @@ class TestWeatherAgent:
         state["cache"] = {"weather_last": HIGH_SAME_DIR}
         out = make_weather_agent(WxRule(), fetch=lambda s, e: HIGH_SAME_DIR)(state)
         assert "plan" not in out        # the existing plan stands
+
+
+# ---------------------------------------------------------------------------
+# normalized_innovation — the score must mean what the policies assume
+# ---------------------------------------------------------------------------
+
+class TestNormalizedInnovation:
+    """About 1 = the observation is as far from the forecast as normal errors explain;
+    much greater than 1 = surprising. The policies' threshold (2.0) relies on this.
+
+    The old denominator, spread + vsize, added vsize (one coordinate's error) to a spread
+    measured over all 2*n_vertex coordinates, so a perfectly normal observation scored
+    ~2.5 when the forecast was confident and was flagged as surprising."""
+
+    N_STATES, N_MEMBERS, VSIZE = 40, 300, 200.0
+
+    def _mean_score(self, forecast_sd: float, obs_offset_m: float = 0.0,
+                    trials: int = 300) -> float:
+        from orchestrator import checks
+        rng = np.random.default_rng(0)
+        scores = []
+        for _ in range(trials):
+            truth = np.zeros((self.N_STATES, 1))
+            # Ensemble whose mean is off by about its own spread (a calibrated forecast)
+            Z = (truth + rng.normal(0, forecast_sd, (self.N_STATES, 1))
+                 + rng.normal(0, forecast_sd, (self.N_STATES, self.N_MEMBERS)))
+            # Observation = truth + normal observation error (+ an optional fault)
+            obs = truth + rng.normal(0, self.VSIZE, (self.N_STATES, 1))
+            obs[0::2] += obs_offset_m                  # shift every vertex east
+            scores.append(checks.normalized_innovation(Z, obs, self.VSIZE))
+        return float(np.mean(scores))
+
+    @pytest.mark.parametrize("forecast_sd", [50.0, 200.0, 500.0])
+    def test_normal_observation_scores_about_one(self, forecast_sd):
+        """Holds whether the forecast is confident (50 m) or loose (500 m)."""
+        score = self._mean_score(forecast_sd)
+        assert 0.8 < score < 1.2, f"forecast sd {forecast_sd} m -> score {score:.2f}"
+
+    def test_normal_observation_is_not_surprising_for_a_confident_forecast(self):
+        """The case the old formula got wrong (it gave ~2.5, above the 2.0 threshold)."""
+        assert self._mean_score(50.0) < SURPRISE_THRESHOLD
+
+    def test_observation_shifted_2km_is_surprising(self):
+        assert self._mean_score(200.0, obs_offset_m=2000.0) > 2 * SURPRISE_THRESHOLD
+
+
+# ---------------------------------------------------------------------------
+# Signals.details — the numbers behind the True/False checks (LLM policies only)
+# ---------------------------------------------------------------------------
+
+class TestCheckDetails:
+    """The numbers must agree with the True/False checks they explain, and adding them
+    must not change anything the Fixed and Rule policies see."""
+
+    @staticmethod
+    def _square(x0, size):
+        from shapely.geometry import box
+        return box(x0, 0, x0 + size, size)
+
+    @pytest.mark.parametrize("shift", [0, 50, 100, 500, 2000])
+    def test_containment_fraction_agrees_with_contains_previous(self, shift):
+        from orchestrator import checks
+        prev = self._square(0, 1000)
+        new = self._square(shift, 1100)            # a bit larger, shifted east
+        frac = checks.containment_fraction(new, prev)
+        assert (frac >= 0.90) == checks.contains_previous(new, prev)
+
+    @pytest.mark.parametrize("dt_min, wind_mph", [(60, 0), (60, 25), (1, 0), (1, 25)])
+    def test_spread_rate_agrees_with_growth_plausible(self, dt_min, wind_mph):
+        from orchestrator import checks
+        prev, new = self._square(0, 1000), self._square(-1500, 4000)
+        rate = checks.implied_spread_rate(new, prev, dt_min)
+        assert ((rate <= checks.spread_ceiling(wind_mph))
+                == checks.growth_plausible(new, prev, dt_min, wind_mph))
+
+    def test_no_previous_perimeter_means_no_number(self):
+        from orchestrator import checks
+        new = self._square(0, 1000)
+        assert checks.containment_fraction(new, None) is None
+        assert checks.implied_spread_rate(new, None, 60) is None
+
+    def test_details_default_to_empty_so_existing_signals_still_build(self):
+        s = Signals(normalized_innovation=1.0, agrees_with_firms=None,
+                    contains_previous=True, growth_plausible=True, obs_age_min=0,
+                    source="mapped_perimeter", wind_shift=False,
+                    consecutive_disagreements=0)
+        assert s.details == {}
 
 
 # ---------------------------------------------------------------------------

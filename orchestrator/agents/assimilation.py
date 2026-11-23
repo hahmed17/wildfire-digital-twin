@@ -303,12 +303,19 @@ def _describe_signals(signals: Signals, innovation_available: bool) -> str:
     the number."""
     lines = []
     for name, field in Signals.model_fields.items():
+        if name == "details":
+            continue                      # shown below, as numbers
         value = getattr(signals, name)
         if name == "normalized_innovation" and not innovation_available:
             value = "unavailable (no forecast ensemble this cycle)"
         lines.append(f"- {name}: {value} — {field.description}")
     lines.append(f"- independent_check_failed: {signals.independent_check_failed} — True if any "
                  "forecast-independent check says the observation is wrong.")
+    from orchestrator.agents.observation import _format_details
+    numbers = _format_details(signals)
+    if numbers:
+        lines.append("\nThe numbers behind the checks (a value just past its threshold is a "
+                     "near miss; one far past it is a clear failure):\n" + numbers)
     return "\n".join(lines)
 
 
