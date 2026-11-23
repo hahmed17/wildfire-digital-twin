@@ -47,7 +47,7 @@ def synthesize(state: TwinState) -> dict:
     accepted one (see synthetic.py), so the forecast and assimilation still run.
     The synthetic event has source="synthetic_perimeter", so the assimilation step trusts
     it less (VSIZE_PRESETS: 500 m vs 200 m for a mapped perimeter)."""
-    t0 = time.time()
+    t0 = time.perf_counter()
     rejected = state["current"]
     good = [ObservationEvent.model_validate(e) for e in state["cache"].get("good_obs", [])]
     out_dir = Path(state["cache"].get("run_dir", "runs")) / "synthetic"
@@ -57,10 +57,16 @@ def synthesize(state: TwinState) -> dict:
         inputs={"rejected": rejected.model_dump(mode="json"),
                 "obs_verdict": _verdict_dump(state.get("obs_verdict"))},
         decision={"synthetic": event.model_dump(mode="json") if event else None, **details},
-        overridden_by_guardrail=False, agent_latency_s=time.time() - t0)
+        overridden_by_guardrail=False, agent_latency_s=time.perf_counter() - t0)
     out = {"log": [record]}
     if event is not None:
         out["current"] = event
+        # The signals in the state describe the REJECTED observation (e.g. source
+        # "mapped_perimeter", contains_previous=False). Recompute them for the synthetic
+        # one, or the assimilation agent judges the replacement by the rejected
+        # observation's signals and never applies the synthetic vsize (500 m).
+        from orchestrator.agents.observation import compute_signals
+        out["signals"] = compute_signals({**state, "current": event})
     return out
 
 
@@ -103,7 +109,7 @@ def make_forecast(lcp_path: str | Path | None = None,
         from orchestrator import adapter
         from orchestrator.agents.weather import forecast_window
 
-        t0 = time.time()
+        t0 = time.perf_counter()
         plan = state.get("plan")
         if plan is None:
             raise ValueError("forecast: state['plan'] is unset — the observation agent "
@@ -196,7 +202,7 @@ def make_forecast(lcp_path: str | Path | None = None,
                     "farsite_dt_minutes": farsite_dt},
             decision={"ensemble_path": str(out), "n_valid": ens.n_valid,
                       "ensemble_wall_s": round(ens.wall_s, 1)},
-            overridden_by_guardrail=False, agent_latency_s=round(time.time() - t0, 3))
+            overridden_by_guardrail=False, agent_latency_s=round(time.perf_counter() - t0, 3))
 
         return {"ensemble_path": str(out), "cache": cache, "log": [record]}
 

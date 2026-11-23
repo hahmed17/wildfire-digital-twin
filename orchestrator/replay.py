@@ -75,7 +75,7 @@ OUTPUT_ROOT = Path("outputs") / "Border_2_Orchestrator"
 
 Scenario = Literal["clean", "shifted_obs", "stale_obs", "mislabeled_obs",
                    "wind_shift", "weather_failure"]
-Policies = Literal["fixed", "rule"]
+Policies = Literal["fixed", "rule", "llm"]
 
 # Which cycle carries the fault. Cycle 2 of 3, so there is an established state
 # before it (the first-observation guardrail would otherwise force acceptance) and
@@ -214,8 +214,13 @@ def make_nodes(policies: Policies, run_dir: Path, lcp_path: str | Path,
         obs_p, wx_p, as_p = O.FixedPolicy(), W.FixedPolicy(), A.FixedPolicy()
     elif policies == "rule":
         obs_p, wx_p, as_p = O.RulePolicy(), W.RulePolicy(), A.RulePolicy()
+    elif policies == "llm":
+        # LLM assimilation agent; observation and weather stay rule-based until their
+        # LLM policies exist. The model is fixed for every run (orchestrator/llm.py).
+        from orchestrator.llm import get_llm
+        obs_p, wx_p, as_p = O.RulePolicy(), W.RulePolicy(), A.LLMPolicy(get_llm())
     else:
-        raise ValueError(f"unknown policies {policies!r}; expected 'fixed' or 'rule'")
+        raise ValueError(f"unknown policies {policies!r}; expected 'fixed', 'rule' or 'llm'")
 
     nodes = {
         "receive": steps.receive,
@@ -410,6 +415,9 @@ def replay(policies: Policies = "fixed",
         "farsite_params": FARSITE_PARAMS,
         "wx_lat": WX_LAT, "wx_lon": WX_LON,
     }
+    if policies == "llm":
+        from orchestrator.llm import get_llm, llm_config
+        config["llm"] = llm_config(get_llm())     # model alias + date: NRP can repoint aliases
     (out_dir / "config.json").write_text(json.dumps(config, indent=2))
 
     return ReplayResult(run_id=run_id, policies=policies, scenario=scenario,

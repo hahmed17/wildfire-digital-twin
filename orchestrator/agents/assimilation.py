@@ -33,11 +33,13 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import numpy as np
+from pydantic import BaseModel, Field
 
 from orchestrator import checks
 from orchestrator.state import (
     BASELINE,
     VSIZE_PRESETS,
+    AssimAction,
     AssimilationDecision,
     DecisionRecord,
     Signals,
@@ -241,6 +243,148 @@ class RulePolicy(AssimilationPolicy):
 
 
 # ---------------------------------------------------------------------------
+# LLMPolicy — same decision, made by an LLM from the same signals
+# ---------------------------------------------------------------------------
+
+class LLMAssimilationChoice(BaseModel):
+    """The part of the decision the LLM makes. vsize and wsize are facts about the sensor
+    and the model, not judgment calls, so code fills them in (same values as RulePolicy)."""
+    action: AssimAction = Field(description=AssimilationDecision.model_fields["action"].description)
+    inflation: float = Field(
+        default=1.0, ge=1.0, le=3.0,
+        description="Factor that widens the forecast ensemble spread before the update. "
+                    "1.0 = no inflation. Only used with 'inflate_and_assimilate'; larger "
+                    "values move the analysis further toward the observation.")
+    reason: str = Field(
+        description="One or two sentences explaining the decision, citing the signals used.")
+
+
+LLM_SYSTEM_PROMPT = """\
+You are the assimilation agent in a wildfire digital twin. Each cycle, a new fire-perimeter \
+observation arrives and an Ensemble Kalman Filter (EnKF) combines it with a FARSITE fire-spread \
+forecast ensemble. You decide HOW the observation is used in that update.
+
+Key idea: a large disagreement between forecast and observation means one of them is wrong, \
+but the disagreement alone cannot tell you which. The forecast-independent checks \
+(contains_previous, growth_plausible, agrees_with_firms) are the evidence about the \
+observation itself; the innovation and the drift streak are evidence about the forecast.
+
+Actions:
+- assimilate: normal EnKF update.
+- inflate_and_assimilate: widen the forecast spread by `inflation` (1.0-3.0) first, so the update \
+moves further toward the observation. For an observation that is surprising but believable.
+- skip: ignore this observation and keep the forecast. Only when the independent evidence says \
+the observation is wrong and nothing (such as a wind shift) explains it.
+- reinitialize_from_obs: discard the forecast and restart from the observation. For when the \
+forecast has kept missing over several cycles, so the model has drifted.
+
+Notes:
+- FIRMS = NASA satellite active-fire hotspot detections (not companies).
+- Guidance from the rule-based policy: normalized_innovation above about 2 is surprising; \
+3 or more consecutive misses suggests the model has drifted. These are guidelines, not hard \
+limits — weigh the signals together.
+- A synthetic_perimeter is not a real observation: it was generated because the real one was \
+rejected, and it is less reliable than a mapped_perimeter.
+"""
+
+LLM_HUMAN_PROMPT = """\
+Signals for this cycle:
+{signals}
+
+Context:
+{context}
+
+Choose the action (and the inflation factor if you inflate) and explain why in one or two \
+sentences citing the signals."""
+
+
+def _describe_signals(signals: Signals, innovation_available: bool) -> str:
+    """Each signal as 'name: value — description', so the model gets the meaning, not just
+    the number."""
+    lines = []
+    for name, field in Signals.model_fields.items():
+        value = getattr(signals, name)
+        if name == "normalized_innovation" and not innovation_available:
+            value = "unavailable (no forecast ensemble this cycle)"
+        lines.append(f"- {name}: {value} — {field.description}")
+    lines.append(f"- independent_check_failed: {signals.independent_check_failed} — True if any "
+                 "forecast-independent check says the observation is wrong.")
+    return "\n".join(lines)
+
+
+def _describe_context(state: TwinState) -> str:
+    wx = state.get("weather_verdict")
+    prev = state.get("assim_verdict")          # still last cycle's verdict at this point
+    history = [round(x, 2) for x in (state.get("drift_history") or [])]
+    return "\n".join([
+        f"- weather agent: {getattr(wx, 'action', 'n/a')} — {getattr(wx, 'reason', '')}",
+        f"- recent normalized innovations (oldest first): {history or 'none yet'}",
+        f"- previous assimilation decision: {getattr(prev, 'action', 'none (first cycle)')}",
+        f"- cycle: {state.get('step', '?')}",
+    ])
+
+
+class LLMPolicy(AssimilationPolicy):
+    """
+    The LLM picks the action and the inflation factor from the same signals the RulePolicy
+    sees; code fills in vsize (source preset) and wsize (baseline), exactly as RulePolicy
+    does, so the LLM-vs-rule comparison differs only in the judgment.
+
+    If the LLM call fails or returns something unparsable, the RulePolicy decision is used
+    and the reason says so — a run never stops because the LLM endpoint was busy.
+
+    After each decide(): `last_tokens` (for the DecisionRecord) and `last_fallback`.
+    """
+
+    def __init__(self, llm, use_source_vsize: bool = True,
+                 wsize_m: float = BASELINE["wsize_m"]):
+        from langchain_core.prompts import ChatPromptTemplate
+        from orchestrator.llm import STRUCTURED_OUTPUT_METHOD
+
+        self.use_source_vsize = use_source_vsize
+        self.wsize_m = wsize_m
+        self.fallback = RulePolicy(use_source_vsize=use_source_vsize, wsize_m=wsize_m)
+        prompt = ChatPromptTemplate.from_messages(
+            [("system", LLM_SYSTEM_PROMPT), ("human", LLM_HUMAN_PROMPT)])
+        self.chain = prompt | llm.with_structured_output(
+            LLMAssimilationChoice, method=STRUCTURED_OUTPUT_METHOD, include_raw=True)
+        self.last_tokens = 0
+        self.last_fallback = False
+
+    def decide(self, state: TwinState, signals: Signals) -> AssimilationDecision:
+        from orchestrator.llm import total_tokens
+
+        vsize = (VSIZE_PRESETS.get(signals.source, BASELINE["vsize_m"])
+                 if self.use_source_vsize else BASELINE["vsize_m"])
+        innovation_available = (state.get("cache") or {}).get("innovation_available", True)
+        self.last_tokens, self.last_fallback = 0, False
+
+        try:
+            out = self.chain.invoke({
+                "signals": _describe_signals(signals, innovation_available),
+                "context": _describe_context(state),
+            })
+            self.last_tokens = total_tokens(out.get("raw"))
+            choice = out.get("parsed")
+            if choice is None:
+                raise ValueError(f"unparsable LLM output: {out.get('parsing_error')}")
+        except Exception as e:
+            self.last_fallback = True
+            d = self.fallback.decide(state, signals)
+            return d.model_copy(update={
+                "reason": f"LLM unavailable ({type(e).__name__}); rule fallback: {d.reason}"})
+
+        return AssimilationDecision(
+            action=choice.action,
+            vsize_m=vsize,
+            wsize_m=self.wsize_m,
+            # Inflation only means something with inflate_and_assimilate.
+            inflation=choice.inflation if choice.action == "inflate_and_assimilate" else 1.0,
+            reason=choice.reason,
+        )
+
+
+# ---------------------------------------------------------------------------
 # Node factory
 # ---------------------------------------------------------------------------
 
@@ -270,7 +414,7 @@ def make_assimilation_agent(policy: AssimilationPolicy, load_ensemble=None):
     do_load = load_ensemble if load_ensemble is not None else default_load_ensemble
 
     def _node(state: TwinState) -> dict:
-        t0 = time.time()
+        t0 = time.perf_counter()
 
         signals = state.get("signals")
         if signals is None:
@@ -332,10 +476,13 @@ def make_assimilation_agent(policy: AssimilationPolicy, load_ensemble=None):
                 "wind_shift": signals.wind_shift,
                 "weather_action": getattr(state.get("weather_verdict"), "action", None),
                 "consecutive_disagreements": signals.consecutive_disagreements,
+                # LLMPolicy only: True if the LLM call failed and the rule decided instead.
+                "llm_fallback": getattr(policy, "last_fallback", None),
             },
             decision=verdict.model_dump(),
             overridden_by_guardrail=overridden,
-            agent_latency_s=round(time.time() - t0, 4),
+            agent_latency_s=round(time.perf_counter() - t0, 4),
+            tokens=getattr(policy, "last_tokens", 0) or 0,
         )
 
         return {

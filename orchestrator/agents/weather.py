@@ -289,7 +289,7 @@ def make_weather_agent(
     do_fetch = fetch if fetch is not None else _default_fetch
 
     def _node(state: TwinState) -> dict:
-        t0 = time.time()
+        t0 = time.perf_counter()
 
         # 1-2. Window + fetch. A service failure must not kill the replay: fall back.
         start, end = forecast_window(state)
@@ -364,7 +364,7 @@ def make_weather_agent(
             },
             decision=verdict.model_dump(),
             overridden_by_guardrail=overridden,
-            agent_latency_s=round(time.time() - t0, 4),
+            agent_latency_s=round(time.perf_counter() - t0, 4),
         )
         out["log"] = [record]
         return out

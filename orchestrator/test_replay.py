@@ -271,6 +271,19 @@ class TestFaultsAreDetectable:
         assert rejects(fixed) == 0, "FixedPolicy must accept everything (it is the control)"
         assert rejects(rule) == 1, f"RulePolicy missed the {scenario} fault"
 
+    def test_synthetic_replacement_is_judged_as_synthetic(self, tmp_path, stubbed,
+                                                          perimeters_available):
+        """After a reject, assimilation must see the SYNTHETIC perimeter's signals, not the
+        rejected observation's: source synthetic_perimeter, so the 500 m vsize applies.
+        (synthesize used to leave the rejected observation's signals in the state.)"""
+        import pandas as pd
+        r = run(tmp_path, "rule", "shifted_obs")
+        d = pd.read_csv(r.out_dir / "decisions.csv")
+        assim = d[d.node == "assimilation"].reset_index(drop=True)
+        cycle2 = assim.iloc[1]          # the faulted cycle (FAULT_CYCLE = 2)
+        assert cycle2.vsize_m == 500.0, cycle2.reason
+        assert assim.iloc[0].vsize_m == 200.0 and assim.iloc[2].vsize_m == 200.0
+
     def test_clean_scenario_has_no_rejections(self, tmp_path, stubbed,
                                               perimeters_available):
         """A policy that rejects real observations is worse than useless."""

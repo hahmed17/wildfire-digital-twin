@@ -56,5 +56,5 @@ dependencies:
   - pip:
       - influxdb             # InfluxDB 1.x client
       - langgraph           # orchestrator graph (StateGraph)
-      - langchain-core       # LLM policies (structured output); add the provider package when chosen,
-                             # e.g. langchain-anthropic or langchain-openai
+      - langchain-core       # LLM policies (structured output)
+      - langchain-openai     # orchestrator/llm.py: ChatOpenAI -> NRP endpoint (gpt-oss)

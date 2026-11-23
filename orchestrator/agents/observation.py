@@ -378,7 +378,7 @@ def make_observation_agent(policy: ObservationPolicy, hotspot_path: str | None =
     policy_name = type(policy).__name__
 
     def _node(state: TwinState) -> dict:
-        t0 = time.time()
+        t0 = time.perf_counter()
 
         # 1. Compute signals (forecast-independent checks + obs age + wind shift).
         #    A path given to the factory wins over one left in the cache.
@@ -424,7 +424,7 @@ def make_observation_agent(policy: ObservationPolicy, hotspot_path: str | None =
             },
             decision=verdict.model_dump(),
             overridden_by_guardrail=overridden,
-            agent_latency_s=round(time.time() - t0, 4),
+            agent_latency_s=round(time.perf_counter() - t0, 4),
         )
 
         out: dict = {

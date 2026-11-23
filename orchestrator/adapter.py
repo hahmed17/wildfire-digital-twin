@@ -221,7 +221,7 @@ def run_ensemble(state_vec: np.ndarray,
     speeds, directions = sample_winds(weather, plan.ensemble_size, rng)
 
     # 2. Hena's ensemble, with our plan mapped onto her arguments
-    t0 = time.time()
+    t0 = time.perf_counter()
     raw = enkf.run_ensemble(
         initial_state=state_vec,
         observation_time=start_time,
@@ -244,7 +244,7 @@ def run_ensemble(state_vec: np.ndarray,
         step_idx=step_idx,
         run_id=run_id,
     )
-    wall_s = time.time() - t0
+    wall_s = time.perf_counter() - t0
 
     # 3. Wrap the result
     return EnsembleResult(raw=raw, plan=plan, wind_speeds=speeds,
