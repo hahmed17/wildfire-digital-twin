@@ -12,6 +12,7 @@ channels:
 dependencies:
   - python=3.11
   - pip
+  - pytest
 
   # geospatial stack (conda-forge builds share one GDAL/PROJ, incl. proj.db)
   - gdal                 # osgeo: LANDFIRE rasters → ASCII for lcpmake

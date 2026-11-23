@@ -107,8 +107,9 @@ def _is_fallback(weather: dict) -> bool:
 
 
 def _mean_speed_mph(weather: dict) -> float:
-    speeds = weather.get("wind_speeds") or [0.0]
-    return float(np.mean(speeds))
+    """Mean usable wind speed (mph). Skips gaps: a real RAWS window can contain
+    None, and np.mean over it raises."""
+    return checks.mean_speed(weather.get("wind_speeds"))
 
 
 # ---------------------------------------------------------------------------

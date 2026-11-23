@@ -234,9 +234,12 @@ def align_vertices(interpolated_vertices):
     for i in range(len(interpolated_vertices) - 1):
         right_vertices = interpolated_vertices[i + 1]
         
-        # Find optimal roll by minimizing L2 distance
+        # Find optimal roll by minimizing L2 distance.
+        # range() must cover every roll: with range(n - 1) the last roll is never
+        # tested, so a pair needing that roll comes back badly misaligned (about
+        # 1 call in n, and alignment runs several times per assimilation step).
         l2perroll = []
-        for roll in range(len(interpolated_vertices[i]) - 1):
+        for roll in range(len(right_vertices)):
             diff = aligned_vertices[0] - right_vertices
             diff2sum = (diff[:, 0]**2 + diff[:, 1]**2).sum()
             l2perroll.append(diff2sum)

@@ -25,6 +25,68 @@ from shapely import make_valid
 # import; these are tiny)
 # ---------------------------------------------------------------------------
 
+def finite_readings(speeds, directions=None) -> tuple[list[float], list[float]]:
+    """Drop missing or non-finite weather readings, keeping speeds and directions paired.
+
+    The Firemap API returns `null` for any timestep a station did not report, and
+    json.loads turns those into None, so a real RAWS window routinely contains gaps.
+    Two things then go wrong, and neither is obvious:
+
+      np.mean([8.0, None, 11.0])            -> TypeError: float + NoneType
+      np.asarray([8.0, None], dtype=float)  -> array([8., nan])
+
+    The first is at least loud. The second is silent: the NaN flows through
+    sample_winds into enkf.run_ensemble, where `int(ws)` raises inside a worker
+    process and the member just shows up as failed.
+
+    A reading is kept only when both its speed and its direction are usable, since
+    the two lists are parallel and a member needs both.
+
+    Args:
+        speeds: wind speeds, possibly containing None/NaN
+        directions: matching directions; None to filter speeds alone
+
+    Returns:
+        (speeds, directions) as lists of floats, both the same length.
+        directions is empty when none was passed in.
+    """
+    def _usable(x) -> bool:
+        if x is None:
+            return False
+        try:
+            return math.isfinite(float(x))
+        except (TypeError, ValueError):
+            return False
+
+    s_in = list(speeds or [])
+    if directions is None:
+        return [float(s) for s in s_in if _usable(s)], []
+
+    d_in = list(directions or [])
+    pairs = [(float(s), float(d)) for s, d in zip(s_in, d_in)
+             if _usable(s) and _usable(d)]
+    if not pairs:
+        return [], []
+    s_out, d_out = zip(*pairs)
+    return list(s_out), list(d_out)
+
+
+def mean_speed(speeds) -> float:
+    """Mean of the usable wind speeds, or 0.0 when there are none."""
+    clean, _ = finite_readings(speeds)
+    return float(np.mean(clean)) if clean else 0.0
+
+
+def mean_direction_deg(directions) -> float:
+    """Circular mean of the usable wind directions in [0, 360), or 0.0 when none."""
+    clean, _ = finite_readings(directions)
+    if not clean:
+        return 0.0
+    rads = np.deg2rad(clean)
+    return float(math.degrees(math.atan2(np.sin(rads).mean(),
+                                         np.cos(rads).mean())) % 360)
+
+
 def _largest_polygon(geom) -> Polygon | None:
     if geom is None or geom.is_empty:
         return None
@@ -351,22 +413,12 @@ def wind_shift(
     if weather_prev is None:
         return False   # no previous window to compare
 
-    def _mean_speed(w: dict) -> float:
-        speeds = w.get("wind_speeds", [])
-        return float(np.mean(speeds)) if speeds else 0.0
-
-    def _mean_dir_deg(w: dict) -> float:
-        dirs = w.get("wind_directions", [])
-        if not dirs:
-            return 0.0
-        rads = np.deg2rad(dirs)
-        return float(math.degrees(math.atan2(np.sin(rads).mean(),
-                                             np.cos(rads).mean())) % 360)
-
-    spd_prev = _mean_speed(weather_prev)
-    spd_now  = _mean_speed(weather_now)
-    dir_prev = _mean_dir_deg(weather_prev)
-    dir_now  = _mean_dir_deg(weather_now)
+    # mean_speed / mean_direction_deg skip missing readings; a real RAWS window
+    # often has gaps, and np.mean over them raises.
+    spd_prev = mean_speed(weather_prev.get("wind_speeds"))
+    spd_now  = mean_speed(weather_now.get("wind_speeds"))
+    dir_prev = mean_direction_deg(weather_prev.get("wind_directions"))
+    dir_now  = mean_direction_deg(weather_now.get("wind_directions"))
 
     spd_delta = abs(spd_now - spd_prev)
 

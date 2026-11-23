@@ -171,6 +171,93 @@ class TestObservationAgent:
         assert out["signals"].wind_shift is True
 
 
+class TestWeatherGaps:
+    """The Firemap API returns null for any timestep a station did not report, so a
+    real RAWS window routinely contains None. Two things broke on it, and only the
+    first was loud:
+
+        np.mean([8.0, None, 11.0])           -> TypeError: float + NoneType
+        np.asarray([8.0, None], dtype=float) -> array([8., nan])
+
+    The NaN reached FARSITE as int(nan) and surfaced only as a failed member. None of
+    this showed up in a sandbox where the weather service was unreachable, because
+    every window came back as the two-element fallback.
+    """
+
+    GAPPY = {"wind_speeds": [8.0, None, 11.0, 12.0, None],
+             "wind_directions": [220.0, None, 215.0, 225.0, None]}
+
+    def test_finite_readings_drops_gaps_and_keeps_pairs_aligned(self):
+        from orchestrator.checks import finite_readings
+        s, d = finite_readings(self.GAPPY["wind_speeds"],
+                               self.GAPPY["wind_directions"])
+        assert s == [8.0, 11.0, 12.0]
+        assert d == [220.0, 215.0, 225.0]
+        assert len(s) == len(d), "a member needs both a speed and a direction"
+
+    def test_finite_readings_drops_a_pair_if_either_half_is_missing(self):
+        from orchestrator.checks import finite_readings
+        s, d = finite_readings([8.0, 9.0], [220.0, None])
+        assert s == [8.0] and d == [220.0]
+
+    def test_finite_readings_drops_nan_and_inf(self):
+        from orchestrator.checks import finite_readings
+        s, _ = finite_readings([8.0, float("nan"), float("inf"), 9.0],
+                               [1.0, 2.0, 3.0, 4.0])
+        assert s == [8.0, 9.0]
+
+    def test_mean_helpers_do_not_raise_on_gaps(self):
+        from orchestrator.checks import mean_direction_deg, mean_speed
+        assert mean_speed(self.GAPPY["wind_speeds"]) == pytest.approx(10.3333, abs=1e-3)
+        assert mean_direction_deg(self.GAPPY["wind_directions"]) == pytest.approx(
+            220.0, abs=1.0)
+
+    def test_mean_helpers_return_zero_when_nothing_is_usable(self):
+        from orchestrator.checks import mean_direction_deg, mean_speed
+        assert mean_speed([None, None]) == 0.0
+        assert mean_speed([]) == 0.0
+        assert mean_direction_deg([None]) == 0.0
+
+    def test_wind_shift_handles_gappy_windows(self):
+        from orchestrator.checks import wind_shift
+        assert wind_shift({"wind_speeds": [8.0], "wind_directions": [220.0]},
+                          self.GAPPY) is False       # must not raise
+
+    def test_weather_agent_mean_handles_gaps(self, state):
+        out = make_weather_agent(WxRule(), fetch=lambda s, e: self.GAPPY)(state)
+        assert out["weather_verdict"] is not None     # must not raise
+        assert out["log"][0].inputs["mean_wind_mph"] == pytest.approx(10.33, abs=0.01)
+
+    def test_sample_winds_never_hands_farsite_a_nan(self):
+        from orchestrator import adapter
+        s, d = adapter.sample_winds(self.GAPPY, 8, np.random.default_rng(0))
+        assert not np.isnan(s).any(), "a NaN wind becomes int(nan) inside a worker"
+        assert not np.isnan(d).any()
+        assert len(s) == len(d) == 8
+
+    def test_all_gaps_falls_back_rather_than_returning_nothing(self, monkeypatch):
+        """An empty wind list divides by zero downstream; fall back instead."""
+        import firemap
+        from orchestrator import adapter
+        monkeypatch.setattr(firemap, "query_weather_for_timestep",
+                            lambda **kw: ([None, None], [None, None]))
+        got = adapter.fetch_weather(T0, T0 + timedelta(hours=2))
+        assert got["wind_speeds"] == adapter.FALLBACK_WIND_SPEEDS
+        assert got["used_fallback"] is True
+        assert got["n_readings_dropped"] == 2
+
+    def test_fetch_weather_reports_how_many_readings_it_dropped(self, monkeypatch):
+        import firemap
+        from orchestrator import adapter
+        monkeypatch.setattr(firemap, "query_weather_for_timestep",
+                            lambda **kw: (self.GAPPY["wind_speeds"],
+                                          self.GAPPY["wind_directions"]))
+        got = adapter.fetch_weather(T0, T0 + timedelta(hours=2))
+        assert got["wind_speeds"] == [8.0, 11.0, 12.0]
+        assert got["n_readings_dropped"] == 2
+        assert got["used_fallback"] is False
+
+
 class TestHotspotLoading:
     """FIRMS downloads carry acq_date + acq_time (HHMM int), not a single datetime
     column. load_hotspots used to pass parse_dates=["acq_datetime"] to read_csv,

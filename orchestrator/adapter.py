@@ -1,4 +1,4 @@
- from dataclasses import dataclass
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 import time
@@ -11,6 +11,7 @@ import geopandas as gpd
 import numpy as np
 
 import firemap
+from orchestrator import checks
 from orchestrator.state import ObservationEvent, ForecastPlan
 from geometry import validate_geom, geom_to_state, resample_state_to_vertex_count
 
@@ -44,6 +45,11 @@ def load_observation(event: ObservationEvent,
 
     return state
 
+# firemap.query_weather_for_timestep's static fallback when no RAWS data is available.
+FALLBACK_WIND_SPEEDS = [10.0]
+FALLBACK_WIND_DIRECTIONS = [225.0]
+
+
 def fetch_weather(start: datetime, 
                   end: datetime,
                   lat: float = 32.59588662537945, 
@@ -65,10 +71,26 @@ def fetch_weather(start: datetime,
     speeds, directions = firemap.query_weather_for_timestep(
         lat=lat, lon=lon, start_time=start, end_time=end)
     use_fallback = (speeds == [10.0] and directions == [225.0])
+
+    # Drop gaps before anything downstream sees them. The Firemap API returns null
+    # for timesteps a station did not report, so a real RAWS window often contains
+    # None: np.mean over it raises, and np.asarray(..., dtype=float) turns it into
+    # NaN that flows silently into FARSITE. See checks.finite_readings.
+    n_raw = len(speeds or [])
+    clean_speeds, clean_directions = checks.finite_readings(speeds, directions)
+    n_dropped = n_raw - len(clean_speeds)
+
+    if not clean_speeds:
+        # Nothing usable in the window: fall back rather than hand on an empty list.
+        clean_speeds = list(FALLBACK_WIND_SPEEDS)
+        clean_directions = list(FALLBACK_WIND_DIRECTIONS)
+        use_fallback = True
+
     return {
-        "wind_speeds": speeds,
-        "wind_directions": directions,
-        "used_fallback": use_fallback
+        "wind_speeds": clean_speeds,
+        "wind_directions": clean_directions,
+        "used_fallback": use_fallback,
+        "n_readings_dropped": n_dropped,
     }
 
 
@@ -100,8 +122,16 @@ def sample_winds(weather: dict, n: int,
     Returns:
         (speeds, directions): two arrays of length n
     """
-    speeds = np.asarray(weather["wind_speeds"], dtype=float)
-    directions = np.asarray(weather["wind_directions"], dtype=float)
+    # Filter again here rather than trusting the caller: np.asarray(..., dtype=float)
+    # silently turns None into NaN, and a NaN wind reaches FARSITE as int(nan),
+    # which raises inside the worker and shows up only as a failed member.
+    clean_speeds, clean_directions = checks.finite_readings(
+        weather.get("wind_speeds"), weather.get("wind_directions"))
+    if not clean_speeds:
+        clean_speeds = list(FALLBACK_WIND_SPEEDS)
+        clean_directions = list(FALLBACK_WIND_DIRECTIONS)
+    speeds = np.asarray(clean_speeds, dtype=float)
+    directions = np.asarray(clean_directions, dtype=float)
 
     if len(speeds) > 1:
         # Case A: pick n random positions; use the SAME positions for both arrays
