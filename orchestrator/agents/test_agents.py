@@ -274,7 +274,9 @@ class TestGoodObsTimeParsing:
         gpd.GeoDataFrame(geometry=[Point(0, 0).buffer(500)],
                          crs="EPSG:5070").to_file(small, driver="GeoJSON")
 
-        prev_event = make_event(0)
+        # The previous perimeter comes from cache["good_obs"][-1], which carries both
+        # path and feature_id; prev_obs_path is only the "is there a previous one" flag.
+        prev_event = make_event(0, path=str(big), feature_id="0")
         state["prev_obs_path"] = str(big)
         state["current"] = make_event(1, path=str(small), feature_id="0")
         state["cache"] = {"good_obs": [prev_event.model_dump(mode="json")],
@@ -284,6 +286,58 @@ class TestGoodObsTimeParsing:
         # the new perimeter is far smaller, so it cannot contain the previous one
         assert sig.contains_previous is False
         assert sig.independent_check_failed is True
+
+
+class TestPreviousPerimeterUsesFeatureId:
+    """compute_signals used to load the previous perimeter from state["prev_obs_path"],
+    which is only a path — the feature id is lost, so it silently read feature 0 of a
+    multi-feature file. On Border 2 that meant every cycle compared against the 229 ha
+    seed perimeter instead of the 1,714 / 2,533 ha ones, leaving contains_previous
+    nearly inert. It now reads cache["good_obs"][-1], which has both."""
+
+    @staticmethod
+    def _multi_feature_file(tmp_path):
+        import geopandas as gpd
+        from shapely.geometry import Point
+        path = tmp_path / "multi.geojson"
+        # feature 0 is tiny; feature 1 is large — the shapes the old code confused
+        gpd.GeoDataFrame(
+            geometry=[Point(0, 0).buffer(300), Point(0, 0).buffer(3000)],
+            crs="EPSG:5070").to_file(path, driver="GeoJSON")
+        return str(path)
+
+    def test_compares_against_the_accepted_feature_not_feature_zero(
+            self, state, tmp_path):
+        from orchestrator.agents.observation import compute_signals
+        multi = self._multi_feature_file(tmp_path)
+
+        # previous accepted = the LARGE feature 1; current = a mid-size perimeter
+        # that contains feature 0 but not feature 1.
+        import geopandas as gpd
+        from shapely.geometry import Point
+        mid = tmp_path / "mid.geojson"
+        gpd.GeoDataFrame(geometry=[Point(0, 0).buffer(1000)],
+                         crs="EPSG:5070").to_file(mid, driver="GeoJSON")
+
+        state["prev_obs_path"] = multi
+        state["current"] = make_event(1, path=str(mid), feature_id="0")
+        state["cache"] = {
+            "good_obs": [make_event(0, path=multi, feature_id="1").model_dump(mode="json")],
+            "weather_last": CALM,
+        }
+        sig = compute_signals(state)
+        assert sig.contains_previous is False, (
+            "a 1,000 m perimeter cannot contain the accepted 3,000 m one; reading "
+            "feature 0 instead would wrongly pass")
+
+    def test_falls_back_to_prev_obs_path_when_good_obs_is_empty(self, state, tmp_path):
+        from orchestrator.agents.observation import compute_signals
+        multi = self._multi_feature_file(tmp_path)
+        state["prev_obs_path"] = multi
+        state["current"] = make_event(1, path=multi, feature_id="1")
+        state["cache"] = {"weather_last": CALM}      # no good_obs yet
+        sig = compute_signals(state)                  # must not raise
+        assert sig.contains_previous is True          # large contains small feature 0
 
 
 # ---------------------------------------------------------------------------

@@ -105,9 +105,24 @@ def compute_signals(state: TwinState) -> Signals:
         current.path if current else None,
         current.feature_id if current else None,
     )
-    prev_poly = _geometry_from_path(
-        state.get("prev_obs_path"), None   # prev_obs_path always feature 0 (the latest accepted)
-    )
+    # Previous perimeter: take it from cache["good_obs"][-1], the last accepted
+    # ObservationEvent, which carries BOTH path and feature_id.
+    # state["prev_obs_path"] is only a path — the feature id is lost, so loading from
+    # it silently reads feature 0 of a multi-feature file rather than the perimeter
+    # that was actually accepted. On Border 2 that meant every cycle compared against
+    # the 229 ha seed perimeter instead of the 1,714 / 2,533 ha ones, which makes
+    # contains_previous nearly inert. prev_obs_path remains the "is there a previous
+    # observation at all" flag for the guardrail.
+    prev_entry = (cache_good[-1] if (cache_good := ((state.get("cache") or {})
+                                                    .get("good_obs") or [])) else None)
+    if prev_entry is not None:
+        prev_path = (prev_entry.get("path") if isinstance(prev_entry, dict)
+                     else getattr(prev_entry, "path", None))
+        prev_fid = (prev_entry.get("feature_id") if isinstance(prev_entry, dict)
+                    else getattr(prev_entry, "feature_id", None))
+    else:
+        prev_path, prev_fid = state.get("prev_obs_path"), None
+    prev_poly = _geometry_from_path(prev_path, prev_fid)
 
     # --- obs age ---
     if current and clock:
