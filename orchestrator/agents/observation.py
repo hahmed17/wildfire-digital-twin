@@ -29,8 +29,10 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Literal
 
 import numpy as np
+from pydantic import BaseModel, Field
 from shapely.geometry import Polygon
 
 from orchestrator import checks
@@ -350,6 +352,127 @@ class RulePolicy(ObservationPolicy):
 
 
 # ---------------------------------------------------------------------------
+# LLMPolicy — same accept / reject decision, made by an LLM from the same signals
+# ---------------------------------------------------------------------------
+
+class LLMObservationChoice(BaseModel):
+    """The part of the decision the LLM makes."""
+    action: Literal["accept", "reject"] = Field(
+        description=ObservationVerdict.model_fields["action"].description)
+    reason: str = Field(
+        description="One or two sentences explaining the decision, citing the signals used.")
+
+
+LLM_SYSTEM_PROMPT = """\
+You are the observation agent in a wildfire digital twin. A new fire-perimeter observation has \
+just arrived. Before it is used to correct the fire-spread forecast, you decide whether it can be \
+trusted: accept or reject.
+
+What happens next:
+- accept: the observation is used in the forecast/assimilation cycle.
+- reject: it is discarded and replaced by a SYNTHETIC perimeter, grown from the last accepted \
+perimeter at the fire's observed spread rate. The synthetic one is much less reliable than a real \
+observation, so rejecting a good observation loses real information. Reject only when the \
+evidence says the observation itself is wrong.
+
+The evidence available now is independent of the forecast (the forecast has not run yet):
+- contains_previous: fires rarely shrink, so a perimeter that does not contain the previous one \
+suggests a shifted, mislabeled or stale observation.
+- growth_plausible: whether the implied spread rate is physically possible given wind and fuel.
+- agrees_with_firms: FIRMS = NASA satellite active-fire hotspot detections (not companies). \
+None means there were no hotspots to compare against, which is not evidence either way.
+- wind_shift: a sharp wind change can make a real perimeter jump in an unusual direction, which \
+can explain a failed geometry check.
+- obs_age_min: an old observation describes the fire as it was, not as it is.
+
+Guidance from the rule-based policy: it rejects if any independent check fails and no wind shift \
+explains it, or if the observation is more than {max_age_min:.0f} minutes old. These are \
+guidelines, not hard limits — weigh the evidence together.
+"""
+
+LLM_HUMAN_PROMPT = """\
+Signals for this observation:
+{signals}
+
+Context:
+{context}
+
+Accept or reject, and explain why in one or two sentences citing the signals."""
+
+# Signals that do not exist yet when this agent runs (the forecast comes later).
+_NOT_YET_AVAILABLE = {"normalized_innovation"}
+
+
+def _describe_signals(signals: Signals) -> str:
+    lines = [f"- {name}: {getattr(signals, name)} — {field.description}"
+             for name, field in Signals.model_fields.items()
+             if name not in _NOT_YET_AVAILABLE]
+    lines.append(f"- independent_check_failed: {signals.independent_check_failed} — True if "
+                 "any forecast-independent check says the observation is wrong.")
+    return "\n".join(lines)
+
+
+def _describe_context(state: TwinState) -> str:
+    # NOTE: never pass current.injected — it labels planted test faults, so showing it
+    # to the LLM would let it read the answer.
+    good = (state.get("cache") or {}).get("good_obs") or []
+    prev_wx = state.get("weather_verdict")      # still the previous cycle's verdict here
+    return "\n".join([
+        f"- cycle: {state.get('step', '?')}",
+        f"- accepted observations so far: {len(good)}",
+        f"- previous cycle's weather verdict: {getattr(prev_wx, 'action', 'none (first cycle)')}",
+    ])
+
+
+class LLMPolicy(ObservationPolicy):
+    """
+    The LLM decides accept / reject from the same signals the RulePolicy sees. The
+    ForecastPlan is still chosen by RulePolicy's code, so the LLM and rule arms use the
+    same resources and differ only in the data decision.
+
+    If the LLM call fails or returns something unparsable, the RulePolicy verdict is used
+    and the reason says so. After each decide(): `last_tokens` and `last_fallback`.
+    """
+
+    def __init__(self, llm, max_age_min: float = 360.0):
+        from langchain_core.prompts import ChatPromptTemplate
+        from orchestrator.llm import STRUCTURED_OUTPUT_METHOD
+
+        self.rule = RulePolicy(max_age_min=max_age_min)
+        prompt = ChatPromptTemplate.from_messages(
+            [("system", LLM_SYSTEM_PROMPT), ("human", LLM_HUMAN_PROMPT)]
+        ).partial(max_age_min=max_age_min)
+        self.chain = prompt | llm.with_structured_output(
+            LLMObservationChoice, method=STRUCTURED_OUTPUT_METHOD, include_raw=True)
+        self.last_tokens = 0
+        self.last_fallback = False
+
+    def decide(
+        self, state: TwinState, signals: Signals
+    ) -> tuple[ObservationVerdict, ForecastPlan | None]:
+        from orchestrator.llm import total_tokens
+
+        plan = self.rule._pick_plan(state, signals)     # resources: same as the rule arm
+        self.last_tokens, self.last_fallback = 0, False
+
+        try:
+            out = self.chain.invoke({"signals": _describe_signals(signals),
+                                     "context": _describe_context(state)})
+            self.last_tokens = total_tokens(out.get("raw"))
+            choice = out.get("parsed")
+            if choice is None:
+                raise ValueError(f"unparsable LLM output: {out.get('parsing_error')}")
+        except Exception as e:
+            self.last_fallback = True
+            verdict, _ = self.rule.decide(state, signals)
+            return verdict.model_copy(update={
+                "reason": f"LLM unavailable ({type(e).__name__}); rule fallback: {verdict.reason}"
+            }), plan
+
+        return ObservationVerdict(action=choice.action, reason=choice.reason), plan
+
+
+# ---------------------------------------------------------------------------
 # Node factory — wrap a policy into a LangGraph node function
 # ---------------------------------------------------------------------------
 
@@ -421,10 +544,13 @@ def make_observation_agent(policy: ObservationPolicy, hotspot_path: str | None =
                 "wind_shift": signals.wind_shift,
                 "consecutive_disagreements": signals.consecutive_disagreements,
                 "injected": current.injected if current else None,
+                # LLMPolicy only: True if the LLM call failed and the rule decided instead.
+                "llm_fallback": getattr(policy, "last_fallback", None),
             },
             decision=verdict.model_dump(),
             overridden_by_guardrail=overridden,
             agent_latency_s=round(time.perf_counter() - t0, 4),
+            tokens=getattr(policy, "last_tokens", 0) or 0,
         )
 
         out: dict = {
