@@ -2,7 +2,7 @@
 Run the Fixed vs Rule experiment arms for Border 2.
 
     # from the repo root, after the baseline finishes (it holds all 12 workers)
-    python -m orchestrator.run_arms --smoke          # ~0.5 h, proves the FARSITE path
+    python -m orchestrator.run_arms --smoke          # ~1 h, proves the fault path too
     python -m orchestrator.run_arms                  # the 10 arms, ~41 h
     python -m orchestrator.run_arms --table          # just reprint the results table
 
@@ -126,7 +126,7 @@ def run_arm(label: str, policies: str, scenario: str, ensemble_size: int,
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     ap.add_argument("--smoke", action="store_true",
-                    help="one tiny run (N=4) to prove the FARSITE path, then stop")
+                    help="two tiny runs (N=4) covering the rule rejection path and the plain path, then stop (~1 h)")
     ap.add_argument("--decisions-only", action="store_true",
                     help="the 8 N=48 arms only (~16 h)")
     ap.add_argument("--accuracy-only", action="store_true",
@@ -146,7 +146,15 @@ def main(argv=None) -> int:
     decision = (DECISION_ARMS_NO_CONTROL if args.no_clean_control
                 else DECISION_ARMS)
     if args.smoke:
-        arms = [("smoke fixed/clean", "fixed", "clean", 4)]
+        # rule/shifted_obs is the one cheap arm worth an hour: it is the only
+        # configuration that exercises the rule policy's rejection branch, the
+        # materialised fault file, the never-skip-without-state guardrail and the
+        # ground-truth scoring split all in the same run. fixed/clean follows as
+        # the control -- it proves the plain path still completes when nothing is
+        # wrong, which is what tells you a smoke failure is the fault handling
+        # rather than FARSITE itself.
+        arms = [("smoke rule/shifted", "rule", "shifted_obs", 4),
+                ("smoke fixed/clean", "fixed", "clean", 4)]
     elif args.decisions_only:
         arms = decision
     elif args.accuracy_only:

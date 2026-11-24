@@ -34,6 +34,8 @@ from typing import Any, Literal
 
 import numpy as np
 
+import config
+
 from orchestrator import metrics, steps
 from orchestrator.graph import build_pipeline, run_pipeline
 from orchestrator.state import (
@@ -48,8 +50,14 @@ from orchestrator.state import (
 # ---------------------------------------------------------------------------
 
 FIRE_NAME = "Border_2"
-PERIMETER_FILE = "data/border2_inputs/border_2_perimeters.geojson"
-HOTSPOT_FILE = "data/border2_inputs/firms_hotspots.csv"
+# Absolute, via config.DATA_DIR, which hangs off the repo root rather than the
+# working directory. These were relative strings and a run launched from any
+# subdirectory failed on the first read -- and failed in a way the pre-flight
+# could not see, because the pre-flight found the file from wherever it had
+# chdir'd to. Module-level paths resolve once, at import, so the only safe form
+# is an absolute one.
+PERIMETER_FILE = str(config.DATA_DIR / "border2_inputs" / "border_2_perimeters.geojson")
+HOTSPOT_FILE = str(config.DATA_DIR / "border2_inputs" / "firms_hotspots.csv")
 
 # The notebook's SELECTED_IDX. Features 0, 1 and 2 of the GeoJSON are byte-identical
 # (IoU 1.0), so only one of them is usable; the notebook takes index 1.
@@ -71,11 +79,11 @@ FARSITE_PARAMS = {"temperature": 66, "humidity": 0.08}
 N_VERTEX = 20
 INITIAL_COV_SCALE = 1000.0      # the notebook's X = 1000 * I
 
-OUTPUT_ROOT = Path("outputs") / "Border_2_Orchestrator"
+OUTPUT_ROOT = config.OUTPUT_DIR / "Border_2_Orchestrator"
 
 Scenario = Literal["clean", "shifted_obs", "stale_obs", "mislabeled_obs",
                    "wind_shift", "weather_failure"]
-Policies = Literal["fixed", "rule", "llm"]
+Policies = Literal["fixed", "rule"]
 
 # Which cycle carries the fault. Cycle 2 of 3, so there is an established state
 # before it (the first-observation guardrail would otherwise force acceptance) and
@@ -214,14 +222,8 @@ def make_nodes(policies: Policies, run_dir: Path, lcp_path: str | Path,
         obs_p, wx_p, as_p = O.FixedPolicy(), W.FixedPolicy(), A.FixedPolicy()
     elif policies == "rule":
         obs_p, wx_p, as_p = O.RulePolicy(), W.RulePolicy(), A.RulePolicy()
-    elif policies == "llm":
-        # All three agents use the LLM (one shared model, fixed for every run:
-        # orchestrator/llm.py).
-        from orchestrator.llm import get_llm
-        llm = get_llm()
-        obs_p, wx_p, as_p = O.LLMPolicy(llm), W.LLMPolicy(llm), A.LLMPolicy(llm)
     else:
-        raise ValueError(f"unknown policies {policies!r}; expected 'fixed', 'rule' or 'llm'")
+        raise ValueError(f"unknown policies {policies!r}; expected 'fixed' or 'rule'")
 
     nodes = {
         "receive": steps.receive,
@@ -416,9 +418,6 @@ def replay(policies: Policies = "fixed",
         "farsite_params": FARSITE_PARAMS,
         "wx_lat": WX_LAT, "wx_lon": WX_LON,
     }
-    if policies == "llm":
-        from orchestrator.llm import get_llm, llm_config
-        config["llm"] = llm_config(get_llm())     # model alias + date: NRP can repoint aliases
     (out_dir / "config.json").write_text(json.dumps(config, indent=2))
 
     return ReplayResult(run_id=run_id, policies=policies, scenario=scenario,
