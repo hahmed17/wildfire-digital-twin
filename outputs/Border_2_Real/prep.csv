@@ -1,5 +1,5 @@
 action,step,detail,elapsed_s,status
 init_state,-1,"initial perimeter -> 20 vertices, cov=1000*I",0.001,ok
-query_weather,0,ws=9.2 wd=83.3 n_obs=148,1.128,ok
-query_weather,1,ws=2.4 wd=199.7 n_obs=30,2.646,ok
-query_weather,2,ws=3.7 wd=177.9 n_obs=235,1.559,ok:dropped_1_of_236
+query_weather,0,ws=9.2 wd=83.3 n_obs=148,1.243,ok
+query_weather,1,ws=2.4 wd=199.7 n_obs=30,1.198,ok
+query_weather,2,ws=3.7 wd=177.9 n_obs=235,2.39,ok:dropped_1_of_236
