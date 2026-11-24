@@ -289,13 +289,23 @@ class Farsite:
 # ============================================================================
 
 def cleanup_farsite_outputs(run_id, base_dir):
-    """Delete all files/directories starting with run_id in base_dir."""
+    """Delete every file and directory belonging to run_id in base_dir.
+
+    Covers two locations. The working files (config, ignition shapefile, FARSITE
+    output shapefiles, run file) sit directly in base_dir and are named
+    "{run_id}_...". The stdout and stderr logs sit in base_dir/farsite_logs and
+    are named "{run_id}.out" and "{run_id}.err" -- a subdirectory, so the
+    "{run_id}_*" glob alone never matched them and they accumulated for the
+    whole run.
+    """
     base_dir = Path(base_dir)
     for p in base_dir.glob(f"{run_id}_*"):
         if p.is_dir():
             shutil.rmtree(p, ignore_errors=True)
         else:
             p.unlink(missing_ok=True)
+    for p in (base_dir / "farsite_logs").glob(f"{run_id}.*"):
+        p.unlink(missing_ok=True)
 
 
 # ============================================================================
@@ -416,6 +426,14 @@ def forward_pass_farsite_multistep(poly, params, start_time, lcppath,
                           perim_res=perim_res, debug=debug)
         farsite.run()
         out = farsite.output_geom()
+        # Clean up this sub-step before starting the next one. Each Farsite gets
+        # its own uuid, so deferring cleanup to the end of the member leaves one
+        # set of working files per sub-step on disk -- and the cleanup at the end
+        # of this function passes a run_id that names no file at all, so nothing
+        # was ever removed. Cleaning here also covers the failure return below,
+        # which used to leak a full set of files for every failed member.
+        if not debug:
+            cleanup_farsite_outputs(farsite.id, str(FARSITE_TMP_DIR))
         if out is None:
             print(f"FARSITE output None at step {i+1}/{number_of_steps}")
             return None
@@ -437,12 +455,13 @@ def forward_pass_farsite_multistep(poly, params, start_time, lcppath,
                           perim_res=perim_res, debug=debug)
         farsite.run()
         out = farsite.output_geom()
+        if not debug:
+            cleanup_farsite_outputs(farsite.id, str(FARSITE_TMP_DIR))
         if out is None:
             print("FARSITE output None on remainder step")
             return None
         poly = validate_geom(out)
 
-    cleanup_farsite_outputs(run_id, str(FARSITE_TMP_DIR))
     return poly
 
 # ============================================================================
