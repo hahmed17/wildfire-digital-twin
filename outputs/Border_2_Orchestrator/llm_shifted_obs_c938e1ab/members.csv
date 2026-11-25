@@ -1,0 +1,13 @@
+run_id,fire,step,member,N,dist_res,perim_res,ncores,n_parallel_workers,wall_s,cpu_s,peak_mem_mb,status,forecast_interval_min,perimeter_vertex_count,perimeter_area_m2,wind_speed_mph,wind_dir_deg
+c938e1ab,Border_2,0,0,4,150,150,1,12,1.714,0.064,,ok,,,,3.18,120.2
+c938e1ab,Border_2,0,1,4,150,150,1,12,1.712,0.064,,ok,,,,3.18,120.2
+c938e1ab,Border_2,0,2,4,150,150,1,12,1.712,0.059,,ok,,,,3.18,120.2
+c938e1ab,Border_2,0,3,4,150,150,1,12,1.667,0.054,,ok,,,,3.67,109.9
+c938e1ab,Border_2,1,0,4,150,150,1,12,9.19,0.264,,ok,,,,3.95,254.9
+c938e1ab,Border_2,1,1,4,150,150,1,12,8.662,0.277,,ok,,,,2.11,120.3
+c938e1ab,Border_2,1,2,4,150,150,1,12,8.402,0.279,,ok,,,,1.5,121.2
+c938e1ab,Border_2,1,3,4,150,150,1,12,8.993,0.254,,ok,,,,0.82,212.9
+c938e1ab,Border_2,2,0,4,150,150,1,12,142.956,1.778,,ok,,,,1.5,121.2
+c938e1ab,Border_2,2,1,4,150,150,1,12,1246.17,0.644,,farsite_failed,,,,4.8,195.0
+c938e1ab,Border_2,2,2,4,150,150,1,12,158.325,1.783,,ok,,,,2.91,146.9
+c938e1ab,Border_2,2,3,4,150,150,1,12,1340.958,1.583,,farsite_failed,,,,3.65,173.8

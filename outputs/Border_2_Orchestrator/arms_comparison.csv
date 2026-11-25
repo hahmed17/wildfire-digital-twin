@@ -1,3 +1,4 @@
-arm,cycles,iou_mean,iou_final,abs_area_err,centroid_m,guardrails,agent_s,tokens,observation:accept,observation:reject,weather:normal,weather:wind_shift_detected,assimilation:inflate_and_assimilate,assimilation:assimilate
-smoke rule/shifted,3,0.1318122666061744,0.11807887044889874,2.87965899039502,3309.2335443857482,0,1338.235,0,2,1.0,2,1.0,2.0,1
-smoke fixed/clean,3,0.19299602656501066,0.29481716695848675,0.9157343059104853,3008.3983961754816,0,1330.091,0,3,,3,,,3
+arm,cycles,iou_mean,iou_final,abs_area_err,centroid_m,guardrails,agent_s,decide_s,llm_fallbacks,tokens,observation:accept,observation:reject,weather:normal,weather:wind_shift_detected,assimilation:inflate_and_assimilate,assimilation:assimilate
+smoke rule/shifted,3,0.1318122666061744,0.11807887044889874,2.87965899039502,3309.2335443857482,0,1338.235,0.0,0,0,2,1.0,2,1.0,2.0,1
+smoke llm/shifted,3,0.1325445827725635,0.13220361893522412,2.6570280407561424,3171.9092686585795,0,34.484,31.269,0,8609,2,1.0,2,1.0,2.0,1
+smoke fixed/clean,3,0.19299602656501066,0.29481716695848675,0.9157343059104853,3008.3983961754816,0,1330.091,0.0,0,0,3,,3,,,3

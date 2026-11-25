@@ -1,0 +1,116 @@
+{
+  "cycles": [
+    {
+      "step": 1,
+      "clock": "2025-01-24T20:41:00+00:00",
+      "obs_time": "2025-01-24T20:36:00+00:00",
+      "source": "mapped_perimeter",
+      "synthetic": false,
+      "obs_action": "accept",
+      "weather_action": "normal",
+      "assim_action": "inflate_and_assimilate",
+      "assim_applied": true,
+      "vsize_m": 200.0,
+      "wsize_m": 100.0,
+      "inflation": 2.0,
+      "analysis_area_m2": 2854102.497829102,
+      "observed_area_m2": 16405784.73230904,
+      "iou": 0.14247957986203905,
+      "centroid_offset_m": 2706.354591136381,
+      "area_error_m2": -13551682.234479938,
+      "area_error_frac": -0.8260307236502792,
+      "assimilated_vs_truth_iou": 0.941893061767924,
+      "assimilated_vs_truth_centroid_m": 65.15154558253566
+    },
+    {
+      "step": 2,
+      "clock": "2025-01-25T03:54:00+00:00",
+      "obs_time": "2025-01-25T03:49:00+00:00",
+      "source": "synthetic_perimeter",
+      "synthetic": true,
+      "obs_action": "reject",
+      "weather_action": "wind_shift_detected",
+      "assim_action": "inflate_and_assimilate",
+      "assim_applied": true,
+      "vsize_m": 500.0,
+      "wsize_m": 100.0,
+      "inflation": 2.0,
+      "analysis_area_m2": 9765410.798350492,
+      "observed_area_m2": 23536442.643601656,
+      "iou": 0.1229505495204273,
+      "centroid_offset_m": 2822.8690530538047,
+      "area_error_m2": -13771031.845251163,
+      "area_error_frac": -0.5850940201022603,
+      "assimilated_vs_truth_iou": 0.6889409744488935,
+      "assimilated_vs_truth_centroid_m": 340.1058417500901
+    },
+    {
+      "step": 3,
+      "clock": "2025-01-27T00:17:00+00:00",
+      "obs_time": "2025-01-27T00:12:00+00:00",
+      "source": "mapped_perimeter",
+      "synthetic": false,
+      "obs_action": "accept",
+      "weather_action": "normal",
+      "assim_action": "assimilate",
+      "assim_applied": true,
+      "vsize_m": 200.0,
+      "wsize_m": 100.0,
+      "inflation": 1.0,
+      "analysis_area_m2": 188450648.8417806,
+      "observed_area_m2": 24927468.443458192,
+      "iou": 0.13220361893522412,
+      "centroid_offset_m": 3986.504161785553,
+      "area_error_m2": 163523180.3983224,
+      "area_error_frac": 6.559959378515888,
+      "assimilated_vs_truth_iou": 0.9401802397701758,
+      "assimilated_vs_truth_centroid_m": 13.349475046027349
+    }
+  ],
+  "accuracy": {
+    "n_scored_cycles": 3,
+    "iou_mean": 0.1325445827725635,
+    "iou_min": 0.1229505495204273,
+    "iou_final": 0.13220361893522412,
+    "abs_area_error_frac_mean": 2.6570280407561424,
+    "centroid_offset_m_mean": 3171.9092686585795
+  },
+  "behaviour": {
+    "decisions_total": 9,
+    "decisions_per_node": {
+      "observation": {
+        "accept": 2,
+        "reject": 1
+      },
+      "weather": {
+        "normal": 2,
+        "wind_shift_detected": 1
+      },
+      "assimilation": {
+        "inflate_and_assimilate": 2,
+        "assimilate": 1
+      }
+    },
+    "guardrail_overrides": 0,
+    "guardrail_override_rate": 0.0,
+    "agent_latency_s_total": 34.4843,
+    "agent_latency_s_max": 5.3196,
+    "llm_decisions": 9,
+    "llm_fallbacks": 0,
+    "llm_fallback_rate": 0.0,
+    "retrieval_s_total": 3.2154999999999996,
+    "decision_s_total": 31.268800000000002,
+    "step_exec_s_total": 1352.7045994410514,
+    "records_total": 13,
+    "tokens_total": 8609,
+    "policies": [
+      "LLMPolicy"
+    ]
+  },
+  "drift_history": [
+    12.312152037695949,
+    6.067430203585245,
+    1.0028996059663633
+  ],
+  "disagreements": 2
+}
