@@ -77,14 +77,27 @@ DECISION_POLICIES = ("fixed", "rule", "llm")
 # cost per arm.
 ACCURACY_POLICIES = ("fixed", "rule")
 
-DECISION_ARMS = [(f"{p}/{s}", p, s, 48)
+DECISION_ARMS = [(f"{p}/{s}", p, s, 48, SEED)
                  for s in SCENARIOS for p in DECISION_POLICIES]
 DECISION_ARMS_NO_CONTROL = [a for a in DECISION_ARMS if a[2] != "clean"]
-ACCURACY_ARMS = [(f"{p}/clean@300", p, "clean", 300) for p in ACCURACY_POLICIES]
+ACCURACY_ARMS = [(f"{p}/clean@300", p, "clean", 300, SEED) for p in ACCURACY_POLICIES]
+
+# Replicates of one configuration at other seeds, to measure run-to-run spread
+# with the policy held fixed. The smoke run showed two replays with identical
+# decisions and the same seed diverging -- members failed at different sub-steps
+# and final IoU differed by 0.014 -- so FARSITE contributes variance of its own,
+# and without an estimate of it there is no way to say whether a difference
+# between configurations is real. rule/shifted_obs is the arm chosen because it is
+# the one the headline comparison quotes: its variance includes fault handling,
+# the synthesis path and member failure, so it bounds the others rather than
+# understating them.
+VARIANCE_SEEDS = (2345, 3456)
+VARIANCE_ARMS = [(f"rule/shifted_obs@seed{sd}", "rule", "shifted_obs", 48, sd)
+                 for sd in VARIANCE_SEEDS]
 
 
 def _already_done(out_root: Path, policies: str, scenario: str,
-                  ensemble_size: int) -> Path | None:
+                  ensemble_size: int, seed: int) -> Path | None:
     """An arm's directory, if a completed run for it already exists."""
     for d in sorted(out_root.glob(f"{policies}_{scenario}_*")):
         mpath = d / "metrics.json"
@@ -95,14 +108,20 @@ def _already_done(out_root: Path, policies: str, scenario: str,
             cfg = json.loads(cpath.read_text())
         except Exception:
             continue
-        if cfg.get("ensemble_size_override") == ensemble_size:
+        # The seed has to be part of the match. Without it a replicate run --
+        # same policy, same scenario, different seed -- is indistinguishable from
+        # the original and gets skipped, which silently defeats the point of
+        # running it. config.json has recorded the seed all along.
+        if (cfg.get("ensemble_size_override") == ensemble_size
+                and cfg.get("seed") == seed):
             return d
     return None
 
 
 def run_arm(label: str, policies: str, scenario: str, ensemble_size: int,
-            out_root: Path, dry_run: bool = False) -> dict | None:
-    done = _already_done(out_root, policies, scenario, ensemble_size)
+            out_root: Path, dry_run: bool = False,
+            seed: int = SEED) -> dict | None:
+    done = _already_done(out_root, policies, scenario, ensemble_size, seed)
     if done is not None:
         print(f"  SKIP  {label:24s} already complete -> {done.name}", flush=True)
         return metrics.load_metrics(done / "metrics.json")
@@ -120,7 +139,7 @@ def run_arm(label: str, policies: str, scenario: str, ensemble_size: int,
             policies=policies, scenario=scenario,
             ensemble_size=ensemble_size, resolution_m=RESOLUTION_M,
             workers=WORKERS, deadline_min=DEADLINE_MIN,
-            output_root=out_root, seed=SEED)
+            output_root=out_root, seed=seed)
     except Exception:
         print(f"  FAIL  {label:24s} after {timedelta(seconds=int(time.time()-t0))}",
               flush=True)
@@ -147,11 +166,42 @@ def main(argv=None) -> int:
                     help="list what would run, without running it")
     ap.add_argument("--no-clean-control", action="store_true",
                     help="drop the two N=48 clean arms (10 runs instead of 12, ~41 h)")
+    ap.add_argument("--variance", action="store_true",
+                    help=f"also run {len(VARIANCE_ARMS)} replicate(s) of "
+                         "rule/shifted_obs at other seeds (+1.9 h each)")
+    ap.add_argument("--variance-only", action="store_true",
+                    help="the replicate arms only")
+    ap.add_argument("--no-llm", action="store_true",
+                    help="skip the LLM arms without the deferral notice")
     ap.add_argument("--output-root", default=str(replay.OUTPUT_ROOT))
     args = ap.parse_args(argv)
 
     out_root = Path(args.output_root)
     out_root.mkdir(parents=True, exist_ok=True)
+
+    # The LLM arms need a key that may not be in hand yet. Rather than failing on
+    # the first decision of the first LLM arm -- which, in the default ordering,
+    # happens a couple of hours in -- defer them and say so. Deferring is safe
+    # because a completed arm is skipped on a later invocation, so adding the key
+    # and re-running executes only the arms that are missing. It is announced
+    # loudly on purpose: a quietly shortened experiment is worse than a failed one.
+    deferred: list[tuple] = []
+    if any(a[1] == "llm" for a in (DECISION_ARMS + ACCURACY_ARMS)):
+        import os
+        if not os.environ.get("NRP_LLM_API_KEY"):
+            try:
+                from dotenv import load_dotenv
+                load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+            except ImportError:
+                pass
+        if not os.environ.get("NRP_LLM_API_KEY") and not args.no_llm:
+            print("!" * 78)
+            print("NRP_LLM_API_KEY is not set, so the LLM arms are DEFERRED, not run.")
+            print("The fixed and rule arms proceed. When the key is available, re-run")
+            print("the same command: completed arms are skipped and only the LLM arms")
+            print("will execute. Pass --no-llm to silence this notice.")
+            print("!" * 78)
+            print(flush=True)
 
     decision = (DECISION_ARMS_NO_CONTROL if args.no_clean_control
                 else DECISION_ARMS)
@@ -163,36 +213,52 @@ def main(argv=None) -> int:
         # the control -- it proves the plain path still completes when nothing is
         # wrong, which is what tells you a smoke failure is the fault handling
         # rather than FARSITE itself.
-        arms = [("smoke rule/shifted", "rule", "shifted_obs", 4),
-                ("smoke llm/shifted", "llm", "shifted_obs", 4),
-                ("smoke fixed/clean", "fixed", "clean", 4)]
+        arms = [("smoke rule/shifted", "rule", "shifted_obs", 4, SEED),
+                ("smoke llm/shifted", "llm", "shifted_obs", 4, SEED),
+                ("smoke fixed/clean", "fixed", "clean", 4, SEED)]
     elif args.decisions_only:
         arms = decision
     elif args.accuracy_only:
         arms = ACCURACY_ARMS
+    elif args.variance_only:
+        arms = VARIANCE_ARMS
     else:
         arms = decision + ACCURACY_ARMS           # cheap group first, on purpose
+        if args.variance:
+            arms = arms + VARIANCE_ARMS
 
     # Measured on the baseline: 42,827 s of ensemble time at N=300 across three
     # cycles, and four rounds instead of twenty-five at N=48.
-    est = sum(1.9 if n == 48 else 11.9 if n == 300 else 0.5 for _, _, _, n in arms)
+    import os as _os
+    if not _os.environ.get("NRP_LLM_API_KEY"):
+        before = len(arms)
+        deferred = [a for a in arms if a[1] == "llm"]
+        arms = [a for a in arms if a[1] != "llm"]
+        if before != len(arms):
+            print(f"deferred {len(deferred)} LLM arm(s): "
+                  f"{', '.join(a[0] for a in deferred)}\n")
+
+    est = sum(1.9 if n == 48 else 11.9 if n == 300 else 0.5
+              for _, _, _, n, _ in arms)
     print(f"{len(arms)} arm(s), roughly {est:.0f} h if none are already complete")
     print(f"output root: {out_root}\n")
 
     scored: dict[str, dict] = {}
     if not args.table:
-        for label, policies, scenario, n in arms:
-            got = run_arm(label, policies, scenario, n, out_root,
+        for label, policies, scenario, n, sd in arms:
+            got = run_arm(label, policies, scenario, n, out_root, seed=sd,
                           dry_run=args.dry_run)
             if got is not None:
                 scored[label] = got
             print(flush=True)
 
     # Pick up every completed run, including ones from earlier invocations.
-    for label, policies, scenario, n in (decision + ACCURACY_ARMS):
+    for label, policies, scenario, n, sd in (decision + ACCURACY_ARMS
+                                             + (VARIANCE_ARMS if args.variance
+                                                or args.variance_only else [])):
         if label in scored:
             continue
-        done = _already_done(out_root, policies, scenario, n)
+        done = _already_done(out_root, policies, scenario, n, sd)
         if done is not None:
             scored[label] = metrics.load_metrics(done / "metrics.json")
 
