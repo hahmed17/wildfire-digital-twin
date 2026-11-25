@@ -37,6 +37,16 @@ def check(name: str, ok: bool, detail: str = "") -> None:
     checks.append((name, bool(ok), detail))
 
 
+warnings: list[tuple[str, str]] = []
+
+
+def warn(name: str, detail: str = "") -> None:
+    """Something to know about, but not a reason to refuse to start. A missing LLM
+    key is the case this exists for: run_arms defers those arms rather than failing
+    on them, so the run is shorter than planned but still valid."""
+    warnings.append((name, detail))
+
+
 # --- 1. the FARSITE disk leak ---------------------------------------------
 # Without the fix each sub-step leaves ~13 files behind. One arm at N=300 leaves
 # roughly 600,000; twelve arms would leave millions. This is the check that
@@ -117,6 +127,79 @@ try:
 except Exception as exc:                                        # noqa: BLE001
     check("replay path constants readable", False, str(exc))
 
+# --- 5c. the LLM policies can actually run --------------------------------
+# Five of the fifteen decision arms reach an external endpoint. If the key is
+# absent or the client library is missing they fail one after another, nine and a
+# half hours into a run that looks healthy from the outside. Reachability is left
+# to the smoke run, which exercises the real path; these two checks only rule out
+# the configuration faults that cost nothing to catch here.
+try:
+    from orchestrator import run_arms as _ra
+    llm_in_use = "llm" in getattr(_ra, "DECISION_POLICIES", ())
+except Exception:                                               # noqa: BLE001
+    llm_in_use = False
+
+if llm_in_use:
+    try:
+        import langchain_openai  # noqa: F401
+        from orchestrator import llm as _llm
+        check("LLM client library present", True)
+        # "not set" is not a diagnosis. The key reaches the process through a
+        # chain -- python-dotenv installed, a .env at the repo root, a line in it
+        # with the right name -- and llm.py wraps its load_dotenv in
+        # `except ImportError: pass`, so a missing dotenv silently skips the file
+        # and looks identical to a missing key. Report which link is broken.
+        if os.environ.get("NRP_LLM_API_KEY"):
+            check("NRP_LLM_API_KEY is set", True)
+        else:
+            import importlib.util
+            have_dotenv = importlib.util.find_spec("dotenv") is not None
+            env_path = Path(config.BASE_DIR) / ".env"
+            alt_path = Path(config.BASE_DIR) / "user_info.env"
+
+            def _has_key(p: Path) -> bool:
+                try:
+                    return p.exists() and any(
+                        ln.strip().startswith("NRP_LLM_API_KEY")
+                        for ln in p.read_text().splitlines())
+                except Exception:                               # noqa: BLE001
+                    return False
+
+            in_file = _has_key(env_path)
+            alt_in_file = _has_key(alt_path)
+
+            if not have_dotenv:
+                why = ("python-dotenv is NOT installed, so llm.py skips the .env "
+                       "file entirely (it catches ImportError and carries on). "
+                       "Install it -- `pip install python-dotenv` -- or export the "
+                       "key into the environment instead.")
+            elif not env_path.exists() and not alt_in_file:
+                why = (f"no .env at {env_path} and no NRP_LLM_API_KEY line in "
+                       f"{alt_path}. Either file works; both are gitignored.")
+            elif alt_in_file and not in_file:
+                why = (f"the key is in {alt_path.name}, which only a current "
+                       "llm.py reads. Either update llm.py to load both files, or "
+                       f"copy the line into {env_path.name}.")
+            elif not in_file:
+                why = (f"{env_path} exists but has no NRP_LLM_API_KEY line. Add "
+                       "NRP_LLM_API_KEY=<key>, with no quotes and no spaces "
+                       "around the equals sign.")
+            else:
+                why = (f"{env_path} has the line and python-dotenv is installed, "
+                       "so the value is probably empty or quoted. Check for "
+                       "NRP_LLM_API_KEY=<key> with nothing around the key.")
+            warn("NRP_LLM_API_KEY did not reach the process",
+                 why + " Until it does, run_arms DEFERS the 5 LLM arms and runs "
+                 "the other 12 (~43 h); completed arms are skipped later, so "
+                 "re-running the same command once the key works executes only "
+                 "the LLM arms.")
+        print(f"  ..    LLM model: {os.environ.get('ORCH_LLM_MODEL', _llm.DEFAULT_MODEL)} "
+              f"at {os.environ.get('ORCH_LLM_BASE_URL', _llm.DEFAULT_BASE_URL)}")
+    except Exception as exc:                                    # noqa: BLE001
+        check("LLM client library present", False,
+              f"{type(exc).__name__}: {exc}; install it or drop 'llm' from "
+              "run_arms.DECISION_POLICIES")
+
 # --- 6. tmp is clear and the disk has room ---------------------------------
 tmp = Path(config.SRC_DIR) / "tmp"
 n_tmp = sum(1 for _ in tmp.rglob("*")) if tmp.exists() else 0
@@ -162,6 +245,13 @@ for name, ok, detail in checks:
     if not ok and detail:
         print(f"        -> {detail}")
 print("=" * (width + 10))
+
+for name, detail in warnings:
+    print(f"  WARN  {name}")
+    if detail:
+        print(f"        -> {detail}")
+if warnings:
+    print("=" * (width + 10))
 
 failed = [n for n, ok, _ in checks if not ok]
 if failed:

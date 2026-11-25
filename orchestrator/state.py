@@ -226,6 +226,12 @@ class DecisionRecord(BaseModel):
     decision: dict[str, Any]           # what it chose (after guardrails)
     overridden_by_guardrail: bool
     agent_latency_s: float = Field(ge=0)   # LLM time counts against the deadline
+    # Time inside the node spent fetching data rather than deciding: the weather
+    # service round trip, the FIRMS read, the ensemble load. The baseline performs
+    # the same retrievals, so this part is not attributable to the agent layer and
+    # has to be subtracted before orchestration overhead can be reported honestly.
+    # Defaulted, so records written before this field existed still validate.
+    retrieval_s: float = Field(default=0.0, ge=0)
     tokens: int = Field(default=0, ge=0)
 
 

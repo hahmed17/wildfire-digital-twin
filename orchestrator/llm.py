@@ -26,9 +26,19 @@ from pathlib import Path
 
 from langchain_openai import ChatOpenAI
 
-try:                                    # .env at the repo root, if present
+# Both locations are read, because the repo tells you to use both: the key is
+# listed in user_info_template.env, so user_info.env is where a reader naturally
+# puts it, while this module originally looked only at .env -- and a key in the
+# wrong one of the two fails silently later, at the first LLM decision. .env is
+# loaded first and wins, since load_dotenv does not overwrite what is already set.
+# Both are gitignored.
+try:
     from dotenv import load_dotenv
-    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+    _root = Path(__file__).resolve().parent.parent
+    for _candidate in (".env", "user_info.env"):
+        _p = _root / _candidate
+        if _p.exists():
+            load_dotenv(_p)
 except ImportError:
     pass
 
@@ -49,7 +59,8 @@ def get_llm(model: str | None = None, temperature: float = TEMPERATURE) -> ChatO
     api_key = os.environ.get("NRP_LLM_API_KEY")
     if not api_key:
         raise RuntimeError(
-            "NRP_LLM_API_KEY is not set. Add it to the repo's .env (gitignored) or export it.")
+            "NRP_LLM_API_KEY is not set. Add it to the repo's .env or "
+            "user_info.env (both gitignored), or export it.")
     return ChatOpenAI(
         model=model or os.environ.get("ORCH_LLM_MODEL", DEFAULT_MODEL),
         base_url=os.environ.get("ORCH_LLM_BASE_URL", DEFAULT_BASE_URL),

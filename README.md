@@ -1,8 +1,8 @@
 # Wildfire Digital Twin — Agentic Orchestration for EnKF Fire Spread Assimilation
 
-This repository implements an **agentic orchestration framework** for wildfire digital twins on the National Data Platform (NDP). The orchestrator adaptively selects simulation parameters at runtime — ensemble size *N*, spatial resolution, and parallelism — based on empirical cost and accuracy models derived from the Border 2 fire experiment. This allows the system to meet a time budget while maximising forecast accuracy, rather than using a fixed configuration.
+This repository implements an **agentic orchestration framework** for wildfire digital twins on the National Data Platform (NDP). The orchestrator adaptively selects simulation parameters at runtime — ensemble size *N*, spatial resolution, and parallelism — based on empirical cost and accuracy models derived from the Border 2 fire experiment. This allows the system to meet a time budget while maximizing forecast accuracy, rather than using a fixed configuration.
  
-The underlying simulation pipeline couples **FARSITE fire-spread modelling** with **Ensemble Kalman Filter (EnKF) data assimilation**, continuously correcting the fire state estimate as new perimeter observations arrive. The experiment fire is the **Border 2 fire** (San Diego County, January 2025), using 6 real WFIGS perimeters.
+The underlying simulation pipeline couples **FARSITE fire-spread modeling** with **Ensemble Kalman Filter (EnKF) data assimilation**, continuously correcting the fire state estimate as new perimeter observations arrive. The experiment fire is the **Border 2 fire** (San Diego County, January 2025), using 6 real WFIGS perimeters.
  
 ---
  
@@ -138,7 +138,7 @@ Run the **baseline** (N=300, 150 m, N_WORKERS=12) first — it is the anchor row
  
 Each run appends to three CSV files the orchestrator learns from:
  
-- **`members.csv`** — one row per FARSITE member: `run_id`, `fire`, `step`, `member`, `N`, `dist_res`, `perim_res`, `ncores`, `n_parallel_workers`, `wall_s`, `cpu_s`, `status`, `wind_speed_ms`, `wind_dir_deg`
+- **`members.csv`** — one row per FARSITE member: `run_id`, `fire`, `step`, `member`, `N`, `dist_res`, `perim_res`, `ncores`, `n_parallel_workers`, `wall_s`, `cpu_s`, `status`, `wind_speed_mph`, `wind_dir_deg`
 - **`steps.csv`** — one row per assimilation cycle: `run_id`, `step`, `t_obs`, `N`, `n_valid`, `t_ensemble_s`, `t_enkf_s`, `vsize`, `wsize`
 - **`prep.csv`** — one row per data-prep action: `action`, `step`, `detail`, `elapsed_s`, `status`
 **Cleaning up between runs**

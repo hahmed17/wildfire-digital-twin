@@ -122,6 +122,12 @@ def decision_rows(log: Iterable) -> list[dict[str, Any]]:
             "reason": d.get("reason", ""),
             "overridden_by_guardrail": bool(rec.overridden_by_guardrail),
             "agent_latency_s": float(rec.agent_latency_s),
+            "retrieval_s": float(getattr(rec, "retrieval_s", 0.0) or 0.0),
+            # LLM policies only: True where the model call failed and the rule
+            # policy decided instead. None for fixed and rule policies, which is
+            # what separates "did not fall back" from "could not fall back".
+            "llm_fallback": (rec.inputs or {}).get("llm_fallback")
+                            if isinstance(rec.inputs, dict) else None,
             "tokens": int(getattr(rec, "tokens", 0) or 0),
             # the fields a policy most often keys on, when present
             "vsize_m": d.get("vsize_m"),
@@ -148,17 +154,48 @@ def behaviour_summary(log: Iterable) -> dict[str, Any]:
         key = str(r["action"])
         per_node[r["node"]][key] = per_node[r["node"]].get(key, 0) + 1
 
-    n = len(rows)
-    overrides = sum(r["overridden_by_guardrail"] for r in rows)
+    # Every quantity below is per *decision*, so all of them exclude the rows that
+    # log for provenance without choosing anything -- the forecast and synthesize
+    # stages. Summing over every row instead conflates two different things:
+    #   - the override rate gets a denominator inflated by non-decisions, which
+    #     deflates the published rate by roughly a third;
+    #   - far worse, the forecast step records its whole runtime (the entire
+    #     ensemble, all of FARSITE) in agent_latency_s, so a sum over all rows
+    #     reports wall-clock time as agent overhead. A smoke run came back with
+    #     1338 s of "agent latency" against a 1339 s run.
+    # Step execution time is still worth having, so it is returned separately
+    # under a name that says what it is.
+    decided = [r for r in rows if r["action"] is not None]
+    llm_rows = [r for r in decided if r["llm_fallback"] is not None]
+    steps_only = [r for r in rows if r["action"] is None]
+    n = len(decided)
+    overrides = sum(r["overridden_by_guardrail"] for r in decided)
     return {
         "decisions_total": n,
         "decisions_per_node": per_node,
         "guardrail_overrides": overrides,
         "guardrail_override_rate": (overrides / n) if n else None,
-        "agent_latency_s_total": sum(r["agent_latency_s"] for r in rows),
-        "agent_latency_s_max": max((r["agent_latency_s"] for r in rows), default=0.0),
-        "tokens_total": sum(r["tokens"] for r in rows),
-        "policies": sorted({r["policy"] for r in rows}),
+        "agent_latency_s_total": sum(r["agent_latency_s"] for r in decided),
+        "agent_latency_s_max": max((r["agent_latency_s"] for r in decided), default=0.0),
+        # Latency minus the data retrieval the baseline also performs (the weather
+        # service round trip). This is the quantity to quote as orchestration
+        # overhead. Only the weather fetch is instrumented, so everything else
+        # still counts in full and the figure is an upper bound.
+        # An LLM arm whose endpoint was flaky is partly a rule arm, and the
+        # comparison is contaminated in proportion to this rate. The rate is taken
+        # over decisions where a fallback was possible at all, so the denominator
+        # is LLM decisions rather than every decision in the run.
+        "llm_decisions": len(llm_rows),
+        "llm_fallbacks": sum(1 for r in llm_rows if r["llm_fallback"]),
+        "llm_fallback_rate": (sum(1 for r in llm_rows if r["llm_fallback"]) / len(llm_rows)
+                              if llm_rows else None),
+        "retrieval_s_total": sum(r["retrieval_s"] for r in decided),
+        "decision_s_total": sum(r["agent_latency_s"] - r["retrieval_s"]
+                                for r in decided),
+        "step_exec_s_total": sum(r["agent_latency_s"] for r in steps_only),
+        "records_total": len(rows),
+        "tokens_total": sum(r["tokens"] for r in decided),
+        "policies": sorted({r["policy"] for r in decided}),
     }
 
 
@@ -272,6 +309,8 @@ def compare_runs(runs: dict[str, dict[str, Any]]):
             "centroid_m": acc.get("centroid_offset_m_mean"),
             "guardrails": beh.get("guardrail_overrides"),
             "agent_s": round(beh.get("agent_latency_s_total") or 0.0, 3),
+            "decide_s": round(beh.get("decision_s_total") or 0.0, 3),
+            "llm_fallbacks": beh.get("llm_fallbacks") or 0,
             "tokens": beh.get("tokens_total"),
             **actions,
         })

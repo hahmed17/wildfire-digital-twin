@@ -3,20 +3,20 @@ Run the Fixed vs Rule experiment arms for Border 2.
 
     # from the repo root, after the baseline finishes (it holds all 12 workers)
     python -m orchestrator.run_arms --smoke          # ~1 h, proves the fault path too
-    python -m orchestrator.run_arms                  # the 10 arms, ~41 h
+    python -m orchestrator.run_arms                  # the 17 arms, ~52 h
     python -m orchestrator.run_arms --table          # just reprint the results table
 
 Design
 ------
 Two groups, because decisions and accuracy need different ensemble sizes:
 
-  decisions  N=48, all four scenarios, both policies   8 runs, ~2.0 h each
+  decisions  N=48, all five scenarios, all three policies  15 runs, ~1.9 h each
              The agents' choices barely depend on N -- containment, growth, obs age
              and wind shift never touch the ensemble, and normalized_innovation is
              stable across N -- so a small ensemble buys the full decision table
              cheaply.
 
-  accuracy   N=300, clean only, both policies          2 runs, ~12.6 h each
+  accuracy   N=300, clean only, fixed and rule only        2 runs, ~11.9 h each
              IoU against the true perimeter does depend on N, and N=300 is what the
              baseline used, so these are the runs that compare to it.
 
@@ -67,10 +67,20 @@ FAULT_SCENARIOS = [s for s in SCENARIOS if s != "clean"]
 # demonstrates true positives, and "does it cry wolf?" is the first thing a reader
 # will ask. Two extra runs, ~4 h. Drop them with --no-clean-control if the budget
 # is tight; the N=300 clean arms cover the same ground at a different N.
+DECISION_POLICIES = ("fixed", "rule", "llm")
+
+# The accuracy group deliberately stays at two policies. On the clean scenario at
+# full ensemble size every policy should accept every observation and apply the
+# standard update, so an LLM arm there spends 11.9 hours re-measuring what the rule
+# arm already shows. What is interesting about the LLM is how it judges degraded
+# observations, and the decision group covers all five scenarios at a sixth of the
+# cost per arm.
+ACCURACY_POLICIES = ("fixed", "rule")
+
 DECISION_ARMS = [(f"{p}/{s}", p, s, 48)
-                 for s in SCENARIOS for p in ("fixed", "rule")]
+                 for s in SCENARIOS for p in DECISION_POLICIES]
 DECISION_ARMS_NO_CONTROL = [a for a in DECISION_ARMS if a[2] != "clean"]
-ACCURACY_ARMS = [(f"{p}/clean@300", p, "clean", 300) for p in ("fixed", "rule")]
+ACCURACY_ARMS = [(f"{p}/clean@300", p, "clean", 300) for p in ACCURACY_POLICIES]
 
 
 def _already_done(out_root: Path, policies: str, scenario: str,
@@ -128,9 +138,9 @@ def main(argv=None) -> int:
     ap.add_argument("--smoke", action="store_true",
                     help="two tiny runs (N=4) covering the rule rejection path and the plain path, then stop (~1 h)")
     ap.add_argument("--decisions-only", action="store_true",
-                    help="the 8 N=48 arms only (~16 h)")
+                    help="the 15 N=48 arms only (~29 h)")
     ap.add_argument("--accuracy-only", action="store_true",
-                    help="the 2 N=300 arms only (~25 h)")
+                    help="the 2 N=300 arms only (~24 h)")
     ap.add_argument("--table", action="store_true",
                     help="reprint the table from completed runs, run nothing")
     ap.add_argument("--dry-run", action="store_true",
@@ -154,6 +164,7 @@ def main(argv=None) -> int:
         # wrong, which is what tells you a smoke failure is the fault handling
         # rather than FARSITE itself.
         arms = [("smoke rule/shifted", "rule", "shifted_obs", 4),
+                ("smoke llm/shifted", "llm", "shifted_obs", 4),
                 ("smoke fixed/clean", "fixed", "clean", 4)]
     elif args.decisions_only:
         arms = decision
@@ -162,7 +173,9 @@ def main(argv=None) -> int:
     else:
         arms = decision + ACCURACY_ARMS           # cheap group first, on purpose
 
-    est = sum(2.0 if n == 48 else 12.6 if n == 300 else 0.5 for _, _, _, n in arms)
+    # Measured on the baseline: 42,827 s of ensemble time at N=300 across three
+    # cycles, and four rounds instead of twenty-five at N=48.
+    est = sum(1.9 if n == 48 else 11.9 if n == 300 else 0.5 for _, _, _, n in arms)
     print(f"{len(arms)} arm(s), roughly {est:.0f} h if none are already complete")
     print(f"output root: {out_root}\n")
 

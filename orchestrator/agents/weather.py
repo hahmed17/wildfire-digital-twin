@@ -434,6 +434,7 @@ def make_weather_agent(
         # 1-2. Window + fetch. A service failure must not kill the replay: fall back.
         start, end = forecast_window(state)
         fetch_error: str | None = None
+        _t_fetch = time.perf_counter()
         try:
             weather = do_fetch(start, end)
         except Exception as exc:                                  # noqa: BLE001
@@ -443,6 +444,9 @@ def make_weather_agent(
                 "wind_directions": list(FALLBACK_DIRECTIONS),
                 "used_fallback": True,
             }
+        # The weather service round trip, kept separate from decision time: the
+        # baseline performs the same retrieval, so it is not layer overhead.
+        _retrieval_s = time.perf_counter() - _t_fetch
 
         # 3. Wind shift against the window the previous cycle fetched
         cache = dict(state.get("cache") or {})
@@ -507,6 +511,7 @@ def make_weather_agent(
             decision=verdict.model_dump(),
             overridden_by_guardrail=overridden,
             agent_latency_s=round(time.perf_counter() - t0, 4),
+            retrieval_s=round(_retrieval_s, 4),
             tokens=getattr(policy, "last_tokens", 0) or 0,
         )
         out["log"] = [record]
