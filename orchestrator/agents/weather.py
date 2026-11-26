@@ -95,7 +95,24 @@ def forecast_window(state: TwinState) -> tuple[datetime, datetime]:
             start = last_time
 
     if start is None:
-        start = end - timedelta(hours=DEFAULT_WINDOW_HOURS)
+        # No accepted observation yet, so this is the first cycle and the interval
+        # to cover runs from the initial condition. cache["seed_obs_time"] carries
+        # that timestamp (set in replay); without it the window collapsed to
+        # DEFAULT_WINDOW_HOURS and the first forecast advanced one hour instead of
+        # the real gap -- on Border 2, one hour instead of 26.2. The fire does not
+        # grow, the analysis stays at the seed's size, and every later cycle
+        # inherits the deficit. The one-hour default remains only for a state with
+        # no recorded origin.
+        seed_time = cache.get("seed_obs_time")
+        if isinstance(seed_time, str):
+            try:
+                seed_time = datetime.fromisoformat(seed_time)
+            except ValueError:
+                seed_time = None
+        if seed_time is not None and seed_time < end:
+            start = seed_time
+        else:
+            start = end - timedelta(hours=DEFAULT_WINDOW_HOURS)
 
     return start, end
 

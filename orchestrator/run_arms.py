@@ -189,9 +189,18 @@ def main(argv=None) -> int:
     if any(a[1] == "llm" for a in (DECISION_ARMS + ACCURACY_ARMS)):
         import os
         if not os.environ.get("NRP_LLM_API_KEY"):
+            # Both files, in the same order llm.py uses. Loading only .env here
+            # while llm.py also reads user_info.env means a key in the second file
+            # works for the policies but not for this check, so the arms get
+            # deferred with the key sitting right there. .env first: load_dotenv
+            # does not overwrite a value already set.
             try:
                 from dotenv import load_dotenv
-                load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+                root = Path(__file__).resolve().parents[1]
+                for candidate in (".env", "user_info.env"):
+                    p_env = root / candidate
+                    if p_env.exists():
+                        load_dotenv(p_env)
             except ImportError:
                 pass
         if not os.environ.get("NRP_LLM_API_KEY") and not args.no_llm:

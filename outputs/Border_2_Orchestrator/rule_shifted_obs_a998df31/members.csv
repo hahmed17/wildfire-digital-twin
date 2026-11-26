@@ -1,0 +1,9 @@
+run_id,fire,step,member,N,dist_res,perim_res,ncores,n_parallel_workers,wall_s,cpu_s,peak_mem_mb,status,forecast_interval_min,perimeter_vertex_count,perimeter_area_m2,wind_speed_mph,wind_dir_deg
+a998df31,Border_2,0,0,4,150,150,1,12,6.089,0.134,,ok,,,,3.18,120.2
+a998df31,Border_2,0,1,4,150,150,1,12,6.264,0.143,,ok,,,,3.18,120.2
+a998df31,Border_2,0,2,4,150,150,1,12,5.009,0.133,,ok,,,,3.18,120.2
+a998df31,Border_2,0,3,4,150,150,1,12,6.293,0.152,,ok,,,,3.67,109.9
+a998df31,Border_2,1,0,4,150,150,1,12,48.707,0.702,,ok,,,,3.95,254.9
+a998df31,Border_2,1,1,4,150,150,1,12,44.622,0.702,,ok,,,,2.11,120.3
+a998df31,Border_2,1,2,4,150,150,1,12,41.884,0.697,,ok,,,,1.5,121.2
+a998df31,Border_2,1,3,4,150,150,1,12,43.906,0.663,,ok,,,,0.82,212.9
