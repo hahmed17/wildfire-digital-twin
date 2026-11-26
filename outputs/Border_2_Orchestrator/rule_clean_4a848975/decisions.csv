@@ -1,0 +1,13 @@
+sim_time,node,policy,action,reason,overridden_by_guardrail,agent_latency_s,retrieval_s,llm_fallback,tokens,vsize_m,wsize_m,inflation
+2025-01-24T20:41:00+00:00,observation,RulePolicy,accept,All checks passed.,False,0.2222,0.0,,0,,,
+2025-01-24T20:41:00+00:00,weather,RulePolicy,normal,Conditions steady; mean wind 4.1 mph.,False,3.9354,3.9352,,0,,,
+2025-01-24T20:41:00+00:00,forecast,rule,,,False,360.521,0.0,,0,,,
+2025-01-24T20:41:00+00:00,assimilation,RulePolicy,inflate_and_assimilate,Inflate and assimilate: innovation 11.98 (> 2.0) is surprising but believable because every independent check passed; widening the prior spread by 1.4x.,False,0.0233,0.0,,0,200.0,100.0,1.4
+2025-01-25T03:54:00+00:00,observation,RulePolicy,accept,All checks passed.,False,0.0563,0.0,,0,,,
+2025-01-25T03:54:00+00:00,weather,RulePolicy,wind_shift_detected,Wind shifted sharply since the last window (> 45° or > 10 mph); mean wind now 2.4 mph. A surprising observation this cycle is likely real.,False,0.9585,0.9582,,0,,,
+2025-01-25T03:54:00+00:00,forecast,rule,,,False,2754.119,0.0,,0,,,
+2025-01-25T03:54:00+00:00,assimilation,RulePolicy,inflate_and_assimilate,Inflate and assimilate: innovation 6.95 (> 2.0) is surprising but believable because a wind shift was detected; widening the prior spread by 1.4x.,False,0.0236,0.0,,0,200.0,100.0,1.4
+2025-01-27T00:17:00+00:00,observation,RulePolicy,accept,All checks passed.,False,0.0555,0.0,,0,,,
+2025-01-27T00:17:00+00:00,weather,RulePolicy,normal,Conditions steady; mean wind 3.7 mph.,False,1.1952,1.1947,,0,,,
+2025-01-27T00:17:00+00:00,forecast,rule,,,False,32634.001,0.0,,0,,,
+2025-01-27T00:17:00+00:00,assimilation,RulePolicy,assimilate,Plain update: innovation 0.77; all checks consistent.,False,0.0258,0.0,,0,200.0,100.0,1.0

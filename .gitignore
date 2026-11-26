@@ -227,4 +227,5 @@ data/border2_inputs/landscape.lcp
 src/.ipynb_checkpoints/outputs/**/*.pkl
 outputs/Border_2_Real/Border_2_Real_enkf_results.pkl
 outputs/Border_2_Real_crashed_*
-outputs/*/*.npz
+outputs/**/*.npz
+outputs/**/ensembles/
