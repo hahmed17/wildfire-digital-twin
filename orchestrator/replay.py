@@ -353,16 +353,18 @@ def replay(policies: Policies = "fixed",
     st = initial_state(events, OperatorRequest(deadline_min=deadline_min),
                        str(state_path))
 
-    # The first cycle's forecast has to start at the initial condition, not at a
-    # default window length. seed_state writes the state vector but not its time,
-    # and cache["good_obs"] is only filled once an observation has been accepted,
-    # so without this the first forecast covers DEFAULT_WINDOW_HOURS instead of
-    # the gap between the seed and the first observation -- on Border 2, one hour
-    # instead of 26.2.
-    st["cache"] = dict(st.get("cache") or {})
-    st["cache"]["seed_obs_time"] = seed_event.obs_time.isoformat()
     st["cache"] = {"run_dir": str(out_dir), "run_id": run_id,
-                   "hotspot_path": hotspot_path}
+                   "hotspot_path": hotspot_path,
+                   # The first cycle's forecast has to start at the initial
+                   # condition, not at a default window length. seed_state writes
+                   # the state vector but not its time, and cache["good_obs"] is
+                   # only filled once an observation has been accepted, so without
+                   # this the first forecast covers DEFAULT_WINDOW_HOURS instead of
+                   # the gap between the seed and the first observation -- on
+                   # Border 2, one hour instead of 26.2. It belongs in this literal
+                   # rather than being added before it: this assignment replaces
+                   # the whole cache, so anything set earlier is discarded.
+                   "seed_obs_time": seed_event.obs_time.isoformat()}
 
     # Ground truth for scoring: always the clean perimeter for that cycle, read
     # straight from the source file. Accuracy must NOT be measured against the

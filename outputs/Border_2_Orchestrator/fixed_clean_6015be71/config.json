@@ -1,0 +1,40 @@
+{
+  "run_id": "6015be71",
+  "policies": "fixed",
+  "scenario": "clean",
+  "fire": "Border_2",
+  "n_vertex": 20,
+  "seed": 1234,
+  "deadline_min": 60.0,
+  "ensemble_size_override": 300,
+  "resolution_m_override": 150,
+  "workers_override": 12,
+  "baseline_reference": {
+    "ensemble_size": 300,
+    "resolution_m": 150,
+    "workers": 12,
+    "vsize_m": 300.0,
+    "wsize_m": 100.0
+  },
+  "perimeter_file": "/home/jovyan/work/digital-twin-group/wildfire-digital-twin/data/border2_inputs/border_2_perimeters.geojson",
+  "hotspot_path": "/home/jovyan/work/digital-twin-group/wildfire-digital-twin/data/border2_inputs/firms_hotspots.csv",
+  "lcp_path": "/home/jovyan/work/digital-twin-group/wildfire-digital-twin/data/border2_inputs/landscape.lcp",
+  "selected_idx": [
+    1,
+    3,
+    4,
+    5
+  ],
+  "obs_timestamps": [
+    "2025-01-23T18:22:00+00:00",
+    "2025-01-24T20:36:00+00:00",
+    "2025-01-25T03:49:00+00:00",
+    "2025-01-27T00:12:00+00:00"
+  ],
+  "farsite_params": {
+    "temperature": 66,
+    "humidity": 0.08
+  },
+  "wx_lat": 32.59588662537945,
+  "wx_lon": -116.85708741551528
+}

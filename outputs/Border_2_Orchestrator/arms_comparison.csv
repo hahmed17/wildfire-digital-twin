@@ -1,3 +1,3 @@
-arm,cycles,iou_mean,iou_final,abs_area_err,centroid_m,guardrails,agent_s,decide_s,llm_fallbacks,tokens,observation:accept,observation:reject,weather:normal,weather:wind_shift_detected,assimilation:inflate_and_assimilate,assimilation:assimilate
-smoke rule/shifted,3,0.1318122666061744,0.11807887044889874,2.87965899039502,3309.2335443857482,0,1338.235,0.0,0,0,2,1.0,2,1.0,2.0,1
-smoke fixed/clean,3,0.19299602656501066,0.29481716695848675,0.9157343059104853,3008.3983961754816,0,1330.091,0.0,0,0,3,,3,,,3
+arm,cycles,iou_mean,iou_final,abs_area_err,centroid_m,guardrails,agent_s,decide_s,llm_fallbacks,tokens,observation:accept,weather:normal,assimilation:assimilate,weather:wind_shift_detected,assimilation:inflate_and_assimilate
+fixed/clean@300,3,0.4531356225753826,0.7919457091163116,0.4270053269656202,1320.516152269405,0,3.667,0.481,0,0,3,3,3,,
+rule/clean@300,3,0.5301479977956197,0.8216125612807744,0.3336838382331631,1110.4681757786664,0,3.425,0.321,0,0,3,2,1,1.0,2.0

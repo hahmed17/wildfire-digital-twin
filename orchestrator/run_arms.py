@@ -3,14 +3,14 @@ Run the Fixed vs Rule experiment arms for Border 2.
 
     # from the repo root, after the baseline finishes (it holds all 12 workers)
     python -m orchestrator.run_arms --smoke          # ~1 h, proves the fault path too
-    python -m orchestrator.run_arms                  # the 17 arms, ~52 h
+    python -m orchestrator.run_arms                  # the 12 arms, ~47 h
     python -m orchestrator.run_arms --table          # just reprint the results table
 
 Design
 ------
 Two groups, because decisions and accuracy need different ensemble sizes:
 
-  decisions  N=48, all five scenarios, all three policies  15 runs, ~1.9 h each
+  decisions  N=48, all five scenarios, fixed and rule       10 runs, ~1.9 h each
              The agents' choices barely depend on N -- containment, growth, obs age
              and wind shift never touch the ensemble, and normalized_innovation is
              stable across N -- so a small ensemble buys the full decision table
@@ -67,7 +67,15 @@ FAULT_SCENARIOS = [s for s in SCENARIOS if s != "clean"]
 # demonstrates true positives, and "does it cry wolf?" is the first thing a reader
 # will ask. Two extra runs, ~4 h. Drop them with --no-clean-control if the budget
 # is tight; the N=300 clean arms cover the same ground at a different N.
-DECISION_POLICIES = ("fixed", "rule", "llm")
+# The language-model policy is implemented and was exercised in the four-member
+# pilot, where it selected inflate_and_assimilate at all three cycles and the
+# filter diverged: the analysis ended 340 km from truth with an area three orders
+# of magnitude too large, and no guardrail caught it. Repeatedly inflating a
+# rank-deficient covariance has nothing to pull it back. Evaluating it properly
+# needs a divergence invariant first, so it is left out of the arms rather than
+# spending nine and a half hours collecting unusable numbers. Add "llm" back once
+# that invariant exists.
+DECISION_POLICIES = ("fixed", "rule")
 
 # The accuracy group deliberately stays at two policies. On the clean scenario at
 # full ensemble size every policy should accept every observation and apply the
@@ -157,7 +165,7 @@ def main(argv=None) -> int:
     ap.add_argument("--smoke", action="store_true",
                     help="two tiny runs (N=4) covering the rule rejection path and the plain path, then stop (~1 h)")
     ap.add_argument("--decisions-only", action="store_true",
-                    help="the 15 N=48 arms only (~29 h)")
+                    help="the 10 N=48 arms only (~19 h)")
     ap.add_argument("--accuracy-only", action="store_true",
                     help="the 2 N=300 arms only (~24 h)")
     ap.add_argument("--table", action="store_true",
@@ -223,7 +231,6 @@ def main(argv=None) -> int:
         # wrong, which is what tells you a smoke failure is the fault handling
         # rather than FARSITE itself.
         arms = [("smoke rule/shifted", "rule", "shifted_obs", 4, SEED),
-                ("smoke llm/shifted", "llm", "shifted_obs", 4, SEED),
                 ("smoke fixed/clean", "fixed", "clean", 4, SEED)]
     elif args.decisions_only:
         arms = decision

@@ -230,6 +230,53 @@ class TestReplay:
         assert cfg["selected_idx"] == replay.SELECTED_IDX
         assert len(cfg["obs_timestamps"]) == 4
 
+    def test_first_cycle_forecasts_from_the_seed_not_a_default_window(
+            self, tmp_path, stubbed, perimeters_available):
+        """The regression this exists for: the first cycle silently forecast one
+        hour instead of the 26.2 between the seed and the first observation.
+
+        cache["good_obs"] is only filled once an observation has been accepted, so
+        on the first cycle forecast_window has no analysis time to work from and
+        falls back to DEFAULT_WINDOW_HOURS unless cache["seed_obs_time"] is set.
+        The bug was invisible three ways over: the scores stayed plausible, the
+        cheap first ensemble looked like a small fire rather than a short forecast,
+        and a fix that set the key immediately after initial_state was discarded by
+        the next statement, which replaces the whole cache. Nothing in the run
+        output recorded the interval, so this asserts on the recorded window
+        rather than on anything derived from it.
+        """
+        import csv
+        r = run(tmp_path)
+        with open(r.out_dir / "decisions.csv") as f:
+            weather = [row for row in csv.DictReader(f)
+                       if row.get("node") == "weather"]
+        assert weather, "no weather decisions recorded"
+        first = float(weather[0]["window_hours"])
+        seed_gap = (replay.OBS_TIMESTAMPS[replay.SELECTED_IDX.index(
+            replay.SELECTED_IDX[1])] - replay.OBS_TIMESTAMPS[0])
+        expected = seed_gap.total_seconds() / 3600
+        assert first == pytest.approx(expected, abs=0.05), (
+            f"first cycle forecast {first} h, expected {expected:.3f} h "
+            "(seed to first observation)")
+        assert first > 2.0, (
+            f"first cycle forecast only {first} h -- this is the "
+            "DEFAULT_WINDOW_HOURS fallback, so seed_obs_time never reached the "
+            "weather agent")
+
+    def test_seed_obs_time_survives_cache_construction(
+            self, tmp_path, stubbed, perimeters_available):
+        """replay assigns st["cache"] from a literal, so a key set before that
+        assignment is thrown away. Guards the shape of the fix, not just its effect.
+        """
+        import inspect
+        src = inspect.getsource(replay.replay)
+        assigns = [i for i, line in enumerate(src.splitlines())
+                   if 'st["cache"] =' in line]
+        assert len(assigns) == 1, (
+            f"{len(assigns)} assignments to st['cache']; a later one discards "
+            "whatever an earlier one set")
+        assert "seed_obs_time" in src
+
     def test_three_cycles_for_the_four_border2_perimeters(
             self, tmp_path, stubbed, perimeters_available):
         r = run(tmp_path)

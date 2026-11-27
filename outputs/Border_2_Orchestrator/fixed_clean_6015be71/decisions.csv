@@ -1,0 +1,13 @@
+sim_time,node,policy,action,reason,overridden_by_guardrail,agent_latency_s,retrieval_s,llm_fallback,window_start,window_hours,tokens,vsize_m,wsize_m,inflation
+2025-01-24T20:41:00+00:00,observation,FixedPolicy,accept,FixedPolicy: accept all observations unconditionally (baseline).,False,0.1281,0.0,,,,0,,,
+2025-01-24T20:41:00+00:00,weather,FixedPolicy,normal,FixedPolicy: mean wind 4.1 mph; no conditional handling (baseline).,False,0.7414,0.7408,,2025-01-24T19:36:00+00:00,1.0,0,,,
+2025-01-24T20:41:00+00:00,forecast,rule,,,False,367.353,0.0,,2025-01-24T19:36:00+00:00,1.0,0,,,
+2025-01-24T20:41:00+00:00,assimilation,FixedPolicy,assimilate,"FixedPolicy: plain EnKF update with baseline noise (vsize=300, wsize=100).",False,0.0371,0.0,,,,0,300.0,100.0,1.0
+2025-01-25T03:54:00+00:00,observation,FixedPolicy,accept,FixedPolicy: accept all observations unconditionally (baseline).,False,0.141,0.0,,,,0,,,
+2025-01-25T03:54:00+00:00,weather,FixedPolicy,normal,FixedPolicy: mean wind 2.4 mph; no conditional handling (baseline).,False,0.9775,0.9763,,2025-01-24T20:36:00+00:00,7.217,0,,,
+2025-01-25T03:54:00+00:00,forecast,rule,,,False,2787.981,0.0,,2025-01-24T20:36:00+00:00,7.217,0,,,
+2025-01-25T03:54:00+00:00,assimilation,FixedPolicy,assimilate,"FixedPolicy: plain EnKF update with baseline noise (vsize=300, wsize=100).",False,0.0265,0.0,,,,0,300.0,100.0,1.0
+2025-01-27T00:17:00+00:00,observation,FixedPolicy,accept,FixedPolicy: accept all observations unconditionally (baseline).,False,0.0901,0.0,,,,0,,,
+2025-01-27T00:17:00+00:00,weather,FixedPolicy,normal,FixedPolicy: mean wind 3.7 mph; no conditional handling (baseline).,False,1.4692,1.4688,,2025-01-25T03:49:00+00:00,44.383,0,,,
+2025-01-27T00:17:00+00:00,forecast,rule,,,False,39676.371,0.0,,2025-01-25T03:49:00+00:00,44.383,0,,,
+2025-01-27T00:17:00+00:00,assimilation,FixedPolicy,assimilate,"FixedPolicy: plain EnKF update with baseline noise (vsize=300, wsize=100).",False,0.0564,0.0,,,,0,300.0,100.0,1.0

@@ -1,0 +1,13 @@
+sim_time,node,policy,action,reason,overridden_by_guardrail,agent_latency_s,retrieval_s,llm_fallback,window_start,window_hours,tokens,vsize_m,wsize_m,inflation
+2025-01-24T20:41:00+00:00,observation,RulePolicy,accept,All checks passed.,False,0.105,0.0,,,,0,,,
+2025-01-24T20:41:00+00:00,weather,RulePolicy,normal,Conditions steady; mean wind 4.1 mph.,False,0.9769,0.9767,,2025-01-24T19:36:00+00:00,1.0,0,,,
+2025-01-24T20:41:00+00:00,forecast,rule,,,False,364.871,0.0,,2025-01-24T19:36:00+00:00,1.0,0,,,
+2025-01-24T20:41:00+00:00,assimilation,RulePolicy,inflate_and_assimilate,Inflate and assimilate: innovation 11.98 (> 2.0) is surprising but believable because every independent check passed; widening the prior spread by 1.4x.,False,0.0242,0.0,,,,0,200.0,100.0,1.4
+2025-01-25T03:54:00+00:00,observation,RulePolicy,accept,All checks passed.,False,0.0496,0.0,,,,0,,,
+2025-01-25T03:54:00+00:00,weather,RulePolicy,wind_shift_detected,Wind shifted sharply since the last window (> 45° or > 10 mph); mean wind now 2.4 mph. A surprising observation this cycle is likely real.,False,0.8764,0.8761,,2025-01-24T20:36:00+00:00,7.217,0,,,
+2025-01-25T03:54:00+00:00,forecast,rule,,,False,2840.499,0.0,,2025-01-24T20:36:00+00:00,7.217,0,,,
+2025-01-25T03:54:00+00:00,assimilation,RulePolicy,inflate_and_assimilate,Inflate and assimilate: innovation 6.95 (> 2.0) is surprising but believable because a wind shift was detected; widening the prior spread by 1.4x.,False,0.0294,0.0,,,,0,200.0,100.0,1.4
+2025-01-27T00:17:00+00:00,observation,RulePolicy,accept,All checks passed.,False,0.0834,0.0,,,,0,,,
+2025-01-27T00:17:00+00:00,weather,RulePolicy,normal,Conditions steady; mean wind 3.7 mph.,False,1.2522,1.2514,,2025-01-25T03:49:00+00:00,44.383,0,,,
+2025-01-27T00:17:00+00:00,forecast,rule,,,False,37636.002,0.0,,2025-01-25T03:49:00+00:00,44.383,0,,,
+2025-01-27T00:17:00+00:00,assimilation,RulePolicy,assimilate,Plain update: innovation 0.77; all checks consistent.,False,0.028,0.0,,,,0,200.0,100.0,1.0

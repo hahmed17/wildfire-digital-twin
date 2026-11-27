@@ -1,0 +1,113 @@
+{
+  "cycles": [
+    {
+      "step": 1,
+      "clock": "2025-01-24T20:41:00+00:00",
+      "obs_time": "2025-01-24T20:36:00+00:00",
+      "source": "mapped_perimeter",
+      "synthetic": false,
+      "obs_action": "accept",
+      "weather_action": "normal",
+      "assim_action": "assimilate",
+      "assim_applied": true,
+      "vsize_m": 300.0,
+      "wsize_m": 100.0,
+      "inflation": 1.0,
+      "analysis_area_m2": 2939284.5971041718,
+      "observed_area_m2": 16405784.73230904,
+      "iou": 0.1464242968928821,
+      "centroid_offset_m": 2721.178149335324,
+      "area_error_m2": -13466500.135204868,
+      "area_error_frac": -0.8208385246384687,
+      "assimilated_vs_truth_iou": 0.941893061767924,
+      "assimilated_vs_truth_centroid_m": 65.15154558253566
+    },
+    {
+      "step": 2,
+      "clock": "2025-01-25T03:54:00+00:00",
+      "obs_time": "2025-01-25T03:49:00+00:00",
+      "source": "mapped_perimeter",
+      "synthetic": false,
+      "obs_action": "accept",
+      "weather_action": "normal",
+      "assim_action": "assimilate",
+      "assim_applied": true,
+      "vsize_m": 300.0,
+      "wsize_m": 100.0,
+      "inflation": 1.0,
+      "analysis_area_m2": 15026579.992184138,
+      "observed_area_m2": 23536442.643601656,
+      "iou": 0.42103686171695415,
+      "centroid_offset_m": 1207.1084233005568,
+      "area_error_m2": -8509862.651417518,
+      "area_error_frac": -0.3615611237550765,
+      "assimilated_vs_truth_iou": 0.9139276841570962,
+      "assimilated_vs_truth_centroid_m": 63.147063925319635
+    },
+    {
+      "step": 3,
+      "clock": "2025-01-27T00:17:00+00:00",
+      "obs_time": "2025-01-27T00:12:00+00:00",
+      "source": "mapped_perimeter",
+      "synthetic": false,
+      "obs_action": "accept",
+      "weather_action": "normal",
+      "assim_action": "assimilate",
+      "assim_applied": true,
+      "vsize_m": 300.0,
+      "wsize_m": 100.0,
+      "inflation": 1.0,
+      "analysis_area_m2": 22469212.926972218,
+      "observed_area_m2": 24927468.443458192,
+      "iou": 0.7919457091163116,
+      "centroid_offset_m": 33.26188417233414,
+      "area_error_m2": -2458255.516485974,
+      "area_error_frac": -0.09861633250331536,
+      "assimilated_vs_truth_iou": 0.9401802397701758,
+      "assimilated_vs_truth_centroid_m": 13.349475046027349
+    }
+  ],
+  "accuracy": {
+    "n_scored_cycles": 3,
+    "iou_mean": 0.4531356225753826,
+    "iou_min": 0.1464242968928821,
+    "iou_final": 0.7919457091163116,
+    "abs_area_error_frac_mean": 0.4270053269656202,
+    "centroid_offset_m_mean": 1320.516152269405
+  },
+  "behaviour": {
+    "decisions_total": 9,
+    "decisions_per_node": {
+      "observation": {
+        "accept": 3
+      },
+      "weather": {
+        "normal": 3
+      },
+      "assimilation": {
+        "assimilate": 3
+      }
+    },
+    "guardrail_overrides": 0,
+    "guardrail_override_rate": 0.0,
+    "agent_latency_s_total": 3.6673,
+    "agent_latency_s_max": 1.4692,
+    "llm_decisions": 0,
+    "llm_fallbacks": 0,
+    "llm_fallback_rate": null,
+    "retrieval_s_total": 3.1859,
+    "decision_s_total": 0.4814,
+    "step_exec_s_total": 42831.705,
+    "records_total": 12,
+    "tokens_total": 0,
+    "policies": [
+      "FixedPolicy"
+    ]
+  },
+  "drift_history": [
+    11.984752268110421,
+    0.6801561548434082,
+    0.7826928137392379
+  ],
+  "disagreements": 1
+}

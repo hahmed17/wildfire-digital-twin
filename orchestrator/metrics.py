@@ -104,6 +104,21 @@ def score_perimeter(analysis, observed) -> dict[str, Any]:
 # Behaviour
 # ---------------------------------------------------------------------------
 
+def _window_hours(inputs) -> float | None:
+    """Length in hours of the forecast window recorded on a decision, if any."""
+    if not isinstance(inputs, dict):
+        return None
+    a, b = inputs.get("window_start"), inputs.get("window_end")
+    if not (isinstance(a, str) and isinstance(b, str)):
+        return None
+    try:
+        from datetime import datetime
+        return round((datetime.fromisoformat(b)
+                      - datetime.fromisoformat(a)).total_seconds() / 3600, 3)
+    except ValueError:
+        return None
+
+
 def decision_rows(log: Iterable) -> list[dict[str, Any]]:
     """Flatten a run's DecisionRecord list into rows for a CSV.
 
@@ -128,6 +143,16 @@ def decision_rows(log: Iterable) -> list[dict[str, Any]]:
             # what separates "did not fall back" from "could not fall back".
             "llm_fallback": (rec.inputs or {}).get("llm_fallback")
                             if isinstance(rec.inputs, dict) else None,
+            # The interval the forecast actually covered, from the weather
+            # record's inputs. Worth a column of its own: a first cycle that
+            # silently advanced one hour instead of the gap since the initial
+            # condition is invisible in the decisions and the scores, and shows up
+            # only as an implausibly cheap ensemble. Recording it makes the
+            # provenance log answer "what was forecast" and not merely "what was
+            # chosen".
+            "window_start": (rec.inputs or {}).get("window_start")
+                            if isinstance(rec.inputs, dict) else None,
+            "window_hours": _window_hours(rec.inputs),
             "tokens": int(getattr(rec, "tokens", 0) or 0),
             # the fields a policy most often keys on, when present
             "vsize_m": d.get("vsize_m"),
